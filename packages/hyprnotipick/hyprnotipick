@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+picked_color="$(hyprpicker --autocopy --render-inactive)"
+[ -z "$picked_color" ] && exit
+
+rgb_color="$( printf      \
+  "rgb(%d, %d, %d)"       \
+  "0x${picked_color:1:2}" \
+  "0x${picked_color:3:2}" \
+  "0x${picked_color:5:2}")"
+
+format="$(notify-send            \
+--app-name="picked color"        \
+--action="hexrgb=$picked_color"  \
+--action="rgb000=$rgb_color"     \
+--expire-time=12000              \
+"🎨 picked color")"
+
+
+case "$format" in
+  'hexrgb' ) wl-copy "$picked_color"
+             wl-copy --primary "$picked_color";;
+  'rgb000' )
+             wl-copy "$rgb_color"
+             wl-copy --primary "$rgb_color"   ;;
+esac

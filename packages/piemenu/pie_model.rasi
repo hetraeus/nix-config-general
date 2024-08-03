@@ -1,0 +1,36 @@
+window {
+  width:            19.5em;
+  height:           13.8em;
+  padding:          0.33em;
+  children:         [ "listview" ];
+  background-color: var(bg);
+  border-radius:    0.6000em ;
+  }
+
+listview {
+  cycle:   false;
+  flow:    horizontal;
+  columns: 4;
+  dynamic: true;
+  lines:   3;
+  layout:  vertical;
+  background-color: transparent;
+  }
+
+element {
+  padding:     1em 1em 1em 1em ;
+  background-color: transparent;
+  }
+
+element selected {
+  background-color: var(button);
+  border-radius:    0.4000em ;
+  }
+
+element-text {
+  vertical-align:   0.50;
+  font:             "Cabin 24";
+  horizontal-align: 0.40;
+  text-color:       var(tcolor);
+  background-color: transparent;
+  }

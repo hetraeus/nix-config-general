@@ -1,0 +1,63 @@
+@import "accent_colors_list.rasi"
+
+* {
+    background-color: transparent;
+    text-color:       var(textcol);
+}
+window {
+    width:            50.0000% ;
+    background-color: var(bg);
+    padding:          1.0000em ;
+    children:         [ "listview","inputbar" ];
+    border-radius:    0.5000em ;
+}
+prompt {
+    enabled: false;
+}
+entry {
+    padding:           0.0000% ;
+    expand:            true;
+    font:              "Cabin 20";
+    horizontal-align:  0.50;
+    text-color:        var(fg);
+}
+inputbar {
+    padding: 0.0000em ;
+    margin:  2.0000% ;
+    expand:  false;
+}
+listview {
+    cycle:   false;
+    dynamic: true;
+    columns: 4;
+    layout:  vertical;
+    lines:   3;
+}
+mainbox {
+    padding:  2.0000% 1.0000% ;
+    spacing:  2.0000% ;
+    children: [ "inputbar","listview" ];
+}
+element {
+    orientation: vertical;
+    padding:     1.0000% 0.0000% ;
+}
+element selected {
+    background-color: var(button);
+    border-radius:    0.4000em ;
+    text-color: var(bg);
+    
+}
+element-icon {
+    size:             5.6000em ;
+    horizontal-align: 0.50;
+    text-color:       inherit;
+}
+element-text {
+    margin:           0.2000% 0.2000% -0.2000% ;
+    expand:           true;
+    vertical-align:   0.50;
+    font:             "Cabin 14";
+    horizontal-align: 0.50;
+    text-color:       inherit;
+}

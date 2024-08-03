@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+toBinary(){
+  local n="$1"
+  local bit=""
+  for (( ; n>0 ; n >>= 1 )); do bit="$bit$(( n&1 ))"; done
+  printf "%s" "$bit"
+}
+
+BIT_LIST="$(toBinary "$(< /proc/sys/kernel/tainted)")"
+
+[[ "$BIT_LIST" != *1*  ]] && exit
+printf '󰄻 Kernel tainted !\n'
+
+taint_msgs=(
+  "  proprietary module was loaded"
+  "  module was force loaded"
+  "  kernel running on an out of specification system"
+  "  module was force unloaded"
+  "  processor reported a Machine Check Exception (MCE)"
+  "  bad page referenced or some unexpected page flags"
+  "  taint requested by userspace application"
+  "  kernel died recently, i.e. there was an OOPS or BUG"
+  "  ACPI table overridden by user"
+  "  kernel issued warning"
+  "  staging driver was loaded"
+  "  workaround for bug in platform firmware applied"
+  "  externally-built (\"out-of-tree\") module was loaded"
+  "  unsigned module was loaded"
+  "  soft lockup occurred"
+  "  kernel has been live patched"
+  "  auxiliary taint, defined for and used by distros"
+  "  kernel was built with the struct randomization plugin"
+  "  an in-kernel test has been run"
+  "  userspace used a mutating debug operation in fwctl"
+  )
+UNKNOWN="  UNKNOWN! check https://www.kernel.org/doc/html/latest/admin-guide/tainted-kernels.html"
+
+for ((i = 0; i < ${#BIT_LIST}; i++)); do
+  char="${BIT_LIST:i:1}"
+  [[ $char == "1" ]] && printf '%s\n' "${taint_msgs[$i]:-$UNKNOWN}"
+  done
+
+grep --perl-regexp 'O|E|P|F' /sys/module/*/taint

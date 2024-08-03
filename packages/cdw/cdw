@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+trap '' 2; stty -echoctl
+echo -e  \
+"\e]2;⏰ COUNTDOWN $*\a
+\e[4;31;1m COUNTDOWN "
+
+[[ -z $* ]] && echo "countdown target?" && read -r
+TIME_INPUT=${*:-"$REPLY"}
+
+SECS=$(( $(date --date="$TIME_INPUT" +%s) - EPOCHSECONDS ))
+
+echo -e  "\e[0;31m"
+date --date="$TIME_INPUT" --rfc-email
+echo -en "\e[0m"
+
+((SECS <= 0 ))            &&
+  echo "can't countdown"  &&
+  exit 1
+
+while (( SECS > 0 )); do
+  echo -en " $SECS \033[0K\r"
+  : "$((SECS--))"
+  sleep 1
+  done
+  echo -en "0 \033[0K\r"
+
+echo -e  "\e]2;🚩 OFF - COUNTDOWN $*\a"
+notify-send --urgency=critical countdown "$TIME_INPUT"
+nohup play --no-show-progress -r 1200 -n synth .25 triangle 400-100 repeat 12 &>/dev/null &
+# for i in {1,0,1,0,1,0,1,0}; do brightnessctl --device="input*::capslock" s "$i"; sleep .2; done

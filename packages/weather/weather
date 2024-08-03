@@ -1,0 +1,23 @@
+#!/usr/bin/python
+import urllib.parse
+import httpx
+import sys
+
+# Initialize an empty string to store the arguments
+args_string = ""
+
+# stitch toghethere `sys.argv` to make a string
+for arg in sys.argv[1:]:
+    args_string += arg + " "
+
+quoted_location = urllib.parse.quote_plus(args_string)
+# print(quoted_location)
+
+response = httpx.get('https://wttr.in/' + quoted_location + '?m')
+# ?m metric, winds in km/h
+# v2, v2d, v2n dashboard
+
+if response.status_code == 200:
+    print(response.text)
+else:
+    print('Error:', response.status_code)

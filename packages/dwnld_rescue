@@ -1,0 +1,18 @@
+#!/bin/bash
+DW="$(stat /proc/"$(pgrep firefox)"/fd/* --format=%N \
+      | grep --invert-match --extended-regexp -- \
+        "' -> '(/dev/.*|/dmabuf:|anon_inode:\[|/dev/null|pipe:\[|socket:\[|/memfd:)" \
+      | fzf )"
+
+DW="${DW%% *}"
+
+exec {myfd}<"$DW"
+
+fzf --height=3 --prompt="keeping the fd open. Should we save the file to \$XDG_DATA_HOME ?" <<< "yes, now"
+
+SAVED_NAME="$XDG_DATA_HOME/mysavedfile_$(printf '%(%Y-%m-%dT%H-%M-%S)T' "$EPOCHSECONDS")"
+cp /dev/fd/"$myfd" "$SAVED_NAME"
+ls --hyperlink "$SAVED_NAME"
+
+fzf --height=3 --prompt="shall we close the file descriptor?" <<< "yes, now"
+exec "$myfd">&-

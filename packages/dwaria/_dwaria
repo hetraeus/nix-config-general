@@ -1,0 +1,54 @@
+#! /usr/bin/env python3
+# Copyright © 2023 sfx <sfx@blacklodge>
+# port of few /usr/share/doc/aria2/xmlrpc/aria2rpc functions
+# http://aria2.github.io/manual/en/html/aria2c.html
+
+import argparse
+import requests
+import re
+import os
+
+os.makedirs(os.environ['HOME'] + '/.cache/torrent', exist_ok=True)
+f = open(os.environ['HOME'] + '/.cache/torrent/aria2_downloads', 'a+')  # open file in append mode
+#f.write('python rules')
+f.close()
+
+_ = os.system('systemctl start --user aria2.service && sleep 8')
+
+
+parser = argparse.ArgumentParser(description='aria downloader wrapper')
+_= parser.add_argument('--dir',     dest='dw_dir', action='store',
+                    required=True, type=str,
+                    help='download directory')
+_ = parser.add_argument('--add',     dest='content_to_dwnld', action='store',
+                    required=True, type=str, nargs='+',
+                    help='list of magnets/torrents/URIs/Metalinks')
+args = parser.parse_args()
+
+rpc_secret = ""
+rpc_port = ""
+
+with open( '/run/user/' + str(os.getuid()) + '/aria2/torrent.conf', 'r') as f:
+
+    for line in f:
+        if rpc_port and rpc_secret:
+            break
+
+        m = re.search('^rpc-secret=(.*)',      line)
+        if m:
+            rpc_secret = m.group(1)
+
+        m = re.search('^rpc-listen-port=(.*)', line)
+        if m:
+            rpc_port = m.group(1)
+
+    f.close()
+
+c = requests.post("http://localhost:" + rpc_port + "/jsonrpc",
+                  json={'jsonrpc': '2.0',
+                        'id':      'test',
+                        'method':  'aria2.addUri',
+                        "params": ["token:" + f"{rpc_secret}",
+                                   args.content_to_dwnld,
+                                   {"dir": f"{args.dw_dir}"}]
+                        })

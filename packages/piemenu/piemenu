@@ -1,0 +1,142 @@
+#!/usr/bin/env bash
+MPD_HOST="$(systemctl --user show --property Listen mpd.socket | grep --only-matching "$XDG_RUNTIME_DIR"'/.* ')"
+MPD_HOST=${MPD_HOST%% }
+
+echo -en "\0keep-selection\x1ftrue\n"
+case "$@" in
+  "󱙝"   ) hyprctl --quiet eval     "require(${TOGGLE_FLOATS:-})"  ; exit;;
+  "󱓈"   ) hyprctl --quiet dispatch 'hl.dsp.window.kill()'         ; exit;;
+  "󰋃"   ) hyprctl --quiet dispatch 'hl.dsp.group.toggle()'        ; exit;;
+  "🬄"   ) hyprctl --quiet dispatch 'hl.dsp.layout ("preselect l")'; exit;;
+  "🬂"   ) hyprctl --quiet dispatch 'hl.dsp.layout ("preselect u")'; exit;;
+  "🬉"   ) hyprctl --quiet dispatch 'hl.dsp.layout ("preselect r")'; exit;;
+  "🬭"   ) hyprctl --quiet dispatch 'hl.dsp.layout ("preselect d")'; exit;;
+  ""   ) hyprctl --quiet dispatch 'hl.dsp.window.pin()'          ; exit;;
+  "⟱"   ) hyprctl --quiet dispatch 'hl.dsp.focus({workspace="next" })'  ;;
+  "⟰"   ) hyprctl --quiet dispatch 'hl.dsp.focus({workspace="next" })'  ;;
+  "⇛"   ) hyprctl --quiet dispatch 'hl.dsp.focus({direction="left" })'  ;;
+  "⇚"   ) hyprctl --quiet dispatch 'hl.dsp.focus({direction="right"})'  ;;
+  ""   ) hyprctl --quiet eval 'hl.config({ cursor = { zoom_factor = 1.0 } })' ;;
+  ""   ) hyprctl --quiet eval '
+            local f = hl.get_config("cursor:zoom_factor")
+            hl.config({ cursor = { zoom_factor = math.max(1.0, f / 1.1) } })' ;;
+  ""   ) hyprctl --quiet eval '
+            local current = hl.get_config("cursor:zoom_factor")
+            hl.config({ cursor = { zoom_factor = math.max(1.0, current * 0.9) } })';;
+
+  "⛧"   ) coproc rofi -modi drun -show drun -show-icons  > /dev/null 2>&1; exit;;
+  ""   ) coproc translat tr_notify it  > /dev/null  2>&1; exit;;
+  "🗽"  ) coproc translat tr_notify en  > /dev/null  2>&1; exit;;
+
+  ""   ) coproc gcolor3                                 > /dev/null 2>&1; exit;;
+  ""   ) coproc swaync-client --toggle-panel            > /dev/null 2>&1; exit;;
+  "󱄺"   ) coproc ocr-screen                              > /dev/null 2>&1; exit;;
+  ""   ) coproc hyprnotipick                            > /dev/null 2>&1; exit;;
+  "󰐳"   ) coproc qr_selectread                           > /dev/null 2>&1; exit;;
+  "󰢸"   ) coproc qr_code_from_clipboard window           > /dev/null 2>&1; exit;;
+  ""   ) coproc wvkbd-start-stop                        > /dev/null 2>&1; exit;;
+  "󱣵"   ) coproc grimscreen                              > /dev/null 2>&1; exit;;
+  "󰳽"   ) coproc clicker oneshot                         > /dev/null 2>&1; exit;;
+  "㊋"  ) coproc wdotool windowclose "$(wdotool getactivewindow)" > /dev/null 2>&1; exit;;
+  ""   ) coproc wdotool keydown Super_L                 > /dev/null 2>&1; exit;;
+  "⎋"   ) coproc hyprctl dispatch 'hl.dsp.window.float()'
+                   dotoolc <<< "key super+space"           > /dev/null 2>&1; exit;;
+
+  "🡫"   ) coproc wdotool key End           ; exit;;
+  "🡩"   ) coproc wdotool key Home          ; exit;;
+  "◹"   ) coproc wdotool key ctrl+w        ; exit;;
+  "◸"   ) coproc wdotool key ctrl+shift+T  ; exit;;
+  "🡸"   ) coproc wdotool key alt+Left      ; exit;;
+  "🡺"   ) coproc wdotool key alt+Left      ; exit;;
+  "↷"   ) coproc wdotool key ctrl+Tab      ; exit;;
+  "↶"   ) coproc wdotool key ctrl+shift+Tab; exit;;
+
+  "⏮"   ) mpc --host="$MPD_HOST" --quiet prev     > /dev/null 2>&1; exit;;
+  "⏭"   ) mpc --host="$MPD_HOST" --quiet next     > /dev/null 2>&1; exit;;
+  "⏯"   ) mpc --host="$MPD_HOST" --quiet toggle   > /dev/null 2>&1; exit;;
+  "❄"   ) coproc { mpc --host="$MPD_HOST" --quiet pause    > /dev/null 2>&1
+                   playerctl --all-players        pause    > /dev/null 2>&1 ;}; exit;;
+
+  ";)"  ) coproc {
+          pkill --exact fmenu-emoticon || foot --title="😲 emoticon_list" --app-id="fmenu_panel" fmenu-emoticon > /dev/null  2>&1 ;}
+          exit;;
+  "󱙴" )   xdg-open "https://www.btdig.com/search?q=""$( wl-paste --primary | sed --regexp-extended 's/([^[:print:]])//g;s#^\s*##;s#\s*$##' )"  > /dev/null  2>&1
+          wdotool windowactivate "$(wdotool search --name "$(awk 'BEGIN{FS="[=.]"} /x-scheme-handler\/https=/{print $2; exit}' ~/.config/mimeapps.list)" 2>/dev/null | cut --fields=1 )" 2>/dev/null
+          exit;;
+  ""   ) xdg-open "https://www.imdb.com/find?q=""$(    wl-paste --primary | sed --regexp-extended 's/([^[:print:]])//g;s#^\s*##;s#\s*$##' )"  > /dev/null  2>&1
+          wdotool windowactivate "$(wdotool search --name "$(awk 'BEGIN{FS="[=.]"} /x-scheme-handler\/https=/{print $2; exit}' ~/.config/mimeapps.list)" 2>/dev/null | cut --fields=1 )" 2>/dev/null
+          exit;;
+  "Ⴍ"   ) xdg-open "https://www.qwant.com/?t=web&q=""$( wl-paste --primary | sed --regexp-extended 's/([^[:print:]])//g;s#^\s*##;s#\s*$##' )"  > /dev/null  2>&1
+          wdotool windowactivate "$(wdotool search --name "$(awk 'BEGIN{FS="[=.]"} /x-scheme-handler\/https=/{print $2; exit}' ~/.config/mimeapps.list)" 2>/dev/null | cut --fields=1 )" 2>/dev/null
+          exit;;
+  ""  )  xdg-open "https://www.youtube.com/results?search_query=""$( wl-paste --primary | sed --regexp-extended 's/([^[:print:]])//g;s#^\s*##;s#\s*$##' )"  > /dev/null  2>&1
+          wdotool windowactivate "$(wdotool search --name "$(awk 'BEGIN{FS="[=.]"} /x-scheme-handler\/https=/{print $2; exit}' ~/.config/mimeapps.list)" 2>/dev/null | cut --fields=1 )" 2>/dev/null
+          exit;;
+  ""   ) xdg-open "https://en.wikipedia.org/w/index.php?title=Special%3ASearch&go=Go&ns0=1&search=""$( wl-paste --primary | sed --regexp-extended 's/([^[:print:]])//g;s#^\s*##;s#\s*$##' )"  > /dev/null  2>&1
+          wdotool windowactivate "$(wdotool search --name "$(awk 'BEGIN{FS="[=.]"} /x-scheme-handler\/https=/{print $2; exit}' ~/.config/mimeapps.list)" 2>/dev/null | cut --fields=1 )" 2>/dev/null
+          exit;;
+  "⧉" )   rofi -show window -window-thumbnail -show-icons -window-format '{t}' > /dev/null 2>&1
+          exit;;
+
+ # "⎔"   ) coproc ( bspc    node --to-node "$(bspc query --nodes --node    'biggest.local.leaf.!window')" --state tiled \
+          # || bspc node           "$(bspc query --nodes --desktop --node .window.descendant_of)" --state tiled  > /dev/null  2>&1 )
+          # exit;;
+  "⛚"   ) bspc node    --focus  first_ancestor > /dev/null 2>&1; exit;;
+  "🄼"   ) bspc desktop --layout          next  > /dev/null 2>&1; exit;;
+  "⟲"   ) bspc node    --circulate     forward > /dev/null 2>&1; exit;;
+  "⮔"   ) bspc node    --rotate             90 > /dev/null 2>&1; exit;;
+
+  ""   ) model="$ONNX";
+          wl-paste --primary \
+          | piper   --model "$model" --sentence_silence 0.3 --output_raw \
+          | pw-play --rate 21000 --raw --channels 1 -  > /dev/null  2>&1
+          exit;;
+  "🕪"   ) wpctl set-volume @DEFAULT_AUDIO_SINK@ 6%+ --limit 1.8 > /dev/null 2>&1;;
+  "🕩"   ) wpctl set-volume @DEFAULT_AUDIO_SINK@ 6%-             > /dev/null 2>&1;;
+  "🌘"  ) visual_brightness down            > /dev/null  2>&1;;
+  "🌔"  ) visual_brightness   up            > /dev/null  2>&1;;
+  "🌗"  ) brightnessctl --class="backlight" set 25% --quiet
+          busctl --user set-property rs.wl-gammarelay / rs.wl.gammarelay Brightness d 1  > /dev/null  2>&1
+          exit;;
+
+   "🟥" ) busctl --user call rs.wl-gammarelay / rs.wl.gammarelay UpdateTemperature n -- -200 > /dev/null 2>&1;;
+   "🟦" ) busctl --user call rs.wl-gammarelay / rs.wl.gammarelay UpdateTemperature n --  200 > /dev/null 2>&1;;
+   "⬜" ) busctl --user set-property rs.wl-gammarelay / rs.wl.gammarelay  Temperature q 6500 > /dev/null 2>&1
+          exit;;
+   "🔳" ) busctl --user call rs.wl-gammarelay / rs.wl.gammarelay ToggleInverted              > /dev/null  2>&1
+          exit;;
+
+  "🌚"  ) brightnessctl --class="backlight" set 1%
+          busctl --user set-property rs.wl-gammarelay / rs.wl.gammarelay Brightness d 1  > /dev/null  2>&1
+          exit;;
+esac
+
+# WARN: DO NOT DELETE TRAILING SPACES !
+case "$0" in
+  *"-1") echo -e "❄\n🕩\n🕪\n󱓈
+⏮\n⏯\n⏭\n
+\n\n󱣵\n󱄺
+🡩\n↶\n↷\n⛧
+🡫\n\n🡸\n🡺
+㊋\n◹\n◸\n⧉
+󰢸\n󰳽\n\n;)
+󰐳\n󱙴\n\n🗽
+\n\n\nႭ" ;;
+
+# accessibility
+# windows management
+# to be assigned
+
+
+# WARN: DO NOT DELETE TRAILING SPACES !
+  *"-2") echo -e "\n\n\n
+🌘\n🌗\n🌔\n🌚
+🟥\n⬜\n🟦\n🔳
+󰋃\n⟰\n⎋\n󱙝
+⇚\n⇛\n🬉\n⟲
+🄼\n⟱\n\n⮔
+ \n \n \n
+ \n \n \n
+ \n \n \n " ;;
+
+esac

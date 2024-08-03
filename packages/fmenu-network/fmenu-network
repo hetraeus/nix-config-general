@@ -1,0 +1,387 @@
+#!/usr/bin/env bash
+# colors {{{
+# COLOR_BRIGHT_BLUE="\e[38;05;38m"
+# COLOR_BRIGHT_GREEN="\e[38;05;118m"
+# COLOR_BUBBLEGUM_PINK="\e[38;05;13m"
+# COLOR_CERULEAN="\e[38;05;32m"
+# COLOR_DARK_GREY="\e[38;05;244m"
+COLOR_DARK_RED="\e[38;05;124m"
+COLOR_FUCHSIA="\e[38;05;207m"
+COLOR_DARK_RED="\e[38;05;124m"
+# COLOR_GREY="\e[38;05;244m"
+# COLOR_LIGHT_BLUE="\e[38;05;111m"
+# COLOR_LIGHT_RED="\e[38;05;214m"
+# COLOR_LIVELY_GREEN="\e[38;05;29m"
+# COLOR_NAVY_BLUE="\e[38;05;67m"
+# COLOR_OCHRE="\e[38;05;3m"
+# COLOR_PINK="\e[38;05;168m"
+# COLOR_SMERALD="\e[38;05;79m"
+# COLOR_TURQUOISE="\e[38;05;51m"
+# COLOR_VIOLET="\e[38;05;99m"
+# COLOR_WATER="\e[38;05;122m"
+# COLOR_WHITE="\e[1;37m"
+# COLOR_YELLOW="\e[38;05;214m"
+
+# COLOR_NEUTRAL=$COLOR_DARK_GREY
+
+# }}}
+
+CAMS_IP="$(grep --only-matching --max-count=1 '[12]*[0-9][0-9]*\.[12]*[0-9][0-9]*\.[12]*[0-9][0-9]*\.[12]*[0-9][0-9]*' "$XDG_CONFIG_HOME"/sops-nix/secrets/watch_cams001)"
+WLAN_DEV="$(find /sys/class/net -iname 'w*'  -printf '%f')"
+WLAN_PHY="$(<    /sys/class/net/"$WLAN_DEV"/phy80211/name)"
+WLAN_SERVICE="iwd.service"
+source "$XDG_CONFIG_HOME"/user-dirs.dirs
+# TRACKER_SERVICE=prey-agent
+
+export  FZF_DEFAULT_OPTS="\
+  --layout=reverse        \
+  --ansi                  \
+  --info=inline-right     \
+  --no-separator          \
+  --scroll-off=5          \
+  --prompt='  '           \
+  --pointer=' '           \
+  --gutter=' '            \
+  --color='bg+:#04727d,hl+:#ff497c,gutter:-1'
+"
+
+conn_dhcp(){
+  # run0 ip address flush  dev "$WLAN_DEV"
+  # run0 ip route   flush  dev "$WLAN_DEV"
+  # run0 systemctl restart iwd.service
+  iwctl station "$WLAN_DEV" scan; sleep .2
+
+  ESSID="$(iwctl station "$WLAN_DEV" get-networks \
+    | fzf --header-lines=4                        \
+          --color='fg:#bbbbbb'                    \
+          --header-first --ellipsis=" "           \
+    | awk '{gsub("^ +> +",""); $NF=$(NF-1)=""; gsub(" +$",""); print }' )"
+  [[ -z "$ESSID" ]] && return 1
+
+  # run0 ip address flush dev "$WLAN_DEV"
+  # run0 ip route   flush dev "$WLAN_DEV"
+  iwctl station "$WLAN_DEV" disconnect
+  iwctl station "$WLAN_DEV" connect "$ESSID"
+
+  sleep 1
+###  tee "$XDG_RUNTIME_DIR"/pipe-fmenu-networklocal <<< ""
+  # iwctl station "$WLAN_DEV" scan; sleep .1
+  # iwctl station "$WLAN_DEV" connect "$(  \
+  # iwctl station "$WLAN_DEV" get-networks \
+  # | fzf --header-lines=4 --layout=reverse --ansi \
+  # | awk '{print $(NF-2)}' )"                                 ;;
+}
+
+[[ "${1:-}" == "--list" ]] && {
+  echo "🧬 $0
+📈 gping google.com DNS GATEWAY
+🖇 trippy trace
+🥁 mtr google
+📉 bandwhich
+🤡 mac spoof static ip before dhcp
+🌫  dhcp connect wifi wlan
+󰐲  qrcode connect wifi wlan dhcp
+🆗 pushbutton wsc wifi wlan
+🏰 captive-portal-alt
+🏰 captive portal wifi wlan
+🍂 wlan list known
+⛩  gateway webUI
+⚭  static ip connect
+🔥 firewall
+🎭 dns nslookup
+🌊 dns flush
+🔀 dns requests monitor
+🧐 https://dnscheck.tools/
+󱙴  termshark
+󱙳  wireshark
+✊ nmap port scan
+📢 netdiscover arp scan
+👭 ss connections
+ぷ librespeed test
+ぷ speedtest
+📏 speed test https://misurainternet.it
+  azure cloud cli
+📘 azure cloud AZ900 cheatsheet
+⎀  aws cloud
+🗒  cheatsheets
+🗍  rfc standards
+󰓌  answer question stack overflow
+⋂⋂ IANA port numbers
+💋 rdap whois domain"
+
+
+echo -n "🥱 "; iw "$WLAN_PHY" wowlan show | head -1 | grep --color=always --extended-regexp '( enabled|$)'
+
+# systemctl is-active "$TRACKER_SERVICE".service --quiet \
+# && echo "🦅 $TRACKER_SERVICE up"                       \
+# || echo " 🔸 🔸 🔸 🐾 $TRACKER_SERVICE rogue 🐾 🔸 🔸 🔸"
+
+echo -e "🪢 $WLAN_SERVICE $(systemctl is-active "$WLAN_SERVICE" | grep --color --extended-regexp "(inactive|$)")$COLOR_DARK_RED"
+systemctl --type=service --state=running | grep --color --extended-regexp '(connman|NetworkManager|networkd).*\.' \
+  && echo "✁  disable network managers"
+
+EXTERNAL_IP="$(curl --silent https://checkip.amazonaws.com || echo "NO IP !")"
+echo "🪧 IP infos - $EXTERNAL_IP"
+
+#~/.local/bin/scripts/status_kdeconnect
+
+if ping "$CAMS_IP" -c 1 >/dev/null 2>&1
+then echo "👁  watch cams"
+else echo " 🔸 🔸 🔸 🔪 cams OFF 🔸 🔸 🔸"; fi
+
+exit
+}
+
+trap '' SIGINT
+
+set +o errexit
+while true; do
+
+operation="$( $0 --list | fzf \
+  --padding=0%,0%,0%,3%       \
+  --info=hidden               \
+  --color='fg:#bbbbbb'        \
+  --bind=left-click:accept,ctrl-space:replace-query,esc:clear-query,shift-down:preview-down,shift-up:preview-up \
+  --preview-window=right,75%,border-left,wrap \
+  --bind 'space:change-preview(
+while clear; do
+  resolvectl status --no-pager
+
+  echo -e "\033[0m                               ──── ★ ────"
+  ip --color route show
+  echo
+  ip --color neighbour show
+
+  echo -e "\033[0m                               ──── ★ ────"
+
+  ip --color=never address show '"$WLAN_DEV"'
+  sleep 10
+done
+)' \
+  --bind 'start:preview(
+while clear; do
+  resolvectl status --no-pager
+
+  echo -e "\033[0m                               ──── ★ ────"
+  ip --color route show
+  echo
+  ip --color neighbour show
+
+  echo -e "\033[0m                               ──── ★ ────"
+
+  ip --color=never address show '"$WLAN_DEV"'
+  sleep 10
+done
+)'
+
+)"
+
+case "${operation}" in
+  *" wireshark"*                )  run0 wireshark        & disown;;
+  *"trippy trace"               )  kitty trip ;;
+  *" dhcp connect wifi"*        )  printf "\x1bc"; conn_dhcp     ;;
+  *" watch cams"*               )  command -v fmenu-watch_cams001 && fmenu-watch_cams001 & disown;;
+  *"dns requests monitor"*      )  (foot --app-id="kitty_floating" --hold run0 resolvectl monitor         ) & disown;;
+  *" bandwhich"*                )  (foot --app-id="kitty_floating" --hold run0 --background="0" bandwhich ) & disown;;
+  *" termshark"*                )  (foot --app-id="kitty_floating" --hold run0 termshark                  ) & disown;;
+  *" firewall"*                 )  (foot --app-id="kitty_floating" --hold run0 nft list ruleset           ) & disown;;
+  *" mtr google"*               )  (foot --app-id="kitty_floating" --hold mtr google.com 8.8.8.8          ) & disown;;
+  *"AZ900"*                     )  (foot ~/.local/bin/scripts/fmenu-cheat-az900 ) & disown;;
+  *" connections"*              )  (foot --app-id="kitty_floating" --hold ss -all            ) & disown;;
+  *" librespeed"*               )  (foot --app-id="kitty_floating" --hold librespeed-cli     ) & disown;;
+  *" speedtest"                 )  (foot --app-id="kitty_floating" --hold speedtest-cli      ) & disown;;
+  *" netdiscover"*              )  (foot --app-id="kitty_floating" --hold run0 netdiscover   ) & disown;;  #arp-scan
+  *" $0"                        )  (foot --app-id="kitty_floating" --hold "$VISUAL" -- "$0"  ) & disown;;
+  *" stack overflow"*           )  (foot --app-id="kitty_floating" --hold \
+                                    so --no-lucky "$(gum input --header="─── ♨ stackoverflow ───")"      ) & disown;;
+  *" wlan list known"*          )  (foot --app-id="kitty_floating" --hold iwctl known-networks list      ) & disown;;
+  *" rfc"*                      )  (foot --app-id="kitty_floating" --hold ~/.local/bin/scripts/fmenu-rfc ) & disown;;
+
+  *" azure cloud cli"*          )  az                  ;;
+
+  *"WoWLAN is disabled"*        )  printf "\x1bc"; echo -e "$COLOR_GRANADE 🛎 enabling magic packet wake on lan"
+                                   run0 iw phy0 wowlan enable magic-packet ;;
+  *" aws"*                      )  aws                 ;;
+  # *"phone "*'% '*               )  ANS="$(fzf --header=' 📞 ring phone?' <<< 'yes\nno')"
+  #                                  [[ "$ANS" == yes ]] && ring_phone ;;
+
+  *" nslookup"*                 ) printf "\x1bc"; website="$(gum input --header="─── 🎭 which site? ───")"
+                                  [[ -z "$website" ]] && continue
+
+                                  for solver in             \
+                                    127.0.0.53              \
+                                    1.1.1.1 8.8.8.8 9.9.9.9 \
+                                    8.26.56.26 94.140.14.14 208.67.222.222 195.10.195.195 ; do
+                                      nslookup "$website" "$solver" \
+                                      | grep --color '^Address:'
+                                      done; read -r ;;
+
+  *" dns flush"*               )  printf "\x1bc"
+                                  systemd-resolve --flush-caches
+                                  echo 'flushed!'
+                                  # systemd-resolve --statistics
+                                  read -r ;;
+
+  *" nmap"*                    )  printf "\x1bc"
+                                  NETW_SUGGESTION="$(gum input --header="scan what?" --value="192.168.")" \
+                                  && run0 nmap "$NETW_SUGGESTION"
+                                  read -r ;;
+
+  *"dnscheck.tools"*           )  xdg-open https://dnscheck.tools/              & disown ;;
+  *"misurainternet"*           )  xdg-open https://misurainternet.it/           & disown ;;
+  *"captive-portal-alt"*       )  xdg-open http://8.8.8.8 http://10.1.1.250     & disown ;;
+  *" cheatsheets"*             )  xdg-open "$(find "$XDG_PICTURES_DIR/cool guides/" -iname 'IT*' \
+                                              | fzf --with-nth=-2 --delimiter='\.|\/')"  ;;
+
+  # *" $TRACKER_SERVICE up"*     )  xdg-open https://panel.preyproject.com/devices/ ;;
+  # *" $TRACKER_SERVICE rogue"*  )  systemctl restart  prey-agent.service
+  #                                 systemctl status   prey-agent.service     ;;
+  *"captive portal"*           )  printf "\x1bc" # FIXME: remove captive portals
+                                  [[ -z "$(ip route)" ]] && { echo -e "$COLOR_FUCHSIA
+⚠️  connect to a network first \!
+" ;}
+                                  echo "
+IF IT FAILS, check credential expiration date
+"
+                                  nohup captive-browser & disown
+                                  printf "\x1bc";;
+
+  *" IANA port numbers"*       )  IANA_PATH="$(grep --only-matching --perl-regexp ':[^:]*iana-etc-[0-9]*/' <<< "$PATH")"
+                                  export IANA_PATH="${IANA_PATH#:}"/etc
+                                  (foot --app-id="kitty_floating" --hold bat --plain --language=nimble "$IANA_PATH"/* ) & disown;;
+
+  *" rdap "*                   )  printf "\x1bc"; echo "─── 💋 rdap who is who ? ───"
+                                  read -re WEBSITE; [[ -z "$WEBSITE" ]] && continue
+                                  rdap "$WEBSITE"  | nvim +'set syntax=yaml nomod' - ;;
+
+  *" disable network managers"*)  printf "\x1bc"
+                                  systemctl stop NetworkManager*.service connman*.service systemd-networkd.service
+                                  ip address flush  dev "$WLAN_DEV"
+                                  ip route   flush  dev "$WLAN_DEV"
+                                  ;;
+
+  *" qrcode"*                  )  printf "\x1bc"; echo " 󰐲  approach wifi QR code"
+                                  iwctl station "$WLAN_DEV" scan; sleep .2
+
+                                  SCANNED_WIFI="$(timeout 12 zbarcam --oneshot --nodisplay)"
+                                  [[ "$SCANNED_WIFI" != "QR-Code:WIFI:"* ]] && continue
+
+                                  ESSID="$(sed        's/.*;S://;s/;.*//' <<< "$SCANNED_WIFI")"
+                                  PASSW="$(sed        's/.*;P://;s/;.*//' <<< "$SCANNED_WIFI")"
+                                  HIDDENSTATUS="$(sed 's/.*;H:true;.*/-hidden/;s/.*;H:true$/-hidden/;s/.*;H;.*/-hidden/;s/.*;H$/-hidden/;/-hidden/!d' <<< "$SCANNED_WIFI")"
+
+                                  iwctl --passphrase "$PASSW" station "$WLAN_DEV" connect"$HIDDENSTATUS" "$ESSID"
+                                  unset SCANNED_WIFI PASSW ESSID HIDDENSTATUS
+                                  sleep 5
+###                                  tee "$XDG_RUNTIME_DIR"/pipe-fmenu-networklocal <<< "";;
+;;
+
+  *"$WLAN_SERVICE"*            )  # gum confirm  " 🌫 $WLAN_SERVICE" --affirmative="🔁 restart" --negative="🍀 no" &&
+                                  # { systemctl restart    "$WLAN_SERVICE"; } ;;
+                                  iwctl ;;
+
+  *" static ip connect"*       )  printf "\x1bc"
+                                  iwctl station "$WLAN_DEV" scan; sleep .1
+
+                                  ESSID="$(iwctl station "$WLAN_DEV" get-networks  \
+                                    | fzf --header-lines=4 \
+                                    | awk '{gsub("^ +> +",""); $NF=$(NF-1)=""; gsub(" +$",""); print }' )"
+                                  [[ -z "$ESSID" ]] && continue
+
+                                  run0 ip address flush dev "$WLAN_DEV"
+                                  run0 ip route   flush dev "$WLAN_DEV"
+                                  iwctl station "$WLAN_DEV" connect "$ESSID"
+
+                                  HISTORY="$HOME/.cache/shell/network_history"
+                                  LOCALNETWORK_IP="$({ echo "define new" ; cat "$HISTORY"; } | fzf \
+                                    --color='fg:#bbbbbb' \
+                                    --info=hidden  \
+                                    --header-first \
+                                    --header="$0"  \
+                                    --bind=left-click:accept,ctrl-space:replace-query,esc:ignore,shift-down:preview-down,shift-up:preview-up \
+                                  )"
+
+                                  [[ "$LOCALNETWORK_IP" == "define new" ]] && {
+                                    NEW_STATIC="$(gum input --header='> 192.168.x.x/16-30 # description' --value="192.168./")"
+                                    { echo "$NEW_STATIC"; cat "$HISTORY"; } | awk '!x[$0]++' | sponge "$HISTORY" # <- awk/head --lines=20 ??
+                                    LOCALNETWORK_IP="$NEW_STATIC"
+                                  }
+
+                                  LOCALNETWORK_IP="${LOCALNETWORK_IP%% *}"
+                                  GATEWAY_SUGGESTION="$(ipcalc "$LOCALNETWORK_IP" | awk '/HostMin:/{print $2}')"
+
+                                  printf "\x1bc"
+                                  ipcalc "$LOCALNETWORK_IP"
+                                  GATEWAY_SUGGESTION="$(gum input --header="─── GATEWAY ───" --value="$GATEWAY_SUGGESTION # gateway")"
+                                  { echo "$GATEWAY_SUGGESTION"; cat "$HISTORY"; } | awk '!x[$0]++' | sponge "$HISTORY"
+
+                                  # can I do this before wlan0 scan/connect??
+                                  run0 ip address add             "$LOCALNETWORK_IP"          dev "$WLAN_DEV"
+                                  run0 ip route   add default via "${GATEWAY_SUGGESTION%% *}" dev "$WLAN_DEV"
+###                                  tee "$XDG_RUNTIME_DIR"/pipe-fmenu-networklocal <<< "";;
+;;
+
+  *" pushbutton"*              )  printf "\x1bc"
+                                  iwctl wsc     "$WLAN_DEV" push-button
+                                  echo "now push router connection button !"
+                                  echo "for PIN use $ iwctl wsc \"$WLAN_DEV\" start-user-pin <PIN>"
+###                                  tee "$XDG_RUNTIME_DIR"/pipe-fmenu-networklocal <<< "";;
+;;
+
+  *"gateway webUI"*            )  printf "\x1bc"
+                                  xdg-open "http://$(ip -json route list default | jq --raw-output '.[].gateway')"
+                                  ;;
+
+  *"gping "*                   )  printf "\x1bc"
+                                  gping-default
+                                  ;;
+
+  *"mac spoof"*                )  printf "\x1bc"
+                                  # save macs ??
+                                  HISTORY="$HOME/.cache/macaddr_history"
+                                  MAC_LIST="$HOME/.cache/shell/vendorMacs.xml"
+                                  curl --silent "https://devtools360.com/en/macaddress/vendorMacs.xml?download=true" \
+                                       --output "$MAC_LIST"
+                                  MAC_PREFIX="$( { tac "$HISTORY"; awk 'BEGIN { FS = "\"" }; /^<VendorMapping mac_prefix="/{print $2 " " $4}' <"$MAC_LIST"; } \
+                                                   | fzf  --color='fg:#bbbbbb,hl+:#cfd92c'   \
+                                                          --prompt="mac address prefixes : " \
+                                                          --bind='enter:become(echo {1})'   )"
+                                  [[ -z "$MAC_PREFIX" ]] && continue
+
+                                  MAC_SUFFIX="$(gum input --header="hex value like 01:9A:BF" --placeholder="01:9A:BF")"
+                                  #  [[ "$MAC_SUFFIX" =~ "^[0-9a-f][0-9a-f]:[0-9a-f][0-9a-f]:[0-9a-f][0-9a-f]$" ]]
+                                  [[ -z "$MAC_SUFFIX" ]] && continue
+                                  # do not save in history if already there
+                                  grep --quiet     "$MAC_PREFIX:$MAC_SUFFIX" "$HISTORY" \
+                                  || { tail --lines=5 "$HISTORY"
+                                       echo           "$MAC_PREFIX:$MAC_SUFFIX $USER $(date --rfc-3339=date)" ;} \
+                                     | sponge         "$HISTORY"
+
+                                  run0 ip link set dev "$WLAN_DEV" down    || continue
+                                  run0 ip link set dev "$WLAN_DEV" address "$MAC_PREFIX:$MAC_SUFFIX"
+                                  run0 ip link set dev "$WLAN_DEV" up
+
+###                                  tee "$XDG_RUNTIME_DIR"/pipe-fmenu-networklocal <<< "";;
+;;
+
+ *" vpn"*                      )  echo "check https://wiki.archlinux.org/title/WireGuard"; read -r
+ ###                                 tee "$XDG_RUNTIME_DIR"/pipe-fmenu-networklocal <<< "";;
+ ;;
+
+
+  *[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+* ) printf "\x1bc"
+                                    { curl --silent https://ipinfo.io; whois "$EXTERNAL_IP" ; } \
+                                    | bat  --language=perl --style=plain ;;
+
+                                  # ngrep
+esac
+
+#
+# burp
+# snort # check dns resolution
+# https://www.tp-link.com/it/support/emulator/
+#
+# verifica copertura
+# https://geo.agcom.it/arcgis/apps/opsdashboard/index.html#/b40ac3dde329479aa283e63e983aa078
+#
+done

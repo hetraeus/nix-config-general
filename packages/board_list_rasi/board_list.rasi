@@ -1,0 +1,76 @@
+* {
+    background-color: transparent;
+    text-color:       var(textcol);
+}
+window {
+    width:            40.0000% ;
+    background-color: var(bg);
+    padding:          0.000% ;
+    font:             "monospace 16";
+    children:         [ "message","prompt","listview","inputbar" ];
+    height:           80.0000% ;
+    border-radius:    0.3000em ;
+}
+prompt {
+    padding:      0.0000% 0.0000% 0.0000% ;
+    enabled:      true;
+    margin:       1.0000% 0% 2% 2% ;
+    font:         "monospace 15";
+    border-color: var(button);
+    border:       0px 0px 0.1000em ;
+}
+entry {
+    padding:           0.0000% ;
+    expand:            true;
+    horizontal-align:  0.50;
+    placeholder-color: var(textcol);
+    text-color:        var(fg);
+  /* placeholder:      "search"; */
+}
+inputbar {
+    padding:  0px ;
+    margin:   2.0000% ;
+    expand:   false;
+    children: [ "entry" ];
+}
+listview {
+    cycle:   false;
+    dynamic: true;
+    columns: 1;
+    layout:  vertical;
+    lines:   12;
+    padding:     0.0000% 1.0000% 0.0000% 1.0000% ;
+}
+mainbox {
+    padding: 2.0000% 1.0000% ;
+    spacing: 1.0000% ;
+}
+element {
+    orientation: vertical;
+    padding:     1.0000% 0.0000% 1.0000% 1.0000% ;
+}
+element selected {
+    background-color: var(button);
+    text-color:       var(bg);
+    border-radius:    0.3000em ;
+}
+element-icon {
+    size:             128px ;
+    horizontal-align: 0.50;
+    text-color:       inherit;
+}
+element-text {
+    margin:           0.2000% ;
+    expand:           true;
+    vertical-align:   0.5;
+    horizontal-align: 0.0;
+    text-color:       inherit;
+    font:             "monospace 13";
+}
+message {
+    height:  8%;
+    padding: 2.0000% 0.0000% 0.5000% 8.0000% ;
+}
+textbox {
+    font:             "monospace 12";
+}

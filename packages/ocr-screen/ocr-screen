@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+
+TMP_SCREENSHOT="$XDG_RUNTIME_DIR/$(date --iso-8601=date)".png
+slurp -b '#0000ff00' -c '#ff0000ff' \
+| grim -g - "$TMP_SCREENSHOT"
+
+[ ! -f "$TMP_SCREENSHOT" ] && exit
+
+# DO NOT MOVE magick OPTIONS! Order counts and it's a delicate command
+magick "$TMP_SCREENSHOT" \
+-set colorspace Gray     \
+-separate                \
+-evaluate-sequence Mean  \
+-scale 300%              \
+-sharpen 0x3             \
+"$TMP_SCREENSHOT".png
+tesseract "$TMP_SCREENSHOT".png stdout | wl-copy --trim-newline
+
+rm "$TMP_SCREENSHOT"{,.png}
+
+[ -z "$(wl-paste)" ] && exit
+
+wl-paste | wl-copy --primary --trim-newline
+
+conv_lang="$(timeout 10 notify-send        \
+--app-name="󱄺 ocr"              \
+--action="eng=to english 🇺🇸"  \
+--action="ita=in italiano 🇮🇹" \
+"📎 clipboard" -- "$(wl-paste)" )"
+
+case "$conv_lang" in
+  ita)
+    notify-send --app-name="󰗊 translate" "''${SOURCE_TEXT:0:25}" "$(trans -no-ansi :it "''${SOURCE_TEXT}" \
+    | tail --lines=+2                              \
+    | fold --spaces --width=75)" --expire-time=20000
+    ;;
+  eng)
+    notify-send --app-name="󰗊 translate" "''${SOURCE_TEXT:0:25}" "$(trans -no-ansi :en "''${SOURCE_TEXT}" \
+    | tail --lines=+2                              \
+    | fold --spaces --width=75)" --expire-time=20000
+    ;;
+esac

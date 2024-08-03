@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+
+# set -x
+
+export  FZF_DEFAULT_OPTS="\
+  --layout=reverse        \
+  --info=hidden           \
+  --scroll-off=5          \
+  --no-separator          \
+  --prompt='  '           \
+  --pointer=' '           \
+  --gutter=' '            \
+  --color='bg+:#04727d,fg+:#fac6c1,hl+:#ff497c,gutter:-1'
+"
+
+SCRIPT_NAME="$0"
+echo -en "\e]2;ʄ𝖕 $SCRIPT_NAME\a\
+\033]2;$SCRIPT_NAME\007"
+
+if [[ "${1:-not_specified}" == "thumbup" ]]
+then PREV_WIN="up,39%,border-down"
+else PREV_WIN="right,70%,border-left"
+fi
+
+# TODO: preview these too? %{style} %{weight} %{width} %{color}
+# INFO: the following shellcheck exception allows --preview
+# shellcheck disable=SC2016
+while true; do
+  readarray -t SEL < <(fc-list --format '%{fullname} %{file}\n' \
+  | fzf                          \
+    --preview-label=" $0 "       \
+    --header-first               \
+    --info=inline-right          \
+    --print-query                \
+    --delimiter="/"              \
+    --query="${SEL[0]:-}"        \
+    --with-nth=-1                \
+    --color='fg:#bbbbbb'         \
+    --preview-window="$PREV_WIN" \
+    --preview='
+    # --transfer-mode=memory is the fastest option but if you want fzf to be able
+    # to redraw the image on terminal resize or on `change-preview-window`,
+    # you need to use --transfer-mode=stream.
+    gen_font_preview /{2..} 2>/dev/null
+    dim=${FZF_PREVIEW_COLUMNS}x$((FZF_PREVIEW_LINES))
+    kitten icat --clear --transfer-mode=memory --stdin=no --place="$dim@0x0" "$XDG_RUNTIME_DIR/font_prev.png"
+    '
+    )
+
+  [[ -z "${SEL[1]:-}" ]] && exit
+
+  [[ -z "${SEL[0]}" ]] && SEL[0]="${SEL[1]##*/}"
+
+  wl-copy --primary <<< "${SEL[1]##*/}"
+  wl-copy           <<< "${SEL[1]##*/}"
+
+  # echo "${SEL[1]}"
+  # kitten icat --hold "$XDG_RUNTIME_DIR/font_prev.png"
+  done

@@ -1,0 +1,11 @@
+[Service]
+ExecStart=@BIN@
+Type=exec
+# Protects against accidental cross-process temp file clashes
+PrivateTmp=yes
+
+[Unit]
+After=graphical-session.target
+Description=fmenu-movie-choose
+PartOf=graphical-session.target
+

@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+
+stty -echoctl
+trap true SIGINT
+
+export  FZF_DEFAULT_OPTS="\
+  --layout=reverse        \
+  --info=hidden           \
+  --scroll-off=5          \
+  --ansi                  \
+  --no-separator          \
+  --prompt='  '           \
+  --pointer=' '           \
+  --gutter=' '            \
+  --color='bg+:#04727d,fg+:#fac6c1,hl+:#ff497c,gutter:-1'
+"
+
+DIRS=()
+
+FLASH_EMU="ruffle"   ;command -v    "$FLASH_EMU" >/dev/null && DIRS+=("$HOME/my/roms/flash"    );
+SPECTRUM_EMU="fuse"  ;command -v "$SPECTRUM_EMU" >/dev/null && DIRS+=("$HOME/my/roms/spectrum" );
+DS_EMU="melonDS"     ;command -v       "$DS_EMU" >/dev/null && DIRS+=("$HOME/my/roms/ds"       );
+VBA_EMU="sameboy"    ;command -v      "$VBA_EMU" >/dev/null && DIRS+=("$HOME/my/roms/gameboy"  );
+SNES_EMU="zsnes"     ;command -v     "$SNES_EMU" >/dev/null && DIRS+=("$HOME/my/roms/snes"     );
+
+#export FZF_DEFAULT_COMMAND="find -maxdepth 1 -type f"
+# INFO: the following shellcheck exception allows --preview
+# shellcheck disable=SC2016
+
+while ! "${finished:-false}"; do printf "\x1bc"
+
+R="$( {
+echo "///////✅ Done"
+fd . "${DIRS[@]:-}"       \
+  --follow --type="file"  \
+  --exclude '**/thumb/**' \
+  --exclude '**.dsv'      \
+  --exclude '**.ml1'      \
+  --exclude '**.rtc'      \
+  --exclude '**.sav'      \
+  --exclude '**.srm'      \
+  --exclude '**.srm.2'    \
+  --exclude '**.state'
+} | fzf                   \
+  --padding=0%,0%,0%,3%   \
+  --color='fg:#bbbbbb'    \
+  --header-first          \
+  --header="$0"           \
+  --delimiter="/"         \
+  --with-nth 8..          \
+  --preview-window="right,70%,border-left" \
+  --preview='dim=${FZF_PREVIEW_COLUMNS}x$((FZF_PREVIEW_LINES))
+THUMB_PATH="$(realpath {} | sed "s#\(.*\)/#\1/thumb/#; s/\..*$/.png/")"
+kitten icat --clear --transfer-mode=memory --stdin=no --place="$dim@0x0" "$THUMB_PATH" ' \
+  --bind=left-click:accept,ctrl-space:replace-query,esc:ignore,shift-down:preview-down,shift-up:preview-up \
+)"
+
+case "$R" in
+  "$FLASH_DIR"*    ) $FLASH_EMU    "$R" ;;
+  "$SPECTRUM_DIR"* ) $SPECTRUM_EMU "$R" ;;
+  "$DS_DIR"*       ) $DS_EMU       "$R" ;;
+  "$GB_DIR"*       ) $VBA_EMU      "$R" ;;
+  "$SNES_DIR"*     ) $SNES_EMU     "$R" ;;
+  *"✅ Done"       ) finished=true      ;;
+esac
+done

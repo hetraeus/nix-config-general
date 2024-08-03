@@ -1,0 +1,152 @@
+#!/usr/bin/env bash
+
+# set -x
+#bootctl status --no-pager
+stty -echoctl
+trap true SIGINT
+
+COLOR_RED="\e[31m"
+
+export  FZF_DEFAULT_OPTS="\
+  --layout=reverse        \
+  --info=hidden           \
+  --scroll-off=5          \
+  --ansi                  \
+  --no-separator          \
+  --prompt='  '           \
+  --pointer=' '           \
+  --gutter=' '            \
+  --color='bg+:#04727d,fg+:#fac6c1,hl+:#ff497c,gutter:-1'
+"
+
+set +o errexit
+while printf "\x1bc"; do
+
+R="$(fzf                   \
+  --padding=0%,0%,0%,3%    \
+  --color='fg:#bbbbbb'     \
+  --header-first           \
+  --header="$(taint-check)
+$(fastfetch --logo none --color green --structure 'Host:Kernel:Packages:Resolution:CPU:GPU:Memory:Disk:Locale:Break' \
+| fold --spaces --width=47 )
+$(systemctl list-units --failed --legend=false        )  \
+$(systemctl list-units --failed --legend=false --user )" \
+  --bind=left-click:accept,ctrl-space:replace-query,esc:ignore,shift-down:preview-down,shift-up:preview-up \
+ < <(
+echo "🧬 $0"
+
+[[ ! -f "$HOME/.cache/shell/due_supdate" ]] && touch "$HOME/.cache/shell/due_supdate"
+
+UPDATE_DATE="$(<"$HOME/.cache/shell/due_supdate")"
+(( EPOCHSECONDS > UPDATE_DATE )) && echo '🔸 🔸 🔸 🤕 need backup ! 🔸 🔸 🔸'
+
+systemctl show --property=Options -- -.mount | sed "s/.*subvolid=/$COLOR_RED🦕 subvolid: /; s/,.*//"
+
+
+echo -n '🏹 battery charge type: '; grep --only-matching '\[.*\]' /sys/class/power_supply/BAT0/charge_types
+echo -n " "; inxi --battery | tail --lines=+2 | fold --spaces --width=40
+
+
+# acpi --details --battery \
+# | sed "
+#       s|^Battery .: | 🔋 |
+#       s|design capacity.||
+#       s|, last full capacity | ▶ |
+#       s| until charged||
+#     1 s|$| 💻$CONSERVATION_MODE|
+#     2 s|\([0-9]+\) \([0-9]+\)| battery health|
+#       " \
+# | rg --passthru '[ 12].% .$'
+
+# workaround because XDG_SESSION_ID is not working in my mangowm setup
+cd /run/systemd/sessions ; WAYLAND_SESSION="$(grep "^TYPE=wayland" --files-with-matches -- *)"
+
+[[ "$(loginctl show-session "$WAYLAND_SESSION" --property=Active --value)" == "yes" ]] &&
+  echo  "🥂 session active"                                                            ||
+  echo  "🔸 🔸 🔸 💔 broken session 🔸 🔸 🔸"
+
+#echo  "🌏 $(timedatectl status | awk -F"                " '/^ *Time zone:/{print $2}')"
+
+# TODO: add SE Linux
+# aa-enabled --quiet                      &&
+#   echo "🏰 apparmor up"                 ||
+#   echo "👿 apparmor down"
+
+[[ $(</proc/sys/kernel/sysrq) == 1 ]]   &&
+  echo "🪄 c+m+fn+prtsc -fn"            ||
+  echo "🛑 no sysrq" #     : run0 echo 1 > /proc/sys/kernel/sysrq"'
+
+tuned-adm active | sed 's/^Current active profile:/♨  powersave/'
+
+command -v btop                2>&1 >/dev/null && echo "⏚  btop"
+command -v top                 2>&1 >/dev/null && echo "⏚  top"
+command -v inxi                2>&1 >/dev/null && echo "ℹ™ hardware inxi"
+command -v lshw                2>&1 >/dev/null && echo "ℹ™ hardware lshw"
+command -v sysprof             2>&1 >/dev/null && echo "🩺 sysprof"
+command -v busctl              2>&1 >/dev/null && echo "🚐 busctl"
+command -v nvtop               2>&1 >/dev/null && echo "🎮 GPU nvtop"
+command -v pw-top              2>&1 >/dev/null && echo "🎚  pipewire sound server"
+command -v powertop            2>&1 >/dev/null && echo "⌁  powertop"
+command -v iotop-c             2>&1 >/dev/null && echo "🖴  i/o"
+command -v sysctl              2>&1 >/dev/null && echo "🥥 syscfg"
+command -v qdbusviewer         2>&1 >/dev/null && echo "🚐 qdbusviewer"
+command -v irqtop              2>&1 >/dev/null && echo "🖐 irq timers"
+[[ -x /run/current-system/sw/bin/perf ]]       && echo "🖐 perf irq timers"
+command -v systemd-cgtop       2>&1 >/dev/null && echo "🛂 control groups"
+command -v tuxclocker-qt       2>&1 >/dev/null && echo "🜚  overcloker"
+command -v fmenu-display-test  2>&1 >/dev/null && echo "🔲 display test dust dead pixels"
+command -v isd                 2>&1 >/dev/null && echo "🪄 systemd services"
+
+command -v fmenu-boot-this-now 2>&1 >/dev/null && echo "🏁 reboot to"
+# TODO: move to benchmark module
+command -v glmark2             2>&1 >/dev/null && echo "🎠 GPU glmark2"
+command -v vkmark              2>&1 >/dev/null && echo "🎠 GPU vkmark"
+command -v kdiskmark           2>&1 >/dev/null && echo "⛂  kdiskmark"
+
+# KBD="$(setxkbmap -query | sed --silent 's/layout: *//p')"
+# for i in "🍕 it" "🍔 us" "🥨 de" "🐻 ru" "🦂 ar" "🥖 fr" "💃 es" ; do echo "${i/ / keyboard }"; done \
+# | sed "s/ $KBD/ 🎹 $KBD/"
+
+))"
+
+case "$R" in
+#  *" keyboard "*       )  setxkbmap                    "${R##* }"      ;;
+  *" no sysrq"*        )  echo  "enable sysrq"; run0 sh -c 'echo 1 > /proc/sys/kernel/sysrq'  ;;
+  *' c+m+fn+prtsc -fn'*)  echo "disable sysrq"; run0 sh -c 'echo 0 > /proc/sys/kernel/sysrq'  ;;
+  *" qdbusviewer"      )  qdbusviewer                                  ;;
+  *" busctl"           )  busctl                                       ;;
+  *"sysprof"           )  sysprof                       & disown       ;;
+  *" btop"             )  (foot --app-id="kitty_floating" --hold btop                    ) & disown        ;;
+  *" top"              )  (foot --app-id="kitty_floating" --hold  top                    ) & disown        ;;
+  *"kdiskmark"         )  (foot --app-id="kitty_floating" --hold kdiskmark               ) & disown        ;;
+  *"glmark2"           )  (foot --app-id="kitty_floating" --hold glmark2                 ) & disown        ;;
+  *"vkmark"            )  (foot --app-id="kitty_floating" --hold vkmark                  ) & disown        ;;
+  *"🎮 gpu nvtop"      )  (foot --app-id="kitty_floating" --hold nvtop                   ) & disown        ;;
+  *" sound server"     )  (foot --app-id="kitty_floating" --hold pw-top                  ) & disown        ;;
+  *"⌁  powertop"       )  (foot --app-id="kitty_floating" --hold run0 powertop           ) & disown        ;;
+  *" perf irq timers"  )  (foot --app-id="kitty_floating" --hold run0 /run/current-system/sw/bin/perf top           ) & disown        ;;
+  *"🖐  irq timers"    )  (foot --app-id="kitty_floating" --hold irqtop                 ) & disown        ;;
+  *"🛂 control groups" )  (foot --app-id="kitty_floating" --hold systemd-cgtop           ) & disown        ;;
+  *" systemd services" )  (foot --app-id="kitty_floating" --hold isd                     ) & disown        ;;
+  *"$0"                )  (foot --app-id="kitty_floating" --hold nvim -- "$0"            ) & disown        ;;
+  *"🖴  i/o"           )  (foot --app-id="kitty_floating" --hold sh -c "run0 iotop-c"    ) & disown        ;;
+  *" hardware inxi"    )  (foot --app-id="kitty_floating" --hold run0 inxi --verbosity 8 ) & disown        ;;
+  *" hardware lshw"    )  (foot --app-id="kitty_floating" --hold sh -c "run0 lshw | bat --language=yaml --style=plain" ) & disown;;
+  *"overcloker"        )  run0  tuxclocker-qt                          ;;
+  *" display test"*    )  fmenu-display_test                           ;;
+  *" reboot to"        )  boot-this-now                                ;;
+#  *" UI icons"         )  (foot --app-id="kitty_floating" --hold icons_fuzzy             ) & disown        ;;
+#  *" font preview"     )  fmenu-prewfont thumbup                       ;;
+  *" sysctl"           )  run0 sysctl --all | fzf --color='fg:#bbbbbb' ;;
+  *"battery charge type" ) CHARGE_TYPE="$(tr ' ' '\n' </sys/class/power_supply/BAT0/charge_types | fzf)"
+                           [[ ! -z $CHARGE_TYPE ]] && run0 echo "$CHARGE_TYPE" > /sys/class/power_supply/BAT0/charge_types
+ ;;
+  *" powersave "*      )  tuned-adm list profiles \
+                          | head --lines=-1       \
+                          | fzf  --header-lines=1 \
+                                 --with-nth="2.." \
+                                 --bind "enter:become(tuned-adm profile {2})" \
+                                 --prompt="recommended profile : $(tuned-adm recommend) " ;;
+esac
+# break
+done

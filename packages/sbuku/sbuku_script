@@ -1,0 +1,138 @@
+#!/usr/bin/env bash
+
+HISTORY="$HOME/.cache/search_history"
+save_history(){ {
+  [[ -z "$*" ]] && return
+  printf '%s\n' "$@"; cat "$HISTORY"; } | awk '!x[$0]++' | sponge "$HISTORY"
+  }
+
+
+if [[ -f "$HOME/.config/rofi/themes/accent_colors_list.rasi" ]]; then
+  THEME_STR='@import "~/.config/rofi/themes/accent_colors_list.rasi"'
+else
+  THEME_STR='* { textcol: #cdd3de; bg: #2c393fe2; button: #89ddff; fg: #82aaff; }'
+fi
+
+ENGINES_FILE="$XDG_RUNTIME_DIR/search_engines.json"
+ROFI_DEFS=( rofi -dmenu -scroll-method 1 -multi-select -theme "${BOARD_LIST_RASI:-material}" -theme-str "$THEME_STR" -ballot-unselected-str '' -ballot-selected-str '➤ ')
+OP=${1:-askme}
+
+# Get the query using the clipboard ──────────────────────────────────────────────────────────────
+if [ "$OP" = "clipboard" ]; then
+  SEARCH_ITEMS="$(                                                        \
+  printf '%q'                                                             \
+    "$( wl-paste --primary                                                \
+    | sed --regexp-extended 's/([^[:print:]])//g;s#^\s*##;s#\s*$##' )"    \
+  | xargs                                                                )"
+# xargs trims whitespaces
+
+#  SEARCH_ITEMS="${RAW_SEARCH_ITEMS//\\}"
+  save_history "${SEARCH_ITEMS##;}"
+
+
+# Get the query asking for it ────────────────────────────────────────────────────────────────────
+elif [ "$OP" = "askme" ]; then
+
+  ASKME_HELP="$0
+  ctrl+space  : edit previous search
+  shift+enter : multiple selection
+  ';' - first char : don't save
+  ';' - elsewhere  : skip suggestion
+  '+'              : multiple queries"
+
+  RAW_SEARCH_ITEMS="$(
+      "${ROFI_DEFS[@]}"           \
+      -input "$HISTORY"           \
+      -mesg  "$ASKME_HELP"        \
+      -p "$(printf ' 🜚  %(%H:%M)T  ')" \
+      | sed --regexp-extended                                    \
+            --expression='s/([^[:print:]])//g;s#^\s*##;s#\s*$##' \
+            --expression=':a' --expression=N --expression='$!ba' \
+            --expression='s/\n/+/g'                              \
+    )"
+
+  [ ${#RAW_SEARCH_ITEMS} -le 2 ] && exit 1
+
+  # Remove every ";" , the rofi suggestions override
+  SEARCH_ITEMS="$(printf %q "${RAW_SEARCH_ITEMS//;/ }")"
+  SEARCH_ITEMS="${SEARCH_ITEMS//\\/}"
+
+  # and save it.
+  # Do not save queries with ";" in front of them
+  [[ $RAW_SEARCH_ITEMS != ';'* ]] && save_history "$SEARCH_ITEMS"
+
+# No query? Then quit. Or collect the queries ────────────────────────────────────────────────────
+fi; [ ${#SEARCH_ITEMS} -eq 0 ] && exit 1
+readarray -td '' QUERY_LIST < <(awk '{ gsub(/\+/,"\0"); print; }' <<<"$SEARCH_ITEMS+")
+unset 'QUERY_LIST[-1]'
+
+# Collect the engines ────────────────────────────────────────────────────────────────────────────
+
+ENGINES_HELP="  shift-enter : multiple selection"
+
+mapfile -t ENGINES <             <(
+  jq --raw-output                 \
+  '.[] | .tags[]' "$ENGINES_FILE" \
+  | sort --unique                 \
+  | "${ROFI_DEFS[@]}"             \
+    -sorting-method fzf           \
+    -sort                         \
+    -mesg "$ENGINES_HELP"         \
+    -p "${SEARCH_ITEMS:0:80}… "
+  )
+[ ${#ENGINES} -eq 0 ] && exit 2
+
+TARGET_LIST=("yes")
+for each_engine      in "${ENGINES[@]}"    ; do
+  jq --arg s_engine "$each_engine" --raw-output --exit-status \
+  '.[] | select ( [ .tags[] == $s_engine and ( .uri | contains("%r") ) ] | any) | .uri' \
+  "$ENGINES_FILE" && {
+   RAW_TARGET_ITEMS=$(printf %q                                              \
+     "$("${ROFI_DEFS[@]}" -input "$HISTORY" -p "Target" -mesg "$ASKME_HELP"  \
+       | sed --regexp-extended                                               \
+             --expression='s/([^[:print:]])//g;s#^\s*##;s#\s*$##'            \
+             --expression=':a' --expression=N --expression='$!ba'            \
+             --expression='s/\n/+/g'                                         \
+     )")
+
+   [ ${#RAW_TARGET_ITEMS} -le 2 ] && exit 1
+
+   # Remove every ";" , the rofi suggestions override
+   TARGET_ITEMS="${RAW_TARGET_ITEMS//;/ }"
+   TARGET_ITEMS="${TARGET_ITEMS//\\}"
+
+   # and save it.
+   # Do not save queries with ";" in front of them
+   [[ $RAW_TARGET_ITEMS != ';'* ]] && save_history "$TARGET_ITEMS"
+   [ ${#TARGET_ITEMS}  -eq 0     ] && exit 1
+   readarray -td '' TARGET_LIST < <(awk '{ gsub(/+/,"\0"); print; }' <<<"$TARGET_ITEMS+"); unset 'TARGET_LIST[-1]'
+   } && break; done
+
+
+# Do the searches ────────────────────────────────────────────────────────────────────────────────
+
+# "$2" = "browser1"
+# "$2" = "browser2"
+# "$2" = "sandboxed"
+# "$2" = "private"
+# "$2" = "mpv"
+# "$2" = "qimgv"
+# "$2" = "yd"
+# "$2" = "yd-audio"
+# "$2" = "gallery-dl"
+# "$2" = "pdf-save"
+
+IFS=$'\n'
+for each_query_word  in "${QUERY_LIST[@]}" ; do
+for each_target_word in "${TARGET_LIST[@]}"; do # %r tag:gmdir
+for each_engine      in "${ENGINES[@]}"    ; do
+for each_url         in  $(
+  jq --arg s_engine "$each_engine" --raw-output      \
+  '.[] | select ( [ .tags[] == $s_engine]|any)|.uri' \
+  "$ENGINES_FILE"                                    \
+  | sed "s#\%s#$each_query_word#g;s#\%r#$each_target_word#g"); do
+
+  sleep .1$RANDOM
+  xdg-open "$each_url" # don't use xdg-open ! It corrupts the tabs
+
+done done done done
