@@ -1,0 +1,26 @@
+import groovy.json.JsonOutput
+
+allprojects {
+    tasks.register('generateDepsJson') {
+        dependsOn configurations.runtimeClasspath
+
+        // Capture the project name during configuration (not execution)
+        def projectName = project.name
+
+        doLast {
+            def json = [:]
+            def deps = configurations.runtimeClasspath.resolvedConfiguration.firstLevelModuleDependencies
+            deps.each { dep ->
+                def moduleId = dep.module.id
+                def depKey = "${moduleId.group}:${moduleId.name}:${moduleId.version}"
+                def artifacts = dep.allModuleArtifacts.collect { artifact ->
+                    [name: artifact.name, type: artifact.type]
+                }
+                json[depKey] = [artifacts: artifacts]
+            }
+            def output = new File("deps.json")
+            // Use the captured variable, not project.name at execution time
+            output.write(JsonOutput.toJson([(projectName): json]))
+        }
+    }
+}
