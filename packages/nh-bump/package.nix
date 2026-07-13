@@ -10,7 +10,7 @@
       systemd-inhibit \
       --what=sleep:idle:handle-lid-switch \
       --why="nixos-rebuild running"       \
-        nh os "$OP" --keep-failed ''${IF_OFFLINE:=} \
+        nh os "$OP" --keep-failed ''${IF_OFFLINE:=} --accept-flake-config \
         "$HOME/my/proj/sysflake" \
         --verbose --hostname="$(hostnamectl hostname)" && printf "\e]777;notify;%s;%s\a" "NixOS" "$OP creation successful"
     '';
