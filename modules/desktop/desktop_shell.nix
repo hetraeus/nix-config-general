@@ -117,7 +117,7 @@ flake.homeModules.desktop_shell = { pkgs, lib, config, self, ... }: {
     pkgs.zint-qt
     ];
 
-  systemd.user.packages = [ self.packages.${pkgs.stdenv.hostPlatform.system}.chillfile ];
+  systemd.user.packages = [ self.packages.${pkgs.stdenv.hostPlatform.system}.chillfile.outputs.systemd-user ];
   systemd.user.services.chillfile.wantedBy = [ "graphical-session.target" ];
   services.udiskie.enable = true; # thunar is not smart enought to mount hard disks plugged from boot
   xdg.autostart.enable = true;
