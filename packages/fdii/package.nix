@@ -1,7 +1,7 @@
 { perSystem = { pkgs, ... }: {
   packages.fdii = pkgs.writeShellApplication {
     name          = "fdii";
-    runtimeInputs = [ pkgs.xdg-utils pkgs.fd pkgs.bat pkgs.fzf pkgs.helix ];
+    runtimeInputs = [ pkgs.coreutils pkgs.xdg-utils pkgs.fd pkgs.bat pkgs.fzf pkgs.helix ];
     text = ''
       (( $# == 0 )) && exit
       mapfile -t MATCHING_FILES < <(fd --type=f --full-path -- "''${@// /*}" . )
@@ -23,6 +23,8 @@
       --bind='enter:become:xdg-open {}'    \
       --preview='bat --style=plain --color=always --pager "less -p {}" {}' \
       -- )"
+      [[ -z "$CHOICE" ]] && exit
+      ls --hyperlink --directory "''${CHOICE%:*}"
       echo "''${CHOICE:-}"
     '';
   };

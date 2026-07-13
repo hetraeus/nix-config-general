@@ -2,6 +2,7 @@
   packages.rgii = pkgs.writeShellApplication {
     name          = "rgii";
     runtimeInputs = [
+      pkgs.coreutils
       pkgs.television
       pkgs.ripgrep pkgs.bat # needed by television tv text internally
       pkgs.helix
@@ -20,7 +21,7 @@
         --input "$* "
         )"
       [[ -z "$CHOICE" ]] && exit
-      echo "$CHOICE"
+      ls --hyperlink --directory "''${CHOICE%:*}"
       "''${AVAIL_EDITOR:-hx}" "$CHOICE"
     '';
   };
