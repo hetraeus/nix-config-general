@@ -1,65 +1,57 @@
-{ perSystem = { self', pkgs, lib, ... }: {
-  packages.chillfile = let
+{ perSystem = { self', pkgs, lib, inputs, ... }:
+  let
+    wlib = inputs.wrappers.lib;
 
-    script = pkgs.stdenv.mkDerivation {
-      pname = "chillfile";
+    # just the qml assets, nothing else
+    qml = pkgs.stdenv.mkDerivation {
+      pname = "chillfile-qml";
       version = "0.1.0";
       src = ./.;
-
-      nativeBuildInputs = [ pkgs.makeWrapper ];
-      buildInputs = [
-        pkgs.kitty
-        pkgs.edir
-        pkgs.findutils
-        pkgs.git
-        pkgs.file
-        pkgs.wl-clipboard-rs
-        self'.packages.fmenu-share
-        ];
-
       installPhase = ''
         runHook preInstall
-
         mkdir -p $out/share/quickshell
         cp -r qml/* $out/share/quickshell/
-
-        # Install the launcher script
-        mkdir -p $out/bin
-        makeWrapper ${lib.getExe pkgs.quickshell} $out/bin/chillfile \
-          --run 'export QS_START_PATH="$HOME/my/proj"' \
-          --set FILEICON_PATH "${lib.getExe self'.packages.fileicon}" \
-          --add-flags "--path $out/share/quickshell"
-
         runHook postInstall
       '';
-
-      meta = with lib; {
-        description = "quickshell background layer file manager";
-        license = licenses.lgpl21Only;
-        platforms = platforms.linux;
-      };
-
     };
 
-  in pkgs.symlinkJoin {
-    name = "chillfile-wrapper";
-    meta.mainProgram = "chillfile";
-    paths = [ script ];
-    postBuild = ''
-      mkdir -p $out/share/systemd/user
-      cat > $out/share/systemd/user/chillfile.service <<EOF
-[Service]
-ExecStart=chillfile
-Type=exec
-PrivateTmp=yes
+    chillfile = (wlib.wrapModule ({ config, wlib, ... }: {
+      imports = [ wlib.modules.systemd ];
+      config = {
+        package = config.pkgs.quickshell;
+        binName = "chillfile";
 
-[Unit]
-After=multi-user-session.target
-Description=background file manager
+        runtimeInputs = [
+          config.pkgs.kitty
+          config.pkgs.edir
+          config.pkgs.findutils
+          config.pkgs.git
+          config.pkgs.file
+          config.pkgs.wl-clipboard-rs
+          self'.packages.fmenu-share
+        ];
 
-[Install]
-WantedBy=graphical-session.target
-EOF
-'';};
+        env.FILEICON_PATH = lib.getExe self'.packages.fileicon;
 
-};}
+        preHook = ''
+          export QS_START_PATH="$HOME/my/proj"
+        '';
+
+        flags."--path" = "${qml}/share/quickshell";
+
+        systemd = {
+          description = "background file manager";
+          after = [ "multi-user-session.target" ];
+          wantedBy = [ "graphical-session.target" ];
+          serviceConfig = {
+            Type = "exec";
+            PrivateTmp = true;
+          };
+        };
+      };
+    })).apply { pkgs = pkgs; };
+  in {
+    packages.chillfile = chillfile.wrapper;
+    packages.chillfile-systemd-user = chillfile.outputs.systemd-user;
+  };
+}
