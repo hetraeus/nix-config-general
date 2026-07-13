@@ -15,7 +15,7 @@
   '';};
 
 in writeShellApplication {
-  name = "piemenu-1";
+  name = "piemenu_1";
   excludeShellChecks = [ "SC1009" "SC1064" "SC1065" "SC1072" "SC1073" ];
   text = ''
     TOGGLE_FLOATS="${hypr-hide-floats}"
@@ -24,6 +24,7 @@ in writeShellApplication {
 
   runtimeInputs = [
     clicker
+    self'.packages.visual-brightness
 
     brightnessctl
     coreutils

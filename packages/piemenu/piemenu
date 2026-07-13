@@ -24,7 +24,8 @@ case "$@" in
             local current = hl.get_config("cursor:zoom_factor")
             hl.config({ cursor = { zoom_factor = math.max(1.0, current * 0.9) } })';;
 
-  "⛧"   ) coproc rofi -modi drun -show drun -show-icons  > /dev/null 2>&1; exit;;
+        # DO NOT REMOVE COPROC
+  "⛧"  ) coproc rofi -modi drun -show drun -show-icons  > /dev/null 2>&1; exit;;
   ""   ) coproc translat tr_notify it  > /dev/null  2>&1; exit;;
   "🗽"  ) coproc translat tr_notify en  > /dev/null  2>&1; exit;;
 
@@ -75,7 +76,9 @@ case "$@" in
   ""   ) xdg-open "https://en.wikipedia.org/w/index.php?title=Special%3ASearch&go=Go&ns0=1&search=""$( wl-paste --primary | sed --regexp-extended 's/([^[:print:]])//g;s#^\s*##;s#\s*$##' )"  > /dev/null  2>&1
           wdotool windowactivate "$(wdotool search --name "$(awk 'BEGIN{FS="[=.]"} /x-scheme-handler\/https=/{print $2; exit}' ~/.config/mimeapps.list)" 2>/dev/null | cut --fields=1 )" 2>/dev/null
           exit;;
-  "⧉" )   rofi -show window -window-thumbnail -show-icons -window-format '{t}' > /dev/null 2>&1
+
+        # DO NOT REMOVE COPROC
+  "⧉" )   coproc rofi -show window -window-thumbnail -show-icons -window-format '{t}' > /dev/null 2>&1
           exit;;
 
  # "⎔"   ) coproc ( bspc    node --to-node "$(bspc query --nodes --node    'biggest.local.leaf.!window')" --state tiled \
@@ -93,8 +96,8 @@ case "$@" in
           exit;;
   "🕪"   ) wpctl set-volume @DEFAULT_AUDIO_SINK@ 6%+ --limit 1.8 > /dev/null 2>&1;;
   "🕩"   ) wpctl set-volume @DEFAULT_AUDIO_SINK@ 6%-             > /dev/null 2>&1;;
-  "🌘"  ) visual_brightness down            > /dev/null  2>&1;;
-  "🌔"  ) visual_brightness   up            > /dev/null  2>&1;;
+  "🌘"  ) visual-brightness down            > /dev/null  2>&1;;
+  "🌔"  ) visual-brightness   up            > /dev/null  2>&1;;
   "🌗"  ) brightnessctl --class="backlight" set 25% --quiet
           busctl --user set-property rs.wl-gammarelay / rs.wl.gammarelay Brightness d 1  > /dev/null  2>&1
           exit;;
@@ -113,7 +116,7 @@ esac
 
 # WARN: DO NOT DELETE TRAILING SPACES !
 case "$0" in
-  *"-1") echo -e "❄\n🕩\n🕪\n󱓈
+  *"_1") echo -e "❄\n🕩\n🕪\n󱓈
 ⏮\n⏯\n⏭\n
 \n\n󱣵\n󱄺
 🡩\n↶\n↷\n⛧
@@ -129,7 +132,7 @@ case "$0" in
 
 
 # WARN: DO NOT DELETE TRAILING SPACES !
-  *"-2") echo -e "\n\n\n
+  *"_2") echo -e "\n\n\n
 🌘\n🌗\n🌔\n🌚
 🟥\n⬜\n🟦\n🔳
 󰋃\n⟰\n⎋\n󱙝
