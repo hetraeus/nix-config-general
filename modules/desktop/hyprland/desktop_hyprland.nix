@@ -65,6 +65,7 @@ in {
       hl.dsp.exec_cmd("${lib.getExe pkgs.rofi} -show window -window-thumbnail -show-icons -window-format '{t}' -theme ${rasi_theme}"))
     hl.bind("SUPER + SHIFT + A", hl.dsp.exec_cmd("${lib.getExe pkgs.kitty}", { float = true, size = "1000 500" }))
 
+    hl.bind("SUPER + Return", hl.dsp.exec_cmd("${lib.getExe pkgs.kitty}"))
     hl.bind("SUPER + A", hl.dsp.exec_cmd("${lib.getExe pkgs.kitty}"))
     hl.bind("SUPER + W", hl.dsp.exec_cmd("${run_or_raise} firefox firefox"))
     hl.bind("SUPER + Q", hl.dsp.exec_cmd("${run_or_raise} thunderbird thunderbird"))
