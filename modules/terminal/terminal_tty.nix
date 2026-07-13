@@ -8,6 +8,7 @@
   services.getty.autologinUser = "${config.users_list.principalUser}";
   services.getty.autologinOnce = true;
   services.kmscon.extraConfig = "
+    #blinking=on # TODO after v10.0.0
     natural-scrolling=on
     ";
 
