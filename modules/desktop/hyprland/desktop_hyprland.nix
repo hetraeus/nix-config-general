@@ -29,7 +29,7 @@
 
 in {
 
-  home.packages = [ pkgs.quickshell piemenu_launch ];
+  home.packages = [ piemenu_launch ];
   wayland.windowManager.hyprland =      {
     enable                       =  true;
     xwayland.enable              =  true;
