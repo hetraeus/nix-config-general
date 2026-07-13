@@ -7,7 +7,7 @@
       pkgs.slurp pkgs.wl-clipboard-rs pkgs.xdg-utils pkgs.nerd-fonts.iosevka
     ];
     text = ''
-      source    "$XDG_CONFIG_HOME/user-dirs.dirs"
+      source    "''${XDG_CONFIG_HOME:-$HOME/.config}/user-dirs.dirs"
       SAVE_PATH="$XDG_SCREENSHOTS_DIR"
       mkdir --parents "$SAVE_PATH"
       NOW_PATH="$SAVE_PATH/shot-$( printf '%(%Y%m%d-%H%M%S)T' ).png"
