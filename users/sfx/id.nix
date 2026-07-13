@@ -180,8 +180,11 @@ programs.zsh.dotDir = "${config.xdg.configHome}/zsh";
     exec         = "${lib.getExe config.programs.firefox.package} --private-window";
     };
 
-  stylix.image = ./wallpaper_001.jpg;
-  # Make wallpaper available to other apps e.g.pcmanfm-qt
+  stylix.image =
+    if builtins.pathExists ./wallpaper_001.png
+     then ./wallpaper_001.png
+     else ./wallpaper_001.jpg;
+  # Make wallpaper available to other apps
   xdg.dataFile."wallpaper.jpg".source = config.stylix.image;
 
   };
