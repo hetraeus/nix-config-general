@@ -30,7 +30,6 @@ in {
     ];
 
  systemd.user.services.aria2 = {
-    Install.WantedBy = [ "multi-user.target" ];
     Unit = {
       Description = "Aria2 Daemon";
       After       = "network.target";
