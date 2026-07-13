@@ -1,5 +1,5 @@
 { perSystem = { pkgs, lib, ... }: {
-  packages.printers_utils = let
+  packages.printers-utils = let
     script_panic = pkgs.writeShellApplication {
       name          = "panicstopprinter";
       runtimeInputs = [ pkgs.cups ];

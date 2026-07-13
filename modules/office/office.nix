@@ -6,11 +6,11 @@
     enable             = true;
     cups-pdf.enable    = true;
     startWhenNeeded    = true;
-    drivers = [ pkgs.hplipWithPlugin ]; # 2025-11-26: yes I really need it. Check the printer with lpinfo -v
+    drivers = [ pkgs.hplip ]; # 2025-11-26: yes I really need it. Check the printer with lpinfo -v
     };
   hardware.sane.extraBackends = [
     pkgs.sane-airscan
-    pkgs.hplipWithPlugin # 2025-11-26: yes I really need it. Check the scanner with scanimage --list-devices
+    pkgs.hplip # 2025-11-26: yes I really need it. Check the scanner with scanimage --list-devices
     ];
 
 
@@ -123,7 +123,7 @@ flake.homeModules.office = { pkgs, lib, config, self, ... }: {
 
     pkgs.libqalculate
     pkgs.qalculate-gtk
-    self.packages.${pkgs.stdenv.hostPlatform.system}.panicstopprinter
+    self.packages.${pkgs.stdenv.hostPlatform.system}.printers-utils
 
     (self.legacyPackages.${pkgs.stdenv.hostPlatform.system}.ocr-batchWith {
       ocr-batch.langs = [ "eng" "ita" ];
