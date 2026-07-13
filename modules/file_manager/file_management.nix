@@ -22,7 +22,7 @@ in {
 
   xdg.mimeApps.enable     = true;
   home.packages = [
-    pkgs.lxqt.pcmanfm-qt
+    pkgs.thunar
     pkgs.libarchive
 
     pkgs.edir
@@ -58,37 +58,18 @@ in {
 
   # wayland.windowManager.hyprland.extraLuaFiles.file_manager = ''
    wayland.windowManager.hyprland.extraConfig = ''
-    hl.bind("SUPER + E", hl.dsp.exec_cmd("${run_or_raise} pcmanfm-qt pcmanfm-qt"))
+    hl.bind("SUPER + E", hl.dsp.exec_cmd("${run_or_raise} thunar thunar"))
     '';
 
   xdg.autostart.enable = true;
 
-  # xdg.autostart.entries = lib.singleton (
-  #   pkgs.makeDesktopItem {
-  #     name = "desktop_icons";
-  #     desktopName = "Add icons to desktop";
-  #     exec = "${lib.getExe pkgs.pcmanfm-qt} --desktop";
-  #     } + /share/applications/desktop_icons.desktop
-  #   );};
-
-  systemd.user.services.pcmanfm_desktop = {
-    Service.ExecStart  = "${lib.getExe pkgs.pcmanfm-qt} --desktop --daemon-mode";
-    Service.Restart    = "on-failure";
-    Unit.Description   = "pcmanfm desktop";
-    Unit.After         = [ "graphical-session.target" ] ;
-    Unit.Wants         = [ "graphical-session.target" ] ;
-    Install.WantedBy   = [ "graphical-session.target" ] ;
-    Service.KillMode   = "process";
-    Service.Slice      = "background.slice";
-    };
-
   gtk.gtk3.bookmarks = [
-    "file://${config.xdg.userDirs.documents}    proj"
-    "file://${config.xdg.userDirs.music} ♪   mus"
-    "file://${config.xdg.userDirs.pictures} 󱦌   pics"
-    "file://${config.xdg.userDirs.videos}    mov"
-    "file://${config.xdg.userDirs.download} 󰇚  dwld"
-    "file://${config.xdg.userDirs.publicShare}   cifs"
+    "file://${config.xdg.userDirs.documents} proj"
+    "file://${config.xdg.userDirs.music} mus"
+    "file://${config.xdg.userDirs.pictures} pics"
+    "file://${config.xdg.userDirs.videos} mov"
+    "file://${config.xdg.userDirs.download} dwld"
+    "file://${config.xdg.userDirs.publicShare} cifs"
     "file:///tmp ᴛᴍᴘ"
     ];
 
@@ -152,8 +133,6 @@ in {
   MimeTypes=image/*
   Exec=${lib.getExe pkgs.kitty} --app-id=fmenu_panel ${lib.getExe fm_image_convert} %F
   '';
-
-  xdg.configFile."pcmanfm-qt" = { source = config.lib.file.mkOutOfStoreSymlink "${config.xdg.dataHome}/../config/pcmanfm-qt"; };
 
   # Drop here template files used by file managers -> right click -> create new
   xdg.userDirs.templates     = "${config.xdg.dataHome}/templates";

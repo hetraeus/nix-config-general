@@ -24,8 +24,13 @@
     };
   services.flatpak.package = true; # 2025-07-20 beekeeper can't be installed with nix https://github.com/beekeeper-studio/beekeeper-studio/pull/3023
 
-  # pcmanfm mount
+  # mount
   services.gvfs.enable     = true;
+  services.udisks2.enable  = true; # needed by udiskie
+  services.tumbler.enable  = true;
+  programs.xfconf.enable   = true;
+  programs.thunar.enable   = true;
+  programs.thunar.plugins = with pkgs; [ thunar-archive-plugin thunar-volman thunar-vcs-plugin thunar-shares-plugin thunar-media-tags-plugin ];
 
   # Should withelist wttr.in , but sometimes is not online. Can I replace it?
 
@@ -79,6 +84,9 @@ flake.homeModules.desktop_shell = { pkgs, lib, config, self, ... }: {
     pkgs.zint-qt
     ];
 
+  systemd.user.packages = [ self.packages.${pkgs.stdenv.hostPlatform.system}.chillfile ];
+  systemd.user.services.chillfile.wantedBy = [ "graphical-session.target" ];
+  services.udiskie.enable = true; # thunar is not smart enought to mount hard disks plugged from boot
   xdg.autostart.enable = true;
   xdg.autostart.entries = lib.singleton ( # TEST
     pkgs.makeDesktopItem {
