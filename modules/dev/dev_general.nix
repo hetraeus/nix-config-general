@@ -124,6 +124,66 @@
       }];
   };};
 
+  services.opensnitch.rules.ai_antigravity = {
+    name      = "ai_antigravity";
+    enabled   = true;
+    created   = "2011-01-01T10:00:00.000000000+00:00"; # silence logs
+    action    = "allow";
+    duration  = "always";
+    operator  = {
+      type    = "list";
+      operand = "list";
+      list    = [{
+      type    = "regexp";
+      operand = "process.path";
+      data    = "^(/nix/store/[a-z0-9]{32}-antigravity-.*/lib/antigravity/(antigravity|resources/app/extensions/antigravity/bin/language_server_linux_x64))$";
+      } {
+      type    = "simple";
+      operand = "dest.port";
+      data    = "443";
+      } {
+      type    = "regexp";
+      operand = "dest.host";
+      data    = "^((mobile|browser)\.events\.data\.microsoft\.com|(cloudcode-pa|daily-cloudcode-pa|oauth2|play|fonts|www)\.googleapis\.com|fonts\.gstatic\.com|lh3\.googleusercontent\.com|main\.vscode-cdn\.net|default\.exp-tas\.com|open-vsx\.org|antigravity-unleash\.goog)$";
+      } {
+      type    = "regexp";
+      operand = "user.id";
+      data    = "^(${toString config.users_list.principalUserUid})$";
+      }];
+  };};
+
+  services.opensnitch.rules.ai_mistral = {
+    name      = "ai_mistral";
+    enabled   = true;
+    created   = "2011-01-01T10:00:00.000000000+00:00"; # silence logs
+    action    = "allow";
+    duration  = "always";
+    operator  = {
+      type    = "list";
+      operand = "list";
+      list    = [{
+      type    = "regexp";
+      operand = "process.path";
+      data    = "^(/nix/store/[a-z0-9]{32}-python3-.*/bin/python3\..*)$";
+      } {
+      type    = "simple";
+      operand = "dest.port";
+      data    = "443";
+      } {
+      type    = "regexp";
+      operand = "dest.host";
+      data    = "^(console|api)\.mistral\.ai|experiments\.mistral\.services)$";
+      } {
+      type    = "regexp";
+      operand = "user.id";
+      data    = "^(${toString config.users_list.principalUserUid})$";
+      } {
+      type    = "regexp";
+      operand = "process.command";
+      data    = "^(/etc/profiles/per-user/.*/bin/vibe(| .*))$";
+      }];
+  };};
+
   services.opensnitch.rules.nix-init = {
     name      = "nix-init";
     enabled   = true;
@@ -277,13 +337,13 @@ xdg.mimeApps.defaultApplications = let
 
   home.sessionVariables.MISTRAL_API_PATH="${config.sops.secrets."ai-api-mistral".path}";
 
-  home.shellAliases.antigrav = "env GEMINI_API_KEY=\"$(cat ${config.sops.secrets."ai-api-antigravity".path})\" ${lib.getExe config.programs.gemini-cli.package} ";
-  programs.gemini-cli.enable = true;
-  programs.gemini-cli.package = pkgs.antigravity; # TODO delete me
-  programs.gemini-cli.commands.sciency.description = "sciency";
-  programs.gemini-cli.commands.sciency.prompt = "Write me the factually correct, most accurate and scientifically sound explanation of {{args}}";
-  programs.gemini-cli.commands.eli5.description = "eli5";
-  programs.gemini-cli.commands.eli5.prompt = "Write me the factually correct, most accurate and scientifically sound explanation of this argument in simple terms: {{args}}";
+  home.shellAliases.antigrav = "env GEMINI_API_KEY=\"$(cat ${config.sops.secrets."ai-api-antigravity".path})\" ${lib.getExe config.programs.antigravity-cli.package} ";
+  programs.antigravity-cli.enable = true;
+  programs.antigravity-cli.package = pkgs.antigravity; # TODO delete me
+  programs.antigravity-cli.commands.sciency.description = "sciency";
+  programs.antigravity-cli.commands.sciency.prompt = "Write me the factually correct, most accurate and scientifically sound explanation of {{args}}";
+  programs.antigravity-cli.commands.eli5.description = "eli5";
+  programs.antigravity-cli.commands.eli5.prompt = "Write me the factually correct, most accurate and scientifically sound explanation of this argument in simple terms: {{args}}";
   };
 
 }
