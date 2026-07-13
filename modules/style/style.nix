@@ -19,6 +19,7 @@ in {
     self.packages.${pkgs.stdenv.hostPlatform.system}.fmenu-prewfont
   ];
   fonts.fontconfig.enable = true;
+  stylix.targets.hyprland.hyprpaper.enable = false;
   stylix.fonts  = {
     serif       = { name = "Noto Serif"       ; package = pkgs.noto-fonts             ;};
     sansSerif   = { name = "Roboto"           ; package = pkgs.roboto                 ;};
