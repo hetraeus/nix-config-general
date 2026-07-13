@@ -24,6 +24,7 @@ stdenv.mkDerivation {
   '';
 
   meta = with lib; {
+    mainProgram = "fileicon";
     description = "Resolve file paths to icon theme paths using GTK/GIO";
     license = licenses.lgpl21Only;
     platforms = platforms.linux;
