@@ -27,7 +27,7 @@ xdg.desktopEntries.invertColors = {
   run-or-raise = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.wrun-or-raise}" ;
   in ''
     hl.bind("SUPER + P", hl.dsp.exec_cmd("${run-or-raise} wdisplays ${lib.getExe pkgs.wdisplays}"))
-    hl.permission({binary="${lib.getExe pkgs.wdisplays}", type="screencopy", mode="allow"})
+    hl.permission({binary="${lib.getExe' pkgs.wdisplays ".wdisplays-wrapper"}", type="screencopy", mode="allow"})
 
     hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("visual-brightness down"), { repeating = true })
     hl.bind("XF86MonBrightnessUp",   hl.dsp.exec_cmd("visual-brightness   up"), { repeating = true })
