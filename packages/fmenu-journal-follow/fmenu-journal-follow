@@ -27,7 +27,7 @@ while true; do
   --prompt=" $USER : "               \
   --header-first                     \
   --header="alt-r : toggle raw mode | alt-down : go to bottom
-suggestions: oops|error|warn|fail|timeout|critical|no-signature|tampered|audit|security|kernel:\ usb\ |missing|deprecat|ignor|vuln" \
+suggestions: SIGSEGV|oops|error|warn|fail|timeout|critical|no-signature|tampered|audit|security|kernel:\ usb\ |missing|deprecat|ignor|vuln" \
   --bind='up:up-match,down:down-match,alt-r:toggle-raw,alt-down:last,alt-up:pos(1)'
   )"
   # --preview-window=bottom,30%,border-top,wrap \
