@@ -262,7 +262,7 @@ in
        }];
 
     userSettings.languages.Nix.language_servers = [ "nixd" "!nil" ];
-    extraPackages = [ pkgs.basedpyright pkgs.nixd pkgs.python3Packages.python-lsp-server ];
+    extraPackages = [ pkgs.basedpyright pkgs.nixd pkgs.python3Packages.python-lsp-server pkgs.kotlin-language-server ];
     extensions = [
       "assembly" # useful for mindustry scripts too!
       "ansible"
@@ -271,6 +271,7 @@ in
       "basher"
       "comment"
       "ini"
+      "kotlin"
       "json5"
       "lua"
       "nix"
@@ -335,6 +336,7 @@ xdg.mimeApps.defaultApplications = let
     trim_trailing_whitespace = false;
     };
 
+  home.shellAliases.nh-dev   = "nix develop --offline --no-update-lock-file";
   home.sessionVariables.MISTRAL_API_PATH="${config.sops.secrets."ai-api-mistral".path}";
 
   home.shellAliases.antigrav = "env GEMINI_API_KEY=\"$(cat ${config.sops.secrets."ai-api-antigravity".path})\" ${lib.getExe config.programs.antigravity-cli.package} ";
