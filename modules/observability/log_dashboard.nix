@@ -6,8 +6,15 @@
 in {
 
   home.packages = [ pkgs.kitty pkgs.isd fmenu-journal-follow fmenu-powerprofiles pkgs.witr pkgs.nuclei ];
+
   systemd.user.packages = [ fmenu-allfeeds ];
-  systemd.user.timers.fmenu-allfeeds.Install.WantedBy = [ "timers.target" ];
+  systemd.user.timers.fmenu-allfeeds = {
+    Install.WantedBy = [ "timers.target" ];
+    Timer.OnBootSec="5min";
+    Timer.OnUnitActiveSec="2h";
+    Timer.Persistent=true;
+    Unit.Description="update rss feeds";
+    };
 
   systemd.user.services.log_dashboard = let
     log_kitty_session = pkgs.writeText "log_kitty_session" ''
