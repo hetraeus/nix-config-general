@@ -94,11 +94,18 @@ flake.homeModules.office = { pkgs, lib, config, self, ... }: {
     # infinite canvas note taking app
     pkgs.rnote
 
-    # font readable to anyone
-    pkgs.open-dyslexic
+    # font readable to anyone - 2026-06-30 UNPROVEN
+    #pkgs.open-dyslexic
 
     # Casual font
     pkgs.nerd-fonts.recursive-mono
+
+    # Metric equivalent of Microsoft fonts
+    pkgs.comic-relief # Comic Sans
+    pkgs.carlito # Calibri
+    pkgs.gelasio # Georgia
+    pkgs.caladea # Cambria
+
 
     # Europass CV fonts
     # find referenced fonts with inkscape pdf import or using
