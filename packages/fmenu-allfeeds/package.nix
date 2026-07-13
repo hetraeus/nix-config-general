@@ -34,7 +34,7 @@
       mkdir -p $out/share/systemd/user
       cat > $out/share/systemd/user/fmenu-allfeeds.service <<EOF
 [Service]
-ExecStart="${script}/bin/fmenu-allfeeds %h/.local/config/sfeed_it"
+ExecStart=${lib.getExe' pkgs.sfeed "sfeed_update"} %h/.local/config/sfeed_it
 Type=exec
 PrivateTmp=yes
 Environment="PATH=${lib.makeBinPath sfeedDeps}"
@@ -42,19 +42,6 @@ Environment="PATH=${lib.makeBinPath sfeedDeps}"
 [Unit]
 After=multi-user-session.target
 Description=fmenu-allfeeds
-EOF
-
-      cat > $out/share/systemd/user/fmenu-allfeeds.timer <<EOF
-[Install]
-WantedBy=timers.target
-
-[Timer]
-OnBootSec=5min
-OnUnitActiveSec=2h
-Persistent=true
-
-[Unit]
-Description=update rss feeds
 EOF
 '';};
 
