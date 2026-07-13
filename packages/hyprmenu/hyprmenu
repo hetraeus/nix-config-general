@@ -9,20 +9,10 @@ echo -en "\0keep-selection\x1ftrue\n"
 echo -en "\0keep-filter\x1ftrue\n"
 
 case "$@" in
-  "󰐳"   ) coproc qr-selectread                             > /dev/null  2>&1
-          exit;;
-  "󰢸"*  ) coproc qr-code-from-clipboard window             > /dev/null  2>&1
-          exit;;
   # "󱙝"   ) coproc ( ~/.local/bin/scripts/hyprhidefloats       > /dev/null  2>&1 )
   #         exit;;
-  "🍃"*  ) hyprctl --quiet dispatch 'hl.dsp.window.float({action="toggle"})'
-           dotoolc <<< "key super+space" > /dev/null  2>&1
-           exit;;
-  "⏮"   ) coproc mpc --host="$MPD_HOST" --quiet prev       > /dev/null  2>&1
-          exit;;
-  "⏭"   ) coproc mpc --host="$MPD_HOST" --quiet next       > /dev/null  2>&1
-          exit;;
-  "⏯"   ) coproc mpc --host="$MPD_HOST" --quiet toggle     > /dev/null  2>&1
+  "🍃"* ) hyprctl --quiet dispatch 'hl.dsp.window.float({action="toggle"})'
+          dotoolc <<< "key super+space" > /dev/null  2>&1
           exit;;
   "❄"*  ) coproc { playerctl --all-players pause --no-messages
                    mpc --quiet --host="$MPD_HOST" pause    > /dev/null  2>&1 ; }
@@ -36,21 +26,30 @@ case "$@" in
           | pw-play   --rate 21000     --channels 1 -    > /dev/null  2>&1 ;}
           exit;;
   "🌗"* ) coproc { brightnessctl --class="backlight" set 375
-          busctl --user set-property rs.wl-gammarelay / rs.wl.gammarelay Brightness d 1  > /dev/null  2>&1;}
+          busctl --user set-property rs.wl-gammarelay / rs.wl.gammarelay Brightness d 1 > /dev/null 2>&1;}
           exit;;
   "🌘"* ) visual-brightness down > /dev/null  2>&1 ;;
   "🌔"* ) visual-brightness   up > /dev/null  2>&1 ;;
+  "1.0x") wlr-randr --output eDP-1 --scale 1   ;;
+  "1.2x") wlr-randr --output eDP-1 --scale 1.2 ;;
+  "1.3x") wlr-randr --output eDP-1 --scale 1.33;;
+  "1.5x") wlr-randr --output eDP-1 --scale 1.5 ;;
+  "2x"  ) wlr-randr --output eDP-1 --scale 2   ;;
+  "󰐳"   ) coproc qr-selectread                  > /dev/null 2>&1; exit;;
+  "󰢸"*  ) coproc qr-code-from-clipboard window  > /dev/null 2>&1; exit;;
+  "⏯"   ) mpc --host="$MPD_HOST" --quiet toggle > /dev/null 2>&1; exit;;
+  "⏮"   ) mpc --host="$MPD_HOST" --quiet prev   > /dev/null 2>&1; exit;;
+  "⏭"   ) mpc --host="$MPD_HOST" --quiet next   > /dev/null 2>&1; exit;;
   "🕪"*  ) wpctl set-volume @DEFAULT_AUDIO_SINK@ 6%+ --limit 1.8  > /dev/null  2>&1 ;;
   "🕩"*  ) wpctl set-volume @DEFAULT_AUDIO_SINK@ 6%-              > /dev/null  2>&1 ;;
   "🟦"* ) busctl --user call rs.wl-gammarelay / rs.wl.gammarelay UpdateTemperature n --  200 > /dev/null  2>&1 ;;
   "🟥"* ) busctl --user call rs.wl-gammarelay / rs.wl.gammarelay UpdateTemperature n -- -200 > /dev/null  2>&1 ;;
   "⬜"* ) busctl --user set-property rs.wl-gammarelay / rs.wl.gammarelay  Temperature q 6500 > /dev/null  2>&1 ;;
   "🎭"  ) busctl --user call rs.wl-gammarelay / rs.wl.gammarelay ToggleInverted;;
-  "◎"*  ) hyprctl --quiet dispatch 'hl.dsp.window.center()'                   ;;
-  "<"   ) hyprctl --quiet dispatch 'hl.dsp.group.next({ direction = "prev" })';;
-  ">"   ) hyprctl --quiet dispatch 'hl.dsp.group.next({ direction = "next" })';;
+  "◎"*  ) hyprctl --quiet dispatch 'hl.dsp.window.center()'                    ;;
+  "<"   ) hyprctl --quiet dispatch 'hl.dsp.group.next({ direction = "prev" })' ;;
+  ">"   ) hyprctl --quiet dispatch 'hl.dsp.group.next({ direction = "next" })' ;;
   "🗄"   ) hyprctl --quiet dispatch 'hl.dsp.group.toggle()'          ; exit;;
-  "󰋃"   ) hyprctl --quiet dispatch 'hl.dsp.group.toggle()'          ; exit;;
   "󱓈"   ) hyprctl --quiet dispatch 'hl.dsp.window.kill()'           ; exit;;
   ""*  ) hyprctl --quiet dispatch 'hl.dsp.window.pin()'            ; exit;;
   "33%" ) hyprctl --quiet dispatch 'hl.dsp.layout("colresize .334")'; exit;;
@@ -59,16 +58,13 @@ case "$@" in
   "50%" ) hyprctl --quiet dispatch 'hl.dsp.layout("colresize .499")'; exit;;
   "↔"   ) hyprctl --quiet dispatch "hl.dsp.window.resize({ x =  30, y = 0, relative = true })";;
   "🡒🡐"  ) hyprctl --quiet dispatch "hl.dsp.window.resize({ x = -30, y = 0, relative = true })";;
-  "1.0x") wlr-randr --output eDP-1 --scale 1   ;;
-  "1.2x") wlr-randr --output eDP-1 --scale 1.2 ;;
-  "1.3x") wlr-randr --output eDP-1 --scale 1.33;;
-  "1.5x") wlr-randr --output eDP-1 --scale 1.5 ;;
-  "2x"  ) wlr-randr --output eDP-1 --scale 2   ;;
+  "⤥"   ) hyprctl dispatch 'hl.dsp.layout("consume")'; exit;;
+  "⤤"   ) hyprctl dispatch 'hl.dsp.layout("promote")'; exit;;
   "🪁"  ) hyprctl --quiet eval '
-             hl.dispatch(hl.dsp.window.float({ action = "set" }))
-             hl.dispatch(hl.dsp.window.resize({ x = "1000", y = "650", relative = false }))
-             hl.dispatch(hl.dsp.window.center())
-             ';;
+           hl.dispatch(hl.dsp.window.float({ action = "set" }))
+           hl.dispatch(hl.dsp.window.resize({ x = "1000", y = "650", relative = false }))
+           hl.dispatch(hl.dsp.window.center())
+           ';;
 
    "🗺"   ) hyprctl --quiet eval '
              local ws = hl.get_active_workspace().id
@@ -97,7 +93,7 @@ case "$0" in
 "66%
 50%
 33%
-100%
+100%\0meta\x1f99%
 ↔\0meta\x1flarger
 🡒🡐\0meta\x1fslimmer
 🟦\0meta\x1fshift to blue
@@ -114,7 +110,7 @@ case "$0" in
 󰢸\0meta\x1fclipboard QR code
 \0meta\x1fpin window
 ◎\0meta\x1fcenter window
-🗄\0meta\x1ftab window toggle
+🗄\0meta\x1ftab window toggle group
 <\0meta\x1fprevious tab group
 >\0meta\x1fnext tab group
 🔝\0meta\x1falways on top
@@ -124,6 +120,8 @@ case "$0" in
 1.5x\0meta\x1fscreen display zoom
 2x\0meta\x1fscreen display zoom
 🗺\0meta\x1fscrolling layout scroller
+⤤\0meta\x1fpromote column
+⤥\0meta\x1fconsume column
 ◨\0meta\x1fmaster layout
 𑁍\0meta\x1fmonocle fullscreen layout
 🎭\0meta\x1finvert colors opposite" ;;
