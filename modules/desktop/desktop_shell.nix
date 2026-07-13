@@ -1,4 +1,4 @@
-{ flake.nixosModules.desktop_shell = { pkgs, lib, ... }: {
+{ flake.nixosModules.desktop_shell = { pkgs, config, lib, ... }: {
 
   environment.systemPackages = [
     pkgs.brightnessctl
@@ -59,6 +59,39 @@
        }];
     };};
 
+  services.opensnitch.rules.wttr_weather = {
+    name      = "wttr_weather";
+    enabled   = true;
+    created   = "2011-01-01T10:00:00.000000000+00:00"; # silence logs
+    action    = "allow";
+    duration  = "always";
+    operator  = {
+      type    = "list";
+      operand = "list";
+      list    = [{
+      type    = "regexp";
+      operand = "process.path";
+      data    = "^(/nix/store/[a-z0-9]{32}-python3-.*/bin/python3\..*)$";
+      } {
+      type    = "simple";
+      operand = "dest.port";
+      data    = "443";
+      } {
+      type    = "regexp";
+      operand = "dest.host";
+      data    = "^(wttr\.in)$";
+      } {
+      type    = "regexp";
+      operand = "user.id";
+      data    = "^(${toString config.users_list.principalUserUid})$";
+      } {
+      type    = "regexp";
+      operand = "process.command";
+      data    = "^(/etc/profiles/per-user/sfx/bin/weather .*)$";
+      }];
+  };};
+
+
 
   };
 
@@ -112,6 +145,7 @@ flake.homeModules.desktop_shell = { pkgs, lib, config, self, ... }: {
 
   # wayland.windowManager.hyprland.extraLuaFiles.desktop_shell = ''
   wayland.windowManager.hyprland.extraConfig = ''
+    hl.permission({binary="${lib.getExe pkgs.hyprpicker}", type="screencopy", mode="allow"})
     hl.permission({binary="${pkgs.xdg-desktop-portal-hyprland}/libexec/.xdg-desktop-portal-hyprland-wrapped", type="screencopy", mode="allow"})
     '';
 
