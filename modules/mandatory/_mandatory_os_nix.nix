@@ -83,7 +83,7 @@
        # } {
         type    = "regexp";
         operand = "dest.host";
-        data    = "^(((cache|channels|tarballs)\.nixos|(devenv|nix-community)\.cachix).org|(codeload.|)github.com|release-assets\.githubusercontent\.com|www\.python\.org|sourceware\.org|(ftpmirror|download\.savannah)\.gnu\.org)$";
+        data    = "^(((cache|channels|tarballs)\.nixos|(devenv|nix-community)\.cachix).org|(codeload.|)github.com|release-assets\.githubusercontent\.com|www\.python\.org|sourceware\.org|(ftpmirror|download\.savannah)\.gnu\.org|cache\.numtide\.com)$";
         } {
         type     = "simple";
         operand  = "dest.port";
