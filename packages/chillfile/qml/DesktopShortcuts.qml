@@ -3,8 +3,8 @@ import QtQuick
 Item {
     id: root
 
-    required property var browser  // FileBrowser instance (navigation + listing)
-    required property var desktop  // root Desktop.qml instance (shared utilities)
+    required property var browser
+    required property var desktop
 
     Shortcut {
         sequence: "Backspace"
@@ -67,5 +67,11 @@ Item {
         onActivated: {
             root.desktop.runTerminal(["kitty", "--directory", root.browser.currentPath]);
         }
+    }
+
+    // NEW: Ctrl+L — copy selected paths + notify
+    Shortcut {
+        sequence: "Ctrl+L"
+        onActivated: root.desktop.copySelectedPathsWithNotification()
     }
 }

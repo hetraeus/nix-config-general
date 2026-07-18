@@ -36,8 +36,7 @@ Item {
     }
 
     RowLayout {
-        anchors.left: parent.left
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.centerIn: parent
         spacing: 12
 
         ClockWidget {}
@@ -50,7 +49,8 @@ Item {
     }
 
     RowLayout {
-        anchors.centerIn: parent
+        anchors.left: parent.left
+        anchors.verticalCenter: parent.verticalCenter
         spacing: 8
 
         Button {
