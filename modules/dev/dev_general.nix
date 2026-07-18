@@ -273,6 +273,7 @@ in
       "ini"
       "kotlin"
       "json5"
+      "qml"
       "lua"
       "nix"
       "pylsp"
