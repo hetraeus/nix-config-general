@@ -74,4 +74,10 @@ Item {
         sequence: "Ctrl+L"
         onActivated: root.desktop.copySelectedPathsWithNotification()
     }
+
+    // Select all visible items in the file grid
+    Shortcut {
+        sequence: "Ctrl+A"
+        onActivated: root.desktop.fileGrid.selectAllVisible()
+    }
 }

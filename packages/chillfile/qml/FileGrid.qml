@@ -37,6 +37,50 @@ GridView {
         }
     }
 
+    function selectAllVisible() {
+        var paths = [];
+        for (var i = 0; i < browser.filteredModel.count; i++) {
+            paths.push(browser.filteredModel.get(i).path);
+        }
+        gridView.selectedPaths = paths;
+        if (browser.filteredModel.count > 0) {
+            gridView.currentIndex = browser.filteredModel.count - 1;
+            browser.lastFocusedPath = browser.filteredModel.get(browser.filteredModel.count - 1).path;
+            gridView.applyScrolloff();
+        }
+    }
+
+    property int scrolloffRows: 2
+
+    // Keep the current item at least 'scrolloffRows' away from the
+    // top and bottom edges of the viewport, like vim's 'scrolloff'.
+    function applyScrolloff() {
+        var idx = gridView.currentIndex;
+        if (idx < 0 || browser.filteredModel.count === 0) return;
+
+        var cols = Math.max(1, Math.floor(gridView.width / gridView.cellWidth));
+        var row = Math.floor(idx / cols);
+        var totalRows = Math.max(1, Math.ceil(browser.filteredModel.count / cols));
+        var viewH = gridView.height;
+        var so = gridView.scrolloffRows;
+        var ch = gridView.cellHeight;
+
+        // Target top-of-viewport to keep 'so' rows above cursor
+        var minY = (row - so) * ch;
+        // Target top-of-viewport to keep 'so' rows below cursor
+        var maxY = (row + so + 1) * ch - viewH;
+
+        var newY = gridView.contentY;
+        if (newY > minY) newY = minY;
+        if (newY < maxY) newY = maxY;
+
+        // Clamp to valid scroll range
+        var absoluteMaxY = Math.max(0, totalRows * ch - viewH);
+        newY = Math.max(0, Math.min(absoluteMaxY, newY));
+
+        gridView.contentY = newY;
+    }
+
     // Whenever the browser rebuilds filteredModel, decide which row should
     // end up focused (previously-focused path if still present, else the
     // first row).
@@ -50,6 +94,7 @@ GridView {
                         gridView.currentIndex = i;
                         var item = gridView.browser.filteredModel.get(i);
                         gridView.selectedPaths = [item.path];
+                        Qt.callLater(function() { gridView.applyScrolloff(); });
                         return;
                     }
                 }
@@ -59,6 +104,7 @@ GridView {
                 var firstItem = gridView.browser.filteredModel.get(0);
                 gridView.selectedPaths = [firstItem.path];
                 gridView.browser.lastFocusedPath = firstItem.path;
+                Qt.callLater(function() { gridView.applyScrolloff(); });
             } else {
                 gridView.currentIndex = -1;
                 gridView.selectedPaths = [];
@@ -105,6 +151,7 @@ GridView {
                 var item = browser.filteredModel.get(gridView.currentIndex);
                 gridView.selectedPaths = [item.path];
                 browser.lastFocusedPath = item.path;
+                gridView.applyScrolloff();
             }
         } else if (event.key === Qt.Key_Right) {
             event.accepted = true;
@@ -113,6 +160,7 @@ GridView {
                 var item = browser.filteredModel.get(gridView.currentIndex);
                 gridView.selectedPaths = [item.path];
                 browser.lastFocusedPath = item.path;
+                gridView.applyScrolloff();
             }
         } else if (event.key === Qt.Key_Up) {
             event.accepted = true;
@@ -121,6 +169,7 @@ GridView {
                 var item = browser.filteredModel.get(gridView.currentIndex);
                 gridView.selectedPaths = [item.path];
                 browser.lastFocusedPath = item.path;
+                gridView.applyScrolloff();
             }
         } else if (event.key === Qt.Key_Down) {
             event.accepted = true;
@@ -129,6 +178,7 @@ GridView {
                 var item = browser.filteredModel.get(gridView.currentIndex);
                 gridView.selectedPaths = [item.path];
                 browser.lastFocusedPath = item.path;
+                gridView.applyScrolloff();
             }
         } else if (event.key === Qt.Key_PageUp) {
             event.accepted = true;
@@ -138,6 +188,7 @@ GridView {
                     var item = browser.filteredModel.get(0);
                     gridView.selectedPaths = [item.path];
                     browser.lastFocusedPath = item.path;
+                    gridView.applyScrolloff();
                 }
             } else {
                 var visibleRows = Math.max(1, Math.floor(gridView.height / gridView.cellHeight));
@@ -150,6 +201,7 @@ GridView {
                 var item = browser.filteredModel.get(newIdx);
                 gridView.selectedPaths = [item.path];
                 browser.lastFocusedPath = item.path;
+                gridView.applyScrolloff();
             }
         } else if (event.key === Qt.Key_PageDown) {
             event.accepted = true;
@@ -159,6 +211,7 @@ GridView {
                     var item = browser.filteredModel.get(0);
                     gridView.selectedPaths = [item.path];
                     browser.lastFocusedPath = item.path;
+                    gridView.applyScrolloff();
                 }
             } else {
                 var visibleRows = Math.max(1, Math.floor(gridView.height / gridView.cellHeight));
@@ -172,6 +225,7 @@ GridView {
                 var item = browser.filteredModel.get(newIdx);
                 gridView.selectedPaths = [item.path];
                 browser.lastFocusedPath = item.path;
+                gridView.applyScrolloff();
             }
         } else if (event.key === Qt.Key_F2) {
             event.accepted = true;
@@ -189,6 +243,9 @@ GridView {
                     desktop.bottomBar.clearSearch();
                 }
             }
+        } else if (event.key === Qt.Key_A && (event.modifiers & Qt.ControlModifier)) {
+            event.accepted = true;
+            gridView.selectAllVisible();
         }
     }
 
@@ -217,6 +274,7 @@ GridView {
                 gridView.selectedPaths = [model.path];
             }
             gridView.browser.lastFocusedPath = model.path;
+            gridView.applyScrolloff();
         }
 
         onDoubleClicked: {
@@ -253,5 +311,53 @@ GridView {
         policy: ScrollBar.AsNeeded
         LayoutMirroring.enabled: true
         LayoutMirroring.childrenInherit: false
+    }
+
+    // ── touchpad swipe gestures ──
+    // Horizontal two-finger swipes navigate back/forward like a browser.
+    // Swipe left-to-right (positive delta) = back  (goUp)
+    // Swipe right-to-left (negative delta) = forward (historyForward)
+    MouseArea {
+        anchors.fill: parent
+        acceptedButtons: Qt.NoButton   // let clicks pass through to FileItem delegates
+        z: 1
+
+        property real accumulatedDeltaX: 0
+        property real swipeThreshold: 200   // total horizontal ° to trigger
+
+        Timer {
+            id: swipeResetTimer
+            interval: 300
+            onTriggered: parent.accumulatedDeltaX = 0
+        }
+
+        onWheel: function(wheel) {
+            // Only grab clearly horizontal swipes (horiz > 2× vert)
+            if (Math.abs(wheel.angleDelta.x) <= Math.abs(wheel.angleDelta.y) * 2) {
+                wheel.accepted = false;
+                return;
+            }
+
+            var dx = wheel.angleDelta.x;
+
+            // Reset if the user changes swipe direction
+            if (accumulatedDeltaX > 0 && dx < 0) accumulatedDeltaX = 0;
+            if (accumulatedDeltaX < 0 && dx > 0) accumulatedDeltaX = 0;
+
+            accumulatedDeltaX += dx;
+            swipeResetTimer.restart();
+
+            if (accumulatedDeltaX > swipeThreshold) {
+                // left-to-right swipe → back
+                gridView.browser.goUp();
+                accumulatedDeltaX = 0;
+            } else if (accumulatedDeltaX < -swipeThreshold) {
+                // right-to-left swipe → forward
+                gridView.browser.historyForward();
+                accumulatedDeltaX = 0;
+            }
+
+            wheel.accepted = true;
+        }
     }
 }

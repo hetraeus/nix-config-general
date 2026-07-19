@@ -27,15 +27,36 @@ Rectangle {
     property string previewPath: ""
     property string previewContent: ""
     property string pendingCheckPath: ""
+    property bool pendingIsDir: false
+
+    // Priority-ordered list of README filenames (lowercased for matching).
+    // The shell script will do case-insensitive matching against these.
+    property var readmePriority: [
+        "readme.md", "readme.txt", "readme.asciidoc", "readme.adoc",
+        "readme.rst", "readme.markdown", "readme", "readme.org",
+        "readme.pod", "readme.tex"
+    ]
+
+    // Second-choice files when no README is found.
+    property var secondChoicePriority: [
+        "flake.nix", "changelog.md", "changelog", "changelog.txt",
+        "changes.md", "changes", "changes.txt", "news.md", "news", "news.txt",
+        "license", "license.md", "license.txt", "copying",
+        "contributing.md", "contributing", "package.json", "cargo.toml",
+        "setup.py", "pyproject.toml", "go.mod", "makefile", "cmakelists.txt",
+        "configure", "meson.build", "build.zig"
+    ]
 
     function updatePreview() {
         var selected = desktop.fileGrid.selectedPaths;
         if (selected.length > 0) {
             root.pendingCheckPath = selected[0];
-            checkMimeProc.command = ["sh", "-c",
-                "file -b --mime-type " + shellQuote(root.pendingCheckPath) + " 2>/dev/null || echo unknown"
+            // First: determine if the selected path is a directory
+            // (handles real directories and symlinks to directories)
+            checkDirProc.command = ["sh", "-c",
+                "if [ -d " + shellQuote(root.pendingCheckPath) + " ]; then echo dir; else echo file; fi"
             ];
-            checkMimeProc.running = true;
+            checkDirProc.running = true;
             return;
         }
         root.tryFallback();
@@ -43,22 +64,76 @@ Rectangle {
 
     function tryFallback() {
         root.pendingCheckPath = "";
+        root.pendingIsDir = false;
         findFallbackProc.command = ["sh", "-c",
             "cd " + shellQuote(browser.currentPath) + " && " +
-            "for want in readme.md readme.asciidoc readme.adoc readme.txt readme.rst readme.markdown readme; do " +
-            "  for f in README*; do " +
-            "    [ -f \"$f\" ] || continue; " +
-            "    lf=$(echo \"$f\" | tr '[:upper:]' '[:lower:]'); " +
-            "    [ \"$lf\" = \"$want\" ] && { echo \"$f\"; exit 0; }; " +
-            "  done; " +
-            "done; " +
-            "if [ -f flake.nix ]; then echo flake.nix; else echo ''; fi"
+            root.buildFindScript()
         ];
         findFallbackProc.running = true;
     }
 
+    function tryDirPreview(dirPath) {
+        findDirProc.command = ["sh", "-c",
+            "cd " + shellQuote(dirPath) + " && " +
+            root.buildFindScript()
+        ];
+        findDirProc.running = true;
+    }
+
+    // Build a shell script that searches for READMEs then second-choices
+    // in the current working directory (which the caller cd's into).
+    function buildFindScript() {
+        var script = '';
+
+        // Search README* files in priority order
+        for (var i = 0; i < readmePriority.length; i++) {
+            var want = readmePriority[i];
+            script +=
+                'for f in README*; do ' +
+                '  [ -f "$f" ] || continue; ' +
+                '  lf=$(echo "$f" | tr \'[:upper:]\' \'[:lower:]\'); ' +
+                '  [ "$lf" = "' + want + '" ] && { echo "$f"; exit 0; }; ' +
+                'done; ';
+        }
+
+        // Search second-choice files in priority order
+        for (var j = 0; j < secondChoicePriority.length; j++) {
+            var want2 = secondChoicePriority[j];
+            script +=
+                'for f in *; do ' +
+                '  [ -f "$f" ] || continue; ' +
+                '  lf=$(echo "$f" | tr \'[:upper:]\' \'[:lower:]\'); ' +
+                '  [ "$lf" = "' + want2 + '" ] && { echo "$f"; exit 0; }; ' +
+                'done; ';
+        }
+
+        script += 'echo \'\';';
+        return script;
+    }
+
     function shellQuote(s) {
         return "'" + s.replace(/'/g, "'\\''") + "'";
+    }
+
+    Process {
+        id: checkDirProc
+        running: false
+        stdout: StdioCollector {
+            onStreamFinished: {
+                var result = text.trim();
+                if (result === "dir") {
+                    root.pendingIsDir = true;
+                    root.tryDirPreview(root.pendingCheckPath);
+                } else {
+                    root.pendingIsDir = false;
+                    // It's a file — check MIME type as before
+                    checkMimeProc.command = ["sh", "-c",
+                        "file -b --mime-type " + shellQuote(root.pendingCheckPath) + " 2>/dev/null || echo unknown"
+                    ];
+                    checkMimeProc.running = true;
+                }
+            }
+        }
     }
 
     Process {
@@ -74,7 +149,7 @@ Rectangle {
                     var textExts = ["md", "asciidoc", "adoc", "txt", "rst", "nix",
                                     "qml", "js", "py", "sh", "c", "h", "cpp", "hpp",
                                     "rs", "go", "yaml", "yml", "toml", "json", "xml",
-                                    "css", "html", "vim", "lua"];
+                                    "css", "html", "vim", "lua", "zig", "nix"];
                     isText = textExts.indexOf(ext) >= 0;
                 } else {
                     isText = mime.startsWith("text/") ||
@@ -107,6 +182,25 @@ Rectangle {
                     readProc.command = ["head", "-n", "200", root.previewPath];
                     readProc.running = true;
                 } else {
+                    root.previewPath = "";
+                    root.previewContent = "";
+                }
+            }
+        }
+    }
+
+    Process {
+        id: findDirProc
+        running: false
+        stdout: StdioCollector {
+            onStreamFinished: {
+                var found = text.trim();
+                if (found) {
+                    root.previewPath = root.pendingCheckPath + "/" + found;
+                    readProc.command = ["head", "-n", "200", root.previewPath];
+                    readProc.running = true;
+                } else {
+                    // Directory has no README or second-choice file
                     root.previewPath = "";
                     root.previewContent = "";
                 }

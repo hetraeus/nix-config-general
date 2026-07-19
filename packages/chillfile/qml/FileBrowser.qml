@@ -93,6 +93,8 @@ QtObject {
     function goUp() {
         if (root.navStack.length > 1) {
             var current = root.navStack[root.navStack.length - 1];
+            root.lastFocusedPath = current;   // select this dir when we land back in parent
+
             var newForward = root.forwardStack.slice();
             newForward.push(current);
             root.forwardStack = newForward;
@@ -112,6 +114,8 @@ QtObject {
             var next = newForward.pop();
             root.forwardStack = newForward;
 
+            root.lastFocusedPath = next;   // select this dir when we later go back
+
             var newStack = root.navStack.slice();
             newStack.push(next);
             root.navStack = newStack;
@@ -129,6 +133,7 @@ QtObject {
             var parentPath = parts.join('/');
             if (parentPath === "") parentPath = "/";
             if (parentPath !== root.currentPath) {
+                root.lastFocusedPath = root.currentPath;   // select current dir in parent
                 root.navigateTo(parentPath);
             }
         }
