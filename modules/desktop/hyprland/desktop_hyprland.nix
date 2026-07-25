@@ -78,6 +78,14 @@ in {
     hl.bind("SUPER + CONTROL + Z", hl.dsp.exec_cmd("fmenu-text-style"))
     hl.bind("SUPER + Space", hl.dsp.exec_cmd("${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.hyprmenu-launch}"))
 
+    hl.bind("mouse:275", function()
+      local pos = hl.get_cursor_pos()
+      -- cursor-ring accepts "x, y" format directly (hyprctl cursorpos output)
+      hl.dispatch(hl.dsp.exec_cmd(
+          string.format("${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.cursor-ring} '%d, %d'", pos.x, pos.y)
+      ))
+    end, { long_press = true, mouse = true })
+
     '';
 
 
