@@ -1,18 +1,19 @@
-// cursor-ring.c
-// Standalone Wayland layer-shell cursor highlight ring
-//
-// Build:
-//   wayland-scanner client-header \
-//     wlr-layer-shell-unstable-v1.xml \
-//     wlr-layer-shell-unstable-v1-client-protocol.h
-//   wayland-scanner private-code \
-//     wlr-layer-shell-unstable-v1.xml \
-//     wlr-layer-shell-unstable-v1-protocol.c
-//   gcc -O2 cursor-ring.c wlr-layer-shell-unstable-v1-protocol.c xdg-shell-protocol.c -o cursor-ring \
-//       $(pkg-config --cflags --libs wayland-client cairo) -lm
-//
-// Or with Nix:
-//   nix build .#cursor-ring
+/* cursor-ring.c
+   Standalone Wayland layer-shell cursor highlight ring
+
+   Build:
+     wayland-scanner client-header \
+       wlr-layer-shell-unstable-v1.xml \
+       wlr-layer-shell-unstable-v1-client-protocol.h
+     wayland-scanner private-code \
+       wlr-layer-shell-unstable-v1.xml \
+       wlr-layer-shell-unstable-v1-protocol.c
+     gcc -O2 cursor-ring.c wlr-layer-shell-unstable-v1-protocol.c xdg-shell-protocol.c -o cursor-ring \
+         $(pkg-config --cflags --libs wayland-client cairo) -lm
+
+   Or with Nix:
+   nix build .#cursor-ring
+*/
 
 #define _GNU_SOURCE
 #include <wayland-client.h>
@@ -34,9 +35,7 @@
 // Generated protocol headers
 #include "wlr-layer-shell-unstable-v1-client-protocol.h"
 
-// ============================================================================
 // Globals
-// ============================================================================
 
 static struct wl_display *display;
 static struct wl_compositor *compositor;
@@ -62,9 +61,7 @@ static double now_seconds(void) {
     return ts.tv_sec + ts.tv_nsec / 1e9;
 }
 
-// ============================================================================
 // SHM buffer helpers
-// ============================================================================
 
 static int create_shm_file(size_t size) {
     char name[] = "/tmp/cursor-ring-XXXXXX";
@@ -124,9 +121,7 @@ static void destroy_buffer(struct buffer *buf) {
     free(buf);
 }
 
-// ============================================================================
 // Drawing
-// ============================================================================
 
 static void draw_ring(struct buffer *buf, double progress) {
     cairo_t *cr = cairo_create(buf->cairo_surface);
@@ -203,9 +198,7 @@ static void draw_ring(struct buffer *buf, double progress) {
     cairo_destroy(cr);
 }
 
-// ============================================================================
 // Wayland callbacks
-// ============================================================================
 
 static void layer_surface_configure(void *data,
     struct zwlr_layer_surface_v1 *layer_surface, uint32_t serial,
@@ -307,9 +300,7 @@ static const struct wl_registry_listener registry_listener = {
     .global_remove = registry_global_remove,
 };
 
-// ============================================================================
 // Cursor position (via Hyprland IPC socket or env vars)
-// ============================================================================
 
 static int get_cursor_position_from_hyprland(void) {
     const char *sig = getenv("HYPRLAND_INSTANCE_SIGNATURE");
@@ -319,13 +310,7 @@ static int get_cursor_position_from_hyprland(void) {
     }
     fprintf(stderr, "cursor-ring: HYPRLAND_INSTANCE_SIGNATURE=%s\n", sig);
 
-    char sock_path[512];
     const char *runtime_dir = getenv("XDG_RUNTIME_DIR");
-    if (runtime_dir) {
-        snprintf(sock_path, sizeof(sock_path), "%s/hypr/%s/.socket.sock", runtime_dir, sig);
-    } else {
-        snprintf(sock_path, sizeof(sock_path), "/tmp/hypr/%s/.socket.sock", sig);
-    }
 
     int fd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (fd < 0) return -1;
@@ -333,7 +318,11 @@ static int get_cursor_position_from_hyprland(void) {
     struct sockaddr_un addr;
     memset(&addr, 0, sizeof(addr));
     addr.sun_family = AF_UNIX;
-    strncpy(addr.sun_path, sock_path, sizeof(addr.sun_path) - 1);
+    if (runtime_dir) {
+        snprintf(addr.sun_path, sizeof(addr.sun_path), "%s/hypr/%s/.socket.sock", runtime_dir, sig);
+    } else {
+        snprintf(addr.sun_path, sizeof(addr.sun_path), "/tmp/hypr/%s/.socket.sock", sig);
+    }
 
     if (connect(fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
         close(fd);
@@ -395,9 +384,7 @@ static void get_cursor_position(void) {
     fprintf(stderr, "cursor-ring: fallback to center %d,%d\n", cursor_x, cursor_y);
 }
 
-// ============================================================================
 // Main
-// ============================================================================
 
 static void sig_handler(int sig) {
     running = 0;
@@ -407,9 +394,10 @@ int main(int argc, char **argv) {
     signal(SIGINT, sig_handler);
     signal(SIGTERM, sig_handler);
 
-    // Parse cursor position from command line.
-    // Accepts either: cursor-ring 1234 567
-    //            or:  cursor-ring "944, 1064"  (hyprctl cursorpos format)
+    /* Parse cursor position from command line.
+       Accepts either: cursor-ring 1234 567
+       or:  cursor-ring "944, 1064"  (hyprctl cursorpos format)
+    */
     if (argc >= 2) {
         char *arg = argv[1];
         // Remove comma if present

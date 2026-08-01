@@ -50,5 +50,6 @@ pkgs.stdenv.mkDerivation {
     description = "A pulsing cursor highlight ring for Wayland compositors";
     license = lib.licenses.mit;
     platforms = lib.platforms.linux;
+    mainProgram = "cursor-ring";
   };
 }
