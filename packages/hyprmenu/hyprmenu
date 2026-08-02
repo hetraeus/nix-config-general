@@ -56,10 +56,11 @@ case "$@" in
   "66%" ) hyprctl --quiet dispatch 'hl.dsp.layout("colresize .664")'; exit;;
   "100%") hyprctl --quiet dispatch 'hl.dsp.layout("colresize 1")'   ; exit;;
   "50%" ) hyprctl --quiet dispatch 'hl.dsp.layout("colresize .499")'; exit;;
+  "⤥"   ) hyprctl --quiet dispatch 'hl.dsp.layout("consume")'       ; exit;;
+  "⤤"   ) hyprctl --quiet dispatch 'hl.dsp.layout("promote")'       ; exit;;
+  "🧛"  ) hyprctl --quiet dispatch 'hl.dsp.window.tag({ tag = "dontclose" })'; exit;;
   "↔"   ) hyprctl --quiet dispatch "hl.dsp.window.resize({ x =  30, y = 0, relative = true })";;
   "🡒🡐"  ) hyprctl --quiet dispatch "hl.dsp.window.resize({ x = -30, y = 0, relative = true })";;
-  "⤥"   ) hyprctl dispatch 'hl.dsp.layout("consume")'; exit;;
-  "⤤"   ) hyprctl dispatch 'hl.dsp.layout("promote")'; exit;;
   "🪁"  ) hyprctl --quiet eval '
            hl.dispatch(hl.dsp.window.float({ action = "set" }))
            hl.dispatch(hl.dsp.window.resize({ x = "1000", y = "650", relative = false }))
@@ -124,6 +125,7 @@ case "$0" in
 ⤥\0meta\x1fconsume column
 ◨\0meta\x1fmaster layout
 𑁍\0meta\x1fmonocle fullscreen layout
-🎭\0meta\x1finvert colors opposite" ;;
+🎭\0meta\x1finvert colors opposite
+🧛\0meta\x1fdontclose toggle" ;;
 
 esac
