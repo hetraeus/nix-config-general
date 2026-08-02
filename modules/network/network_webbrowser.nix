@@ -188,10 +188,10 @@ programs.firefox.policies.ExtensionSettings = { # about:support
   #   install_url = "https://addons.mozilla.org/firefox/downloads/latest/nextpage/latest.xpi";
   #   installation_mode = "force_installed";
   #   };
-  # "printedit-we@DW-dev"                   = { # remove useless parts before printing a webpage
-  #   install_url = "https://addons.mozilla.org/firefox/downloads/latest/print-edit-we/latest.xpi";
-  #   installation_mode = "force_installed";
-  #   };
+  "printedit-we@DW-dev"                   = { # remove useless parts before printing a webpage
+    install_url = "https://addons.mozilla.org/firefox/downloads/latest/print-edit-we/latest.xpi";
+    installation_mode = "force_installed";
+    };
   };
 
 
