@@ -47,7 +47,14 @@ in {
 #    builtins.readFile ./floating.lua +
     builtins.readFile ./main.lua     +
     ''
-    hl.bind("mouse:275", hl.dsp.exec_cmd("${lib.getExe piemenu_launch} kb"), { mouse = true })
+    local longPressTriggered = false
+    hl.bind("mouse:275", function()
+      if not longPressTriggered then
+        hl.dsp.exec_cmd("${lib.getExe piemenu_launch} kb")
+      end
+      longPressTriggered = false
+    end)
+
     hl.bind("mouse:276", hl.dsp.exec_cmd("${lib.getExe piemenu_launch} wm"), { mouse = true })
     hl.bind("SUPER + S"        , hl.dsp.exec_cmd("${lib.getExe sbuku}     askme"))
     hl.bind("SUPER + SHIFT + S", hl.dsp.exec_cmd("${lib.getExe sbuku} clipboard"))
@@ -78,13 +85,13 @@ in {
     hl.bind("SUPER + CONTROL + Z", hl.dsp.exec_cmd("fmenu-text-style"))
     hl.bind("SUPER + Space", hl.dsp.exec_cmd("${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.hyprmenu-launch}"))
 
-    hl.bind("mouse:275", function()
-      local pos = hl.get_cursor_pos()
-      -- cursor-ring accepts "x, y" format directly (hyprctl cursorpos output)
-      hl.dispatch(hl.dsp.exec_cmd(
-          string.format("${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.cursor-ring} '%d, %d'", pos.x, pos.y)
-      ))
-    end, { long_press = true, mouse = true })
+--    hl.bind("mouse:275", function()
+--      longPressTriggered = true
+--      local pos = hl.get_cursor_pos()
+--      hl.dispatch(hl.dsp.exec_cmd(
+--        string.format("${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.cursor-ring} '%.0f, %.0f'", tonumber(pos.x), tonumber(pos.y))
+--      ))
+--    end, { long_press = true })
 
     '';
 

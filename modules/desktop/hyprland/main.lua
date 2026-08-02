@@ -199,7 +199,7 @@ hl.window_rule({
   pin = true,
   no_anim = true,
   no_initial_focus = true,
-  fullscreen_state = "3",                                               
+  fullscreen_state = "3",
 })
 
 hl.window_rule({
@@ -397,20 +397,20 @@ end)
 
 
 hl.on("window.open", function(w)
-    -- Only act on the currently active workspace so we do not pull focus
-    -- from another monitor/workspace
-    local active_ws = hl.get_active_workspace()
-    if not active_ws or not w.workspace or w.workspace.id ~= active_ws.id then
-        return
-    end
+  -- Only act on the currently active workspace so we do not pull focus
+  -- from another monitor/workspace
+  local active_ws = hl.get_active_workspace()
+  if not active_ws or not w.workspace or w.workspace.id ~= active_ws.id then
+    return
+  end
 
-    -- Get all actual windows on this workspace (layers are excluded)
-    local windows = hl.get_workspace_windows(active_ws)
+  -- Get all actual windows on this workspace (layers are excluded)
+  local windows = hl.get_workspace_windows(active_ws)
 
-    -- If this newly opened window is the only one, force focus onto it
-    if #windows == 1 then
-        hl.dispatch(hl.dsp.focus({ window = w }))
-    end
+  -- If this newly opened window is the only one, force focus onto it
+  if #windows == 1 then
+    hl.dispatch(hl.dsp.focus({ window = w }))
+  end
 end)
 
 hl.bind("SUPER + SHIFT + C", function()
