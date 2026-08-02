@@ -1,4 +1,4 @@
-{ flake.homeModules.dev_helix = { lib, pkgs, config, ... } : {
+{ flake.homeModules.dev_helix = { pkgs, ... } : {
 
   programs.helix.extraPackages = [
     pkgs.bash-language-server pkgs.shellcheck pkgs.gopls pkgs.nil

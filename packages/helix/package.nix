@@ -1,5 +1,5 @@
 { inputs, ... }: {
-  perSystem = { lib, pkgs, ... }: {
+  perSystem = { pkgs, ... }: {
 
     packages.helix = (inputs.wrappers.wrapperModules.helix.apply {
       inherit pkgs;
