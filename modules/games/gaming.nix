@@ -58,6 +58,7 @@ flake.homeModules.gaming = { pkgs, lib, self, ... }: {
     pkgs.tetris
     pkgs.wesnoth
     pkgs.mindustry
+    pkgs.openloco
 
   #  manga-tui
     pkgs.faugus-launcher
