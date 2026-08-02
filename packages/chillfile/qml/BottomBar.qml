@@ -294,7 +294,16 @@ Item {
             }
 
             onClicked: {
-                bottomBar.desktop.runTerminal(["kitty", "--directory", bottomBar.browser.currentPath, "edir"]);
+              var args = ["kitty", "--directory", bottomBar.browser.currentPath, "edir"];
+              var selected = bottomBar.desktop.fileGrid.selectedPaths;
+              if (selected.length > 0) {
+                  for (var i = 0; i < selected.length; i++) {
+                      args.push(selected[i]);
+                  }
+              } else {
+                  args.push(bottomBar.browser.currentPath);
+              }
+              bottomBar.desktop.runTerminal(args);
             }
         }
 
