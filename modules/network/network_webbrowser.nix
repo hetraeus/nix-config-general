@@ -20,7 +20,7 @@ services.opensnitch.rules.kkk_firefox-80_443 = {
       } {
       type    = "regexp";
       operand = "dest.port";
-      data    = "^(80|443)$";
+      data    = "^(80|443|3478)$";
       } {
       type    = "regexp";
       operand = "user.id";
