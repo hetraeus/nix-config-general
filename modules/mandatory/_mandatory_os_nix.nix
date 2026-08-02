@@ -16,6 +16,8 @@
   #  options = "--delete-older-than 8d";
     };
 
+  nix.package = pkgs.lixPackageSets.stable.lix;
+
   #nix.settings.cores = 2;
   nix.settings.max-jobs = 4;
 
