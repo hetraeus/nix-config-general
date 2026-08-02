@@ -15,10 +15,10 @@ in {
   services.hypridle.enable = true;
   services.hypridle.settings.general = {
     #lock_cmd = pidof hyprlock || find $XDG_RUNTIME_DIR -iname hyprlock_override | grep --quiet hyprlock_override && hyprlock
-    unlock_cmd          = "${lib.getExe' pkgs.systemd   "loginctl"   } unlock-session";
+#    unlock_cmd          = "${lib.getExe' pkgs.systemd   "loginctl"   } unlock-session";
     lock_cmd            = lock;
     before_sleep_cmd    = "${lib.getExe' pkgs.libnotify "notify-send"} --app-name=hypridle 'Zzz'";
-    after_sleep_cmd     = "${lib.getExe' pkgs.libnotify "notify-send"} --app-name=hypridle '⯕  Awake!'";
+    after_sleep_cmd     = "${lib.getExe (dpms_ctrl  "on")}; ${lib.getExe' pkgs.libnotify "notify-send"} --app-name=hypridle '⯕  Awake!'";
     ignore_dbus_inhibit = false; # dbus-sent idle-inhibit requests used by e.g. firefox or steam
     };
 
