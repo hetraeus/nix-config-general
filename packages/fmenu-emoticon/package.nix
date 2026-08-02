@@ -1,7 +1,14 @@
 { perSystem = { pkgs, lib, self', ... }: let
   script = pkgs.writeShellApplication {
     name          = "fmenu-emoticon";
-    runtimeInputs = [ pkgs.coreutils pkgs.rofi pkgs.wl-clipboard-rs pkgs.gnugrep pkgs.moreutils ];
+    runtimeInputs = [
+      pkgs.coreutils
+      pkgs.rofi
+      pkgs.wl-clipboard-rs
+      pkgs.gnugrep
+      pkgs.moreutils
+      self'.packages.wdotool
+    ];
     text = let emojiList = ./emojis_list; in ''
 
       if [[ -f "$HOME/.config/rofi/themes/accent_colors_list.rasi" ]]; then
@@ -11,7 +18,7 @@
       fi
 
       EMOJI_LIST=${emojiList}
-      EMOJI_HISTORY="$XDG_CACHE_HOME"/emoji_history
+      EMOJI_HISTORY="''${XDG_CACHE_HOME:-$HOME/.cache}"/emoji_history
       selectedSmileyEntry="$({
         date --iso-8601=date
         date --iso-8601=minutes
@@ -33,10 +40,25 @@
       )"
       [ -z "$selectedSmileyEntry" ] && exit
       selectedSmiley="''${selectedSmileyEntry%% *}"
+
+      # Keep the clipboard copies for convenience
       printf '%s' "$selectedSmiley" | wl-copy --regular
       printf '%s' "$selectedSmiley" | wl-copy --primary
-      grep --quiet --fixed-strings -- "$selectedSmiley" "$EMOJI_HISTORY" && exit
-      { tail --lines=5 "$EMOJI_HISTORY"; grep --fixed-strings -- "^$selectedSmiley " "$EMOJI_LIST"; } \
+
+      # Wait for rofi to close and focus to return, then type the emoji directly
+      while pgrep -x rofi >/dev/null 2>&1; do sleep 0.05; done
+      sleep 0.15
+
+      if [ ''${#selectedSmiley} -eq 1 ]; then
+        wdotool key "$selectedSmiley"
+      else
+        wdotool key shift+Insert
+      fi
+
+
+      # Update history
+      grep --quiet -- "$selectedSmiley" "$EMOJI_HISTORY" && exit
+      { tail --lines=5 "$EMOJI_HISTORY"; grep -- "^$selectedSmiley " "$EMOJI_LIST"; } \
         | sponge "$EMOJI_HISTORY"
     '';
   };
