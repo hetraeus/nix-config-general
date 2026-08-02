@@ -13,6 +13,7 @@ flake.homeModules.terminal_gui = { lib, pkgs, ... }: {
   home.sessionVariables.TERM =  "kitty";
   programs.kitty.keybindings = {
   # ctrl+t               new_tab_with_cwd
+    "shift+insert"       = "paste_from_clipboard";
     "alt+space"          = "start_resizing_window";
     "ctrl+shift+q"       = "no_op";
     "ctrl+shift+t"       = "new_tab_with_cwd";
