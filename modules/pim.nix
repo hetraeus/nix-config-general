@@ -20,7 +20,7 @@
         } {
         type    = "regexp";
         operand = "dest.host";
-        data    = "^((imap.|)gmail|.*\.gmail|www\.googleapis|(lh3|apidata)\.googleusercontent)\.com$";
+        data    = "^(.*\.thunderbird\.net|www\.googleapis\.com|(lh3|apidata)\.googleusercontent\.com|imap\.gmail\.com)$";
         } {
         type    = "regexp";
         operand = "user.id";
@@ -28,33 +28,6 @@
         }];
     };};
 
-  services.opensnitch.rules.thb_enable_homepage = {
-    name        = "thb_enable_homepage";
-      enabled   = true;
-      created   = "2010-01-01T10:00:00.000000000+01:00"; # silence logs
-      action    = "allow";
-      duration  = "always";
-      operator  = {
-        type    = "list";
-        operand = "list";
-        list    = [{
-        type    = "simple";
-        operand = "process.path";
-        data    = "${pkgs.thunderbird}/lib/thunderbird/thunderbird";
-        } {
-        type    = "simple";
-        operand = "dest.port";
-        data    = "443";
-        } {
-        type    = "regexp";
-        operand = "dest.host";
-        data    = "^((thunderbird-settings|incoming|start|notifications|live|(|.*\.)addons)\.thunderbird\.net)$";
-        } {
-        type    = "regexp";
-        operand = "user.id";
-        data    = "^(${toString config.users_list.principalUserUid})$";
-        }];
-    };};
 };
 
 flake.homeModules.pim = { lib, config, pkgs, self, ... }: {
