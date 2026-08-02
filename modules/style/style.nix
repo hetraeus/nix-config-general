@@ -29,7 +29,7 @@ in {
     sizes.applications  = 12;
     sizes.terminal      = 13;
     };
-    
+
   xdg.configFile."rofi/themes/accent_colors_list.rasi".text = "* { textcol: ${textColor}; bg: ${backColor}e2; button: ${buttonColor}; fg: ${fgColor}; }" ;
 
   xdg.configFile."terminal-colors.d/cal.scheme".text = ''
