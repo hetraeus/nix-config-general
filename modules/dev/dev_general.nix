@@ -28,10 +28,30 @@
       }];
   };};
 
+  services.opensnitch.rules.schemastore = {
+    name      = "schemastore";
+    enabled   = true;
+    created   = "2010-01-01T10:00:00.000000000+00:00"; # silence logs
+    action    = "allow";
+    duration  = "always";
+    operator  = {
+      type    = "list";
+      operand = "list";
+      list    = [{
+      type    = "simple";
+      operand = "dest.port";
+      data    = "443";
+      } {
+      type    = "regexp";
+      operand = "dest.host";
+      data    = "^(www\.schemastore\.org)$";
+      }];
+  };};
+
   services.opensnitch.rules.zed_api_dev = {
     name      = "zed_api_dev";
     enabled   = true;
-    created   = "2011-01-01T10:00:00.000000000+00:00"; # silence logs
+    created   = "2010-01-01T10:00:00.000000000+00:00"; # silence logs
     action    = "allow";
     duration  = "always";
     operator  = {
@@ -270,6 +290,7 @@ in
       "awk"
       "basher"
       "comment"
+      "CSharp"
       "ini"
       "kotlin"
       "json5"
@@ -281,6 +302,7 @@ in
       "sql"
       "vale"
       "verilog"
+      "XML"
       ];
   };
 
@@ -292,6 +314,7 @@ xdg.mimeApps.defaultApplications = let
     "application/x-java"
     "application/x-subrip"
     "application/yaml"
+    "text/xml"
     "text/plain"
     "text/vtt"
     "text/x-script.python"
@@ -307,6 +330,7 @@ xdg.mimeApps.defaultApplications = let
     pkgs.git # https://discourse.nixos.org/t/cannot-login-with-gh-cli/16601
     pkgs.git-lfs
     pkgs.sourcegit
+    pkgs.godot
     # pkgs.beekeeper-studio # BUG: https://github.com/beekeeper-studio/beekeeper-studio/pull/3023 meanwhile use flatpak
 
     ];
