@@ -1,5 +1,11 @@
 { flake.nixosModules.observability = { pkgs, lib, self, ... }: {
   boot.loader.systemd-boot.memtest86.enable = true;
+  services.journald.extraConfig = ''
+    # Compress=yes # commented out. Assume compressed file system
+    SystemMaxUse=500M
+    SystemKeepFree=1G
+    MaxFileSec=1week
+    '';
   environment.systemPackages = let
     vkmark-iGPU   = pkgs.makeDesktopItem {
       name        = "vkmark iGPU";
