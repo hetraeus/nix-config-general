@@ -47,7 +47,7 @@ static struct wl_output *output;
 static struct wl_surface *surface;
 static struct zwlr_layer_surface_v1 *layer_surface;
 
-static int width = 200, height = 200;
+static int width = 400, height = 400;
 static int cursor_x = 0, cursor_y = 0;
 static int configured = 0;
 static int running = 1;
@@ -135,15 +135,15 @@ static void draw_ring(struct buffer *buf, double progress) {
     double cx = width / 2.0;
     double cy = height / 2.0;
 
-    // Snappy spread: starts bigger, expands fast, ends at 65
-    double start_radius = 28.0;
-    double end_radius = 78.0;
-    // Ease-out for snappy start, smooth end
-    double t = 1.0 - (1.0 - progress) * (1.0 - progress);
+    // Close-in: starts big (2x old max), snaps down to cursor
+    double start_radius = 156.0;
+    double end_radius = 20.0;
+    // Ease-in for accelerating close
+    double t = progress * progress;
     double radius = start_radius + (end_radius - start_radius) * t;
 
-    // Fade: sharp start, then linear fade (kept less transparent overall)
-    double alpha = 1.0 - progress * 0.6;
+    // Fade-in: ghostly start, solid at target
+    double alpha = 0.25 + progress * 0.75;
 
     // Redshift: start bright teal, shift to red
     double r = 0.0 + progress * 1.0;
@@ -310,7 +310,13 @@ static int get_cursor_position_from_hyprland(void) {
     }
     fprintf(stderr, "cursor-ring: HYPRLAND_INSTANCE_SIGNATURE=%s\n", sig);
 
+    char sock_path[512];
     const char *runtime_dir = getenv("XDG_RUNTIME_DIR");
+    if (runtime_dir) {
+        snprintf(sock_path, sizeof(sock_path), "%s/hypr/%s/.socket.sock", runtime_dir, sig);
+    } else {
+        snprintf(sock_path, sizeof(sock_path), "/tmp/hypr/%s/.socket.sock", sig);
+    }
 
     int fd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (fd < 0) return -1;
@@ -318,11 +324,7 @@ static int get_cursor_position_from_hyprland(void) {
     struct sockaddr_un addr;
     memset(&addr, 0, sizeof(addr));
     addr.sun_family = AF_UNIX;
-    if (runtime_dir) {
-        snprintf(addr.sun_path, sizeof(addr.sun_path), "%s/hypr/%s/.socket.sock", runtime_dir, sig);
-    } else {
-        snprintf(addr.sun_path, sizeof(addr.sun_path), "/tmp/hypr/%s/.socket.sock", sig);
-    }
+    snprintf(addr.sun_path, sizeof(addr.sun_path), "%s", sock_path);
 
     if (connect(fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
         close(fd);
