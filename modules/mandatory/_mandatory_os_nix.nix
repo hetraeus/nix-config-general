@@ -16,10 +16,9 @@
   #  options = "--delete-older-than 8d";
     };
 
-  nix.package = pkgs.lixPackageSets.stable.lix;
-
-  #nix.settings.cores = 2;
-  nix.settings.max-jobs = 4;
+  nix.settings.cores = 2;
+  nix.settings.max-jobs = 3;
+  nix.daemonIOSchedPriority = 7;
 
   programs.nh.enable = true;
   # services.opensnitch.rules.ewr_nhwrap_nix = {
