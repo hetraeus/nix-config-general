@@ -26,7 +26,7 @@ GridView {
     leftMargin: 14
 
     function openPath(path) {
-        Qt.openUrlExternally("file://" + path);
+        desktop.openFile(path);
     }
 
     function startRenameAtCurrent() {

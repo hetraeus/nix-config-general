@@ -130,6 +130,16 @@ PanelWindow {
         running: false
     }
 
+    // Opens a file with the system's default app via xdg-open, run as a
+    // Process (like everything else in this file) rather than
+    // Qt.openUrlExternally, which relies on a desktop-portal/QDesktopServices
+    // integration that isn't reliably available from a layer-shell surface
+    // and was silently failing for file opens.
+    Process {
+        id: openProc
+        running: false
+    }
+
     Timer {
         id: refreshTimer
         interval: 100
@@ -172,6 +182,11 @@ PanelWindow {
         renameProc.command = ["mv", oldPath, newPath];
         renameProc.running = true;
         refreshTimer.start();
+    }
+
+    function openFile(path) {
+        openProc.command = ["xdg-open", path];
+        openProc.running = true;
     }
 
     // NEW: copy selected paths + show notification

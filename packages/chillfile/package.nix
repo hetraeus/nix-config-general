@@ -1,5 +1,4 @@
-{ inputs, ... }:
-{
+{ inputs, ... }: {
   perSystem = { self', pkgs, lib, ... }:
     let
       wlib = inputs.wrappers.lib;
@@ -32,6 +31,7 @@
             config.pkgs.wl-clipboard-rs
             config.pkgs.coreutils
             config.pkgs.bash
+            config.pkgs.xdg-utils
             self'.packages.fmenu-share
           ];
 
@@ -57,23 +57,11 @@
               Icon=folder
               NoDisplay=true
             EOF
-            '';
+          '';
 
-          systemd = {
-            description = "background file manager";
-            after    = [ "multi-user-session.target" ];
-            wantedBy = [ "graphical-session.target" ];
-            serviceConfig = {
-              ExecStart = "${config.wrapper}/bin/chillfile";
-              Type = "exec";
-              Restart = "on-failure";
-              PrivateTmp = true;
-            };
-          };
         };
       })).apply { pkgs = pkgs; };
     in {
       packages.chillfile = chillfile.wrapper;
-      packages.chillfile-systemd-user = chillfile.outputs.systemd-user;
     };
 }

@@ -151,7 +151,7 @@ Item {
                             bottomBar.browser.lastFocusedPath = first.path;
                             bottomBar.browser.navigateTo(first.path);
                         } else {
-                            Qt.openUrlExternally("file://" + first.path);
+                            bottomBar.desktop.openFile(first.path);
                             bottomBar.clearSearch();
                         }
                     }

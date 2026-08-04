@@ -102,7 +102,6 @@ flake.homeModules.desktop_shell = { pkgs, lib, config, self, ... }: {
     self.packages.${pkgs.stdenv.hostPlatform.system}.qr-selectread
     self.packages.${pkgs.stdenv.hostPlatform.system}.qr-code-from-clipboard
     self.packages.${pkgs.stdenv.hostPlatform.system}.cam-reader
-    self.packages.${pkgs.stdenv.hostPlatform.system}.chillfile
 
     pkgs.gcolor3
     pkgs.wl-clipboard-rs
@@ -114,20 +113,16 @@ flake.homeModules.desktop_shell = { pkgs, lib, config, self, ... }: {
     pkgs.zint-qt
     ];
 
-  xdg.dataFile."systemd/user/chillfile.service".source =
-    "${self.packages.${pkgs.stdenv.hostPlatform.system}.chillfile-systemd-user}/lib/systemd/user/chillfile.service";
-  xdg.configFile."systemd/user/graphical-session.target.wants/chillfile.service".source =
-    "${self.packages.${pkgs.stdenv.hostPlatform.system}.chillfile-systemd-user}/lib/systemd/user/chillfile.service";
-
   services.udiskie.enable = true; # thunar is not smart enought to mount hard disks plugged from boot
   xdg.autostart.enable    = true;
-  xdg.autostart.entries   = lib.singleton ( # TEST
-    pkgs.makeDesktopItem {
-      name = "password dialog";
+  xdg.autostart.entries   = [
+    "${self.packages.${pkgs.stdenv.hostPlatform.system}.chillfile}/share/applications/chillfile.desktop"
+    (pkgs.makeDesktopItem {
+      name = "password_dialog";
       desktopName = "password dialog";
-      exec = "${lib.getExe' pkgs.lxqt.lxqt-policykit "lxqt-policykit-agent"}";
-      } + /share/applications/password_dialog.desktop
-    );
+      exec = lib.getExe' pkgs.lxqt.lxqt-policykit "lxqt-policykit-agent";
+      } + /share/applications/password_dialog.desktop )
+    ];
 
   # BUG: https://github.com/gmodena/nix-flatpak/issues/31
   # Hide warning about showing the program in the menu

@@ -37,15 +37,15 @@ Menu {
     }
 
     MenuItem {
-        // The only place in the file manager that can reach the network -
-        // hands the file to the system's default app for its type, which
+        // Hands the file to the system's default app for its type, which
         // may itself make network requests (e.g. resolving remote
-        // includes/links). Deliberately opt-in, never the default action.
+        // includes/links). Also reachable via double-click/Enter on a
+        // file; kept here too as an explicit right-click option.
         text: "Open Externally"
         font.pixelSize: 15
         visible: !contextMenu.isDir
         onTriggered: {
-            Qt.openUrlExternally("file://" + contextMenu.filePath);
+            contextMenu.desktop.openFile(contextMenu.filePath);
         }
     }
 
