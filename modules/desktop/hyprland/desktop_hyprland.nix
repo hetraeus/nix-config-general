@@ -47,12 +47,8 @@ in {
 #    builtins.readFile ./floating.lua +
     builtins.readFile ./main.lua     +
     ''
-    local longPressTriggered = false
     hl.bind("mouse:275", function()
-      if not longPressTriggered then
         hl.dsp.exec_cmd("${lib.getExe piemenu_launch} kb")
-      end
-      longPressTriggered = false
     end)
 
     hl.bind("mouse:276", hl.dsp.exec_cmd("${lib.getExe piemenu_launch} wm"), { mouse = true })
