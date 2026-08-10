@@ -20,6 +20,7 @@ flake.nixosConfigurations.${hostname} = inputs.nixpkgs.lib.nixosSystem {
     self.nixosModules.hardware
     self.nixosModules.power
     self.nixosModules.share_samba
+    self.nixosModules.share_ssh
     self.nixosModules.virtualisation_android
     self.nixosModules.virtualisation_lfhs
     self.nixosModules.virtualisation_pro
