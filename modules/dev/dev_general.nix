@@ -172,38 +172,6 @@
       }];
   };};
 
-  services.opensnitch.rules.ai_mistral = {
-    name      = "ai_mistral";
-    enabled   = true;
-    created   = "2011-01-01T10:00:00.000000000+00:00"; # silence logs
-    action    = "allow";
-    duration  = "always";
-    operator  = {
-      type    = "list";
-      operand = "list";
-      list    = [{
-      type    = "regexp";
-      operand = "process.path";
-      data    = "^(/nix/store/[a-z0-9]{32}-python3-.*/bin/python3\..*)$";
-      } {
-      type    = "simple";
-      operand = "dest.port";
-      data    = "443";
-      } {
-      type    = "regexp";
-      operand = "dest.host";
-      data    = "^(console|api)\.mistral\.ai|experiments\.mistral\.services)$";
-      } {
-      type    = "regexp";
-      operand = "user.id";
-      data    = "^(${toString config.users_list.principalUserUid})$";
-      } {
-      type    = "regexp";
-      operand = "process.command";
-      data    = "^(/etc/profiles/per-user/.*/bin/vibe(| .*))$";
-      }];
-  };};
-
   services.opensnitch.rules.nix-init = {
     name      = "nix-init";
     enabled   = true;
@@ -230,26 +198,7 @@
 };
 
 
-flake.homeModules.dev_general = { lib, pkgs, config, ... } :
-let
-
-fmenu-mistral = pkgs.writeShellApplication {
-  runtimeInputs = [ pkgs.curl pkgs.jq pkgs.bat ];
-  name = "fmenu-mistral";
-  text = ''
-    curl \
-    --location https://api.mistral.ai/v1/chat/completions    \
-    --header 'Content-Type: application/json'                \
-    --header 'Accept: application/json'                      \
-    --header "Authorization: Bearer $(<"$MISTRAL_API_PATH")" \
-    --data '{ "model": "mistral-large-latest", "messages":
-    [{ "role": "user", "content": "'"$(printf '%s\n' "$*")"'" }]}' \
-    | jq --raw-output '.choices[0].message.content' \
-    | bat --language=markdown --paging=never --plain
-  '';};
-
-in
-{
+flake.homeModules.dev_general = { lib, pkgs, config, ... } : {
 
   programs.zed-editor    = {
     enable               = true;
@@ -326,7 +275,6 @@ xdg.mimeApps.defaultApplications = let
 
   home.packages = [
     pkgs.devenv
-    fmenu-mistral
     pkgs.git # https://discourse.nixos.org/t/cannot-login-with-gh-cli/16601
     pkgs.git-lfs
     pkgs.sourcegit
@@ -337,8 +285,6 @@ xdg.mimeApps.defaultApplications = let
   programs.git.enable = true; #lib.mkForce false; # https://discourse.nixos.org/t/cannot-login-with-gh-cli/16601
   programs.git.signing.format = "openpgp";
 
-  programs.mistral-vibe.enable = true;
-  # programs.mistral-vibe.package = pkgs.mistral-vibe ;
   programs.gh.enable      = true;
   programs.lazygit.enable = true;
   services.ollama.enable  = true;
@@ -362,7 +308,6 @@ xdg.mimeApps.defaultApplications = let
     };
 
   home.shellAliases.nh-dev   = "nix develop --offline --no-update-lock-file";
-  home.sessionVariables.MISTRAL_API_PATH="${config.sops.secrets."ai-api-mistral".path}";
 
   home.shellAliases.antigrav = "env GEMINI_API_KEY=\"$(cat ${config.sops.secrets."ai-api-antigravity".path})\" ${lib.getExe config.programs.antigravity-cli.package} ";
   programs.antigravity-cli.enable = true;
