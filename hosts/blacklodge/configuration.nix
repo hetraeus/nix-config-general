@@ -37,7 +37,7 @@ flake.nixosConfigurations.${hostname} = inputs.nixpkgs.lib.nixosSystem {
     self.nixosModules.network_connect_default
 
     self.nixosModules.dev_general
-    self.nixosModules.dev_web
+    # self.nixosModules.dev_web
     self.nixosModules.virtualisation_containers
     self.nixosModules.security
     self.nixosModules.media_songrec

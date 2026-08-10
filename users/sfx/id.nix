@@ -19,7 +19,7 @@
     self.homeModules.dev_general
     self.homeModules.dev_helix
     self.homeModules.dev_neovim
-    self.homeModules.dev_web
+    # self.homeModules.dev_web
     self.homeModules.desktop_accessibility
     self.homeModules.desktop_display
     self.homeModules.desktop_emoji
