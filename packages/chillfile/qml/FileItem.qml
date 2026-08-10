@@ -11,6 +11,9 @@ Rectangle {
     property bool isSelected
     property bool renaming: false
     property color renameBgColor: "#1a1a2e"
+    property color selectionColor: Qt.rgba(0.27, 0.51, 0.9, 0.4)
+    property color selectionBorderColor: Qt.rgba(0.39, 0.63, 1.0, 0.6)
+    property color hoverColor: Qt.rgba(1, 1, 1, 0.1)
 
     signal clicked(var mouse)
     signal doubleClicked
@@ -21,9 +24,9 @@ Rectangle {
     width: 280
     height: 80
     color: isSelected
-        ? Qt.rgba(0.27, 0.51, 0.9, 0.4)
-        : (hovered ? Qt.rgba(1, 1, 1, 0.1) : "transparent")
-    border.color: isSelected ? Qt.rgba(0.39, 0.63, 1.0, 0.6) : "transparent"
+        ? root.selectionColor
+        : (hovered ? root.hoverColor : "transparent")
+    border.color: isSelected ? root.selectionBorderColor : "transparent"
     border.width: isSelected ? 1 : 0
     radius: 6
 

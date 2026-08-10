@@ -8,15 +8,49 @@ RowLayout {
     id: root
     spacing: 8
 
+    required property var desktop
+
     // ----- Backup indicator (🤕) -----
     Label {
         id: backupLabel
         text: "🤕"
         font.pixelSize: 18
         visible: false
+        property bool hovered: false
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: true
+            onEntered: parent.hovered = true
+            onExited: parent.hovered = false
+        }
+        onHoveredChanged: {
+            if (hovered) {
+                backupTipTimer.start();
+            } else {
+                backupTipTimer.stop();
+                backupTip.visible = false;
+            }
+        }
+        Timer {
+            id: backupTipTimer
+            interval: 1500
+            onTriggered: backupTip.visible = true
+        }
         ToolTip {
-            text: "Needs backup"
-            visible: parent.hovered
+            id: backupTip
+            text: "Need updates!"
+            visible: false
+            background: Rectangle {
+                color: root.desktop.base01
+                border.color: Qt.rgba(root.desktop.base04.r, root.desktop.base04.g, root.desktop.base04.b, 0.3)
+                border.width: 1
+                radius: 4
+            }
+            contentItem: Label {
+                text: backupTip.text
+                color: root.desktop.base04
+                font.pixelSize: 13
+            }
         }
     }
 
@@ -25,9 +59,41 @@ RowLayout {
         id: sessionLabel
         text: "🥂"
         font.pixelSize: 18
+        property bool hovered: false
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: true
+            onEntered: parent.hovered = true
+            onExited: parent.hovered = false
+        }
+        onHoveredChanged: {
+            if (hovered) {
+                sessionTipTimer.start();
+            } else {
+                sessionTipTimer.stop();
+                sessionTip.visible = false;
+            }
+        }
+        Timer {
+            id: sessionTipTimer
+            interval: 1500
+            onTriggered: sessionTip.visible = true
+        }
         ToolTip {
-            text: sessionLabel.text === "🥂" ? "Session active" : "Session broken"
-            visible: parent.hovered
+            id: sessionTip
+            text: sessionLabel.text === "🥂" ? "Systemd user session active" : "Systemd user session broken"
+            visible: false
+            background: Rectangle {
+                color: root.desktop.base01
+                border.color: Qt.rgba(root.desktop.base04.r, root.desktop.base04.g, root.desktop.base04.b, 0.3)
+                border.width: 1
+                radius: 4
+            }
+            contentItem: Label {
+                text: sessionTip.text
+                color: root.desktop.base04
+                font.pixelSize: 13
+            }
         }
     }
 
@@ -36,9 +102,41 @@ RowLayout {
         id: sysrqLabel
         text: "🪄"
         font.pixelSize: 18
+        property bool hovered: false
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: true
+            onEntered: parent.hovered = true
+            onExited: parent.hovered = false
+        }
+        onHoveredChanged: {
+            if (hovered) {
+                sysrqTipTimer.start();
+            } else {
+                sysrqTipTimer.stop();
+                sysrqTip.visible = false;
+            }
+        }
+        Timer {
+            id: sysrqTipTimer
+            interval: 1500
+            onTriggered: sysrqTip.visible = true
+        }
         ToolTip {
-            text: sysrqLabel.text === "🪄" ? "c+m+fn+prtsc -fn" : "no sysrq"
-            visible: parent.hovered
+            id: sysrqTip
+            text: sysrqLabel.text === "🪄" ? "SysRq active (c+m+fn+prtsc -fn)" : "SysRq disabled"
+            visible: false
+            background: Rectangle {
+                color: root.desktop.base01
+                border.color: Qt.rgba(root.desktop.base04.r, root.desktop.base04.g, root.desktop.base04.b, 0.3)
+                border.width: 1
+                radius: 4
+            }
+            contentItem: Label {
+                text: sysrqTip.text
+                color: root.desktop.base04
+                font.pixelSize: 13
+            }
         }
     }
 
@@ -48,9 +146,49 @@ RowLayout {
         text: "⚖️"
         font.pixelSize: 18
         property string tooltipText: ""
+        property bool hovered: false
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onEntered: parent.hovered = true
+            onExited: parent.hovered = false
+            onClicked: launchPowerProfilesMenu.running = true
+        }
+        onHoveredChanged: {
+            if (hovered) {
+                perfTipTimer.start();
+            } else {
+                perfTipTimer.stop();
+                perfTip.visible = false;
+            }
+        }
+        Timer {
+            id: perfTipTimer
+            interval: 1500
+            onTriggered: perfTip.visible = true
+        }
         ToolTip {
-            text: "Performance: " + perfLabel.tooltipText
-            visible: parent.hovered
+            id: perfTip
+            text: "Power profile: " + perfLabel.tooltipText
+            visible: false
+            background: Rectangle {
+                color: root.desktop.base01
+                border.color: Qt.rgba(root.desktop.base04.r, root.desktop.base04.g, root.desktop.base04.b, 0.3)
+                border.width: 1
+                radius: 4
+            }
+            contentItem: Label {
+                text: perfTip.text
+                color: root.desktop.base04
+                font.pixelSize: 13
+            }
+        }
+
+        Process {
+            id: launchPowerProfilesMenu
+            command: ["fmenu-powerprofiles"]
+            running: false
         }
     }
 
@@ -105,15 +243,26 @@ RowLayout {
                 }
             }
         }
-        onExited: {
+        onExited: function(exitCode, exitStatus) {
             if (exitCode !== 0) backupLabel.visible = false;
         }
     }
 
+    // Session detection: quickshell runs as a systemd --user *service*
+    // (see package.nix), which is NOT a member of a session-*.scope cgroup.
+    // That means "self" resolution (sd_pid_get_session, which walks the
+    // caller's own cgroup) has nothing to find and always fails here - this
+    // is a different failure mode from the earlier WAYLAND_SESSION issue.
+    // Instead, resolve the session by user id: prefer the user's "Display"
+    // session (the active graphical one), falling back to the first
+    // session listed for the user if Display is empty.
     function updateSession() {
-        var session = Quickshell.env("WAYLAND_SESSION") || "";
-        if (!session) { sessionLabel.text = "💔"; return; }
-        sessionProc.command = ["loginctl", "show-session", session, "--property=Active", "--value"];
+        sessionProc.command = ["sh", "-c",
+            "sid=$(loginctl show-user \"$(id -u)\" --property=Display --value 2>/dev/null); " +
+            "if [ -z \"$sid\" ]; then sid=$(loginctl show-user \"$(id -u)\" --property=Sessions --value 2>/dev/null | awk '{print $1}'); fi; " +
+            "if [ -z \"$sid\" ]; then echo unknown; exit 1; fi; " +
+            "loginctl show-session \"$sid\" --property=State --value"
+        ];
         sessionProc.running = true;
     }
 
@@ -122,11 +271,11 @@ RowLayout {
         running: false
         stdout: StdioCollector {
             onStreamFinished: {
-                var active = text.trim();
-                sessionLabel.text = (active === "yes") ? "🥂" : "💔";
+                var state = text.trim();
+                sessionLabel.text = (state === "active" || state === "online") ? "🥂" : "💔";
             }
         }
-        onExited: {
+        onExited: function(exitCode, exitStatus) {
             if (exitCode !== 0) sessionLabel.text = "💔";
         }
     }
@@ -145,7 +294,7 @@ RowLayout {
                 sysrqLabel.text = (val === "1") ? "🪄" : "🛑";
             }
         }
-        onExited: {
+        onExited: function(exitCode, exitStatus) {
             if (exitCode !== 0) sysrqLabel.text = "🛑";
         }
     }
@@ -177,7 +326,7 @@ RowLayout {
                 perfLabel.tooltipText = profile.charAt(0).toUpperCase() + profile.slice(1);
             }
         }
-        onExited: {
+        onExited: function(exitCode, exitStatus) {
             if (exitCode !== 0) {
                 perfLabel.text = "❓";
                 perfLabel.tooltipText = "unknown";

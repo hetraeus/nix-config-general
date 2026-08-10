@@ -36,16 +36,23 @@ Item {
     }
 
     RowLayout {
-        anchors.centerIn: parent
-        spacing: 12
+      anchors.centerIn: parent
+      spacing: 12
 
-        ClockWidget {}
-
-        GitStatus {
-            id: gitStatus
-            currentDir: bottomBar.browser.currentPath
-            bgColor: bottomBar.desktop.base01
-        }
+      StatusIndicators {
+          desktop: bottomBar.desktop
+      }          // left of clock
+      ClockWidget {
+          desktop: bottomBar.desktop
+      }
+      BatteryIndicator {
+          desktop: bottomBar.desktop
+      }          // right of clock
+      GitStatus {
+          id: gitStatus
+          currentDir: bottomBar.browser.currentPath
+          bgColor: bottomBar.desktop.base01
+      }
     }
 
     RowLayout {

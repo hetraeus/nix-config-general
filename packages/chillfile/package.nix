@@ -32,7 +32,9 @@
             config.pkgs.coreutils
             config.pkgs.bash
             config.pkgs.xdg-utils
+            config.pkgs.systemd
             self'.packages.fmenu-share
+            self'.packages.fmenu-powerprofiles
           ];
 
           env.FILEICON_PATH = lib.getExe self'.packages.fileicon;

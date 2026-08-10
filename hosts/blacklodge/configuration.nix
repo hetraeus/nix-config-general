@@ -8,9 +8,7 @@
 
 flake.nixosConfigurations.${hostname} = inputs.nixpkgs.lib.nixosSystem {
   inherit system;
-  specialArgs = let
-#    pkgs-unstable = import inputs.nixpkgs-unstable { inherit system; config.allowUnfree = true; };
-  in { inherit inputs self; };
+  specialArgs = { inherit inputs self; };
 
   modules = [
     self.nixosModules.mandatory

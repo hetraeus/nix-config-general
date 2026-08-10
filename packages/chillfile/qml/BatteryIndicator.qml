@@ -8,14 +8,49 @@ RowLayout {
     id: root
     spacing: 8
 
+    required property var desktop
+
     // ----- AC indicator (🔌 when connected) -----
     Label {
         id: acLabel
         text: ""
         font.pixelSize: 18
+        color: "white"
+        property bool hovered: false
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: true
+            onEntered: parent.hovered = true
+            onExited: parent.hovered = false
+        }
+        onHoveredChanged: {
+            if (hovered && acLabel.text !== "") {
+                acTipTimer.start();
+            } else {
+                acTipTimer.stop();
+                acTip.visible = false;
+            }
+        }
+        Timer {
+            id: acTipTimer
+            interval: 1500
+            onTriggered: acTip.visible = true
+        }
         ToolTip {
-            text: "AC connected"
-            visible: parent.hovered && parent.text !== ""
+            id: acTip
+            text: "Connected to AC"
+            visible: false
+            background: Rectangle {
+                color: root.desktop.base01
+                border.color: Qt.rgba(root.desktop.base04.r, root.desktop.base04.g, root.desktop.base04.b, 0.3)
+                border.width: 1
+                radius: 4
+            }
+            contentItem: Label {
+                text: acTip.text
+                color: root.desktop.base04
+                font.pixelSize: 13
+            }
         }
     }
 
@@ -24,34 +59,89 @@ RowLayout {
         id: batteryLabel
         text: "🔋 ?"
         font.pixelSize: 18
+        color: "white"
         property string tooltipText: ""
+        property string chargeText: ""
+        property bool hovered: false
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: true
+            onEntered: parent.hovered = true
+            onExited: parent.hovered = false
+        }
+        onHoveredChanged: {
+            if (hovered) {
+                batteryTipTimer.start();
+            } else {
+                batteryTipTimer.stop();
+                batteryTip.visible = false;
+            }
+        }
+        Timer {
+            id: batteryTipTimer
+            interval: 1500
+            onTriggered: batteryTip.visible = true
+        }
         ToolTip {
+            id: batteryTip
             text: batteryLabel.tooltipText
-            visible: parent.hovered
+            visible: false
+            background: Rectangle {
+                color: root.desktop.base01
+                border.color: Qt.rgba(root.desktop.base04.r, root.desktop.base04.g, root.desktop.base04.b, 0.3)
+                border.width: 1
+                radius: 4
+            }
+            contentItem: Label {
+                text: batteryTip.text
+                color: root.desktop.base04
+                font.pixelSize: 13
+            }
         }
     }
 
-    // ----- Health (❤️) -----
-    Label {
-        id: healthLabel
-        text: ""
-        font.pixelSize: 18
-        visible: false
-        ToolTip {
-            text: "Health: " + healthLabel.text
-            visible: parent.hovered
-        }
-    }
-
-    // ----- Charge limit mode (🔋80 / 🔋100) -----
+    // ----- Charge limit mode (🧢 80% / 🧢 100%) -----
     Label {
         id: limitLabel
         text: ""
         font.pixelSize: 18
+        color: "white"
         visible: false
+        property bool hovered: false
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: true
+            onEntered: parent.hovered = true
+            onExited: parent.hovered = false
+        }
+        onHoveredChanged: {
+            if (hovered) {
+                limitTipTimer.start();
+            } else {
+                limitTipTimer.stop();
+                limitTip.visible = false;
+            }
+        }
+        Timer {
+            id: limitTipTimer
+            interval: 1500
+            onTriggered: limitTip.visible = true
+        }
         ToolTip {
+            id: limitTip
             text: "Charge limit: " + limitLabel.text
-            visible: parent.hovered
+            visible: false
+            background: Rectangle {
+                color: root.desktop.base01
+                border.color: Qt.rgba(root.desktop.base04.r, root.desktop.base04.g, root.desktop.base04.b, 0.3)
+                border.width: 1
+                radius: 4
+            }
+            contentItem: Label {
+                text: limitTip.text
+                color: root.desktop.base04
+                font.pixelSize: 13
+            }
         }
     }
 
@@ -60,6 +150,9 @@ RowLayout {
     // ---------------------------------------------------------------------
     property string batteryPath: ""
     property string acPath: ""
+    // Health isn't shown as its own icon (it doesn't need to live on the bar
+    // permanently) - it's folded into the battery tooltip instead, below.
+    property string batteryHealthText: ""
 
     // ---------------------------------------------------------------------
     // Timers
@@ -111,10 +204,9 @@ RowLayout {
                 updateLimit();
             }
         }
-        onExited: {
+        onExited: function(exitCode, exitStatus) {
             if (!root.batteryPath) {
                 batteryLabel.text = "🔋 ?";
-                healthLabel.visible = false;
                 limitLabel.visible = false;
             }
             if (!root.acPath) acLabel.visible = false;
@@ -151,6 +243,13 @@ RowLayout {
         batProc.running = true;
     }
 
+    function updateBatteryTooltip() {
+        // Combines the live charge reading with the last known health
+        // reading into a single tooltip on the battery icon.
+        var health = root.batteryHealthText !== "" ? root.batteryHealthText : "checking…";
+        batteryLabel.tooltipText = batteryLabel.chargeText + "\nBattery health: " + health;
+    }
+
     Process {
         id: batProc
         running: false
@@ -160,15 +259,15 @@ RowLayout {
                 var cap = parseInt(parts[0]) || 0;
                 var status = parts.slice(1).join(" ") || "Unknown";
                 var icon = "🔋";
-                if (status === "Charging") icon = "🔌";
+                if (status === "Charging") icon = "🔋";
                 else if (status === "Discharging") icon = "🔋";
                 else if (status === "Full") icon = "🔋";
                 batteryLabel.text = icon + " " + cap + "%";
-                var tip = "Battery: " + cap + "% (" + status + ")";
-                batteryLabel.tooltipText = tip;
+                batteryLabel.chargeText = "Battery charge: " + cap + "% (" + status + ")";
+                updateBatteryTooltip();
             }
         }
-        onExited: {
+        onExited: function(exitCode, exitStatus) {
             if (exitCode !== 0) batteryLabel.text = "🔋 ?";
         }
     }
@@ -176,9 +275,17 @@ RowLayout {
     function updateHealth() {
         if (!root.batteryPath) return;
         healthProc.command = ["sh", "-c",
+            // Prefer charge_* (Ah-based fuel gauges). Some batteries only
+            // expose energy_* (Wh-based) instead - that's the "condition"
+            // figure inxi reports - so fall back to those if charge_full
+            // is missing or zero.
             "full=$(cat " + root.batteryPath + "/charge_full 2>/dev/null || echo 0); " +
             "design=$(cat " + root.batteryPath + "/charge_full_design 2>/dev/null || echo 0); " +
-            "if [ $design -gt 0 ]; then echo $(( full * 100 / design )); else echo 0; fi"
+            "if [ \"$full\" -eq 0 ] || [ \"$design\" -eq 0 ]; then " +
+            "  full=$(cat " + root.batteryPath + "/energy_full 2>/dev/null || echo 0); " +
+            "  design=$(cat " + root.batteryPath + "/energy_full_design 2>/dev/null || echo 0); " +
+            "fi; " +
+            "if [ \"$design\" -gt 0 ]; then echo $(( full * 100 / design )); else echo 0; fi"
         ];
         healthProc.running = true;
     }
@@ -190,15 +297,18 @@ RowLayout {
             onStreamFinished: {
                 var health = parseInt(text.trim());
                 if (health > 0 && health <= 100) {
-                    healthLabel.text = "❤️ " + health + "%";
-                    healthLabel.visible = true;
+                    root.batteryHealthText = health + "%";
                 } else {
-                    healthLabel.visible = false;
+                    root.batteryHealthText = "unknown";
                 }
+                updateBatteryTooltip();
             }
         }
-        onExited: {
-            if (exitCode !== 0) healthLabel.visible = false;
+        onExited: function(exitCode, exitStatus) {
+            if (exitCode !== 0) {
+                root.batteryHealthText = "unknown";
+                updateBatteryTooltip();
+            }
         }
     }
 
@@ -219,14 +329,14 @@ RowLayout {
             onStreamFinished: {
                 var limit = parseInt(text.trim()) || 100;
                 if (limit >= 0 && limit <= 100) {
-                    limitLabel.text = "🔋" + limit + "%";
+                    limitLabel.text = "🧢 " + limit + "%";
                     limitLabel.visible = true;
                 } else {
                     limitLabel.visible = false;
                 }
             }
         }
-        onExited: {
+        onExited: function(exitCode, exitStatus) {
             if (exitCode !== 0) limitLabel.visible = false;
         }
     }

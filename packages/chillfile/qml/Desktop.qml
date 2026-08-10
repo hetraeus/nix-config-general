@@ -36,6 +36,7 @@ PanelWindow {
     property color base01: "#2c393f"
     property color base03: "#707880"
     property color base04: "#c9ccd3"
+    property color base0E: "#bb9af7"
 
     property alias browser: fileBrowser
     property alias fileGrid: fileGrid
@@ -166,6 +167,7 @@ PanelWindow {
         if (palette.base01) root.base01 = "#" + palette.base01;
         if (palette.base03) root.base03 = "#" + palette.base03;
         if (palette.base04) root.base04 = "#" + palette.base04;
+        if (palette.base0E) root.base0E = "#" + palette.base0E;
     }
 
     function runTerminal(args) {

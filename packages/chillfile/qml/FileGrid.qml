@@ -259,6 +259,9 @@ GridView {
         isSelected: gridView.selectedPaths.indexOf(model.path) >= 0
         renaming: gridView.renamingPath === model.path
         renameBgColor: gridView.desktop.base01
+        selectionColor: Qt.rgba(gridView.desktop.base0E.r, gridView.desktop.base0E.g, gridView.desktop.base0E.b, 0.4)
+        selectionBorderColor: Qt.rgba(gridView.desktop.base0E.r, gridView.desktop.base0E.g, gridView.desktop.base0E.b, 0.6)
+        hoverColor: Qt.rgba(gridView.desktop.base03.r, gridView.desktop.base03.g, gridView.desktop.base03.b, 0.25)
 
         onClicked: function(mouse) {
             gridView.currentIndex = index;
