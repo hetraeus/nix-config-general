@@ -16,7 +16,7 @@
       pkgs.bat
       pkgs.neovim
       pkgs.xdg-utils
-      pkgs.foot
+      pkgs.kitty
       pkgs.systemd
       pkgs.iwd
       pkgs.curl

@@ -10,7 +10,7 @@
     vkmark-iGPU   = pkgs.makeDesktopItem {
       name        = "vkmark iGPU";
       desktopName = "vkmark integrated graphic card benchmark";
-      exec        = "${lib.getExe pkgs.foot} -e ${lib.getExe' pkgs.coreutils "env"} DRI_PRIME=0 ${lib.getExe pkgs.vkmark}";
+      exec        = "${lib.getExe pkgs.kitty} ${lib.getExe' pkgs.coreutils "env"} DRI_PRIME=0 ${lib.getExe pkgs.vkmark}";
       terminal    = false;
       categories  = [ "System" ];
       icon        = "histogram-symbolic";
@@ -19,7 +19,7 @@
     vkmark-dGPU   = pkgs.makeDesktopItem {
       name        = "vkmark dGPU";
       desktopName = "vkmark discrete graphic card benchmark";
-      exec        = "${lib.getExe pkgs.foot} -e ${lib.getExe' pkgs.coreutils "env"} DRI_PRIME=1 ${lib.getExe pkgs.vkmark}";
+      exec        = "${lib.getExe pkgs.kitty} ${lib.getExe' pkgs.coreutils "env"} DRI_PRIME=1 ${lib.getExe pkgs.vkmark}";
       terminal    = false;
       categories  = [ "System" ];
       icon        = "histogram-symbolic";

@@ -8,7 +8,7 @@
       pkgs.coreutils
       pkgs.fzf pkgs.gnused pkgs.gawk pkgs.gnugrep
       pkgs.bat
-      pkgs.foot
+      pkgs.kitty
       pkgs.fastfetch
       pkgs.systemd
       # pkgs.perf
@@ -17,6 +17,7 @@
       pkgs.tuned
       pkgs.inxi
       pkgs.lshw
+      pkgs.helix
       pkgs.isd
       pkgs.powertop
       pkgs.sysctl

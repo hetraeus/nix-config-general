@@ -13,10 +13,10 @@
       '';
     };
     script = pkgs.writeShellApplication {
-      name          = "foot-gping-gateway-dns-example";
-      runtimeInputs = [ pkgs.foot gping-gateway-dns-example ];
+      name          = "term-gping-gateway-dns-example";
+      runtimeInputs = [ pkgs.kitty gping-gateway-dns-example ];
       text = ''
-        foot --app-id="kitty_floating" --hold ${lib.getExe gping-gateway-dns-example}
+        kitty --app-id="kitty_floating" --hold ${lib.getExe gping-gateway-dns-example}
       '';
     };
     desktopItem = pkgs.makeDesktopItem {
@@ -30,6 +30,6 @@
   in pkgs.buildEnv {
     name             = "gping-default-wrapper";
     paths            = [ script desktopItem ];
-    meta.mainProgram = "foot-gping-gateway-dns_example";
+    meta.mainProgram = "term-gping-gateway-dns_example";
   };
 };}

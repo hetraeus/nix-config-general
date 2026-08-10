@@ -5,7 +5,6 @@
 };
 
 flake.homeModules.terminal_gui = { lib, pkgs, ... }: {
-  programs.foot.enable  = true;
   home.packages = [ pkgs.blobdrop ];
   programs.kitty.enable = true;
   programs.kitty.shellIntegration.enableZshIntegration = false; # it's awkward

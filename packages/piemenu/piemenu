@@ -59,7 +59,7 @@ case "$@" in
                    playerctl --all-players        pause    > /dev/null 2>&1 ;}; exit;;
 
   ";)"  ) coproc {
-          pkill --exact fmenu-emoticon || foot --title="😲 emoticon_list" --app-id="fmenu_panel" fmenu-emoticon > /dev/null  2>&1 ;}
+          pkill --exact fmenu-emoticon || kitty --title="😲 emoticon_list" --app-id="fmenu_panel" fmenu-emoticon > /dev/null  2>&1 ;}
           exit;;
   "󱙴" )   xdg-open "https://www.btdig.com/search?q=""$( wl-paste --primary | sed --regexp-extended 's/([^[:print:]])//g;s#^\s*##;s#\s*$##' )"  > /dev/null  2>&1
           wdotool windowactivate "$(wdotool search --name "$(awk 'BEGIN{FS="[=.]"} /x-scheme-handler\/https=/{print $2; exit}' ~/.config/mimeapps.list)" 2>/dev/null | cut --fields=1 )" 2>/dev/null

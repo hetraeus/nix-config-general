@@ -181,21 +181,21 @@ case "${operation}" in
   *"trippy trace"               )  kitty trip ;;
   *" dhcp connect wifi"*        )  printf "\x1bc"; conn_dhcp     ;;
   *" watch cams"*               )  command -v fmenu-watch_cams001 && fmenu-watch_cams001 & disown;;
-  *"dns requests monitor"*      )  (foot --app-id="kitty_floating" --hold run0 resolvectl monitor         ) & disown;;
-  *" bandwhich"*                )  (foot --app-id="kitty_floating" --hold run0 --background="0" bandwhich ) & disown;;
-  *" termshark"*                )  (foot --app-id="kitty_floating" --hold run0 termshark                  ) & disown;;
-  *" firewall"*                 )  (foot --app-id="kitty_floating" --hold run0 nft list ruleset           ) & disown;;
-  *" mtr google"*               )  (foot --app-id="kitty_floating" --hold mtr google.com 8.8.8.8          ) & disown;;
-  *"AZ900"*                     )  (foot ~/.local/bin/scripts/fmenu-cheat-az900 ) & disown;;
-  *" connections"*              )  (foot --app-id="kitty_floating" --hold ss -all            ) & disown;;
-  *" librespeed"*               )  (foot --app-id="kitty_floating" --hold librespeed-cli     ) & disown;;
-  *" speedtest"                 )  (foot --app-id="kitty_floating" --hold speedtest-cli      ) & disown;;
-  *" netdiscover"*              )  (foot --app-id="kitty_floating" --hold run0 netdiscover   ) & disown;;  #arp-scan
-  *" $0"                        )  (foot --app-id="kitty_floating" --hold "$VISUAL" -- "$0"  ) & disown;;
-  *" stack overflow"*           )  (foot --app-id="kitty_floating" --hold \
+  *"dns requests monitor"*      )  (kitty --app-id="kitty_floating" --hold run0 resolvectl monitor         ) & disown;;
+  *" bandwhich"*                )  (kitty --app-id="kitty_floating" --hold run0 --background="0" bandwhich ) & disown;;
+  *" termshark"*                )  (kitty --app-id="kitty_floating" --hold run0 termshark                  ) & disown;;
+  *" firewall"*                 )  (kitty --app-id="kitty_floating" --hold run0 nft list ruleset           ) & disown;;
+  *" mtr google"*               )  (kitty --app-id="kitty_floating" --hold mtr google.com 8.8.8.8          ) & disown;;
+  *"AZ900"*                     )  (kitty ~/.local/bin/scripts/fmenu-cheat-az900 ) & disown;;
+  *" connections"*              )  (kitty --app-id="kitty_floating" --hold ss -all            ) & disown;;
+  *" librespeed"*               )  (kitty --app-id="kitty_floating" --hold librespeed-cli     ) & disown;;
+  *" speedtest"                 )  (kitty --app-id="kitty_floating" --hold speedtest-cli      ) & disown;;
+  *" netdiscover"*              )  (kitty --app-id="kitty_floating" --hold run0 netdiscover   ) & disown;;  #arp-scan
+  *" $0"                        )  (kitty --app-id="kitty_floating" --hold "$VISUAL" -- "$0"  ) & disown;;
+  *" stack overflow"*           )  (kitty --app-id="kitty_floating" --hold \
                                     so --no-lucky "$(gum input --header="─── ♨ stackoverflow ───")"      ) & disown;;
-  *" wlan list known"*          )  (foot --app-id="kitty_floating" --hold iwctl known-networks list      ) & disown;;
-  *" rfc"*                      )  (foot --app-id="kitty_floating" --hold ~/.local/bin/scripts/fmenu-rfc ) & disown;;
+  *" wlan list known"*          )  (kitty --app-id="kitty_floating" --hold iwctl known-networks list      ) & disown;;
+  *" rfc"*                      )  (kitty --app-id="kitty_floating" --hold ~/.local/bin/scripts/fmenu-rfc ) & disown;;
 
   *" azure cloud cli"*          )  az                  ;;
 
@@ -248,7 +248,7 @@ IF IT FAILS, check credential expiration date
 
   *" IANA port numbers"*       )  IANA_PATH="$(grep --only-matching --perl-regexp ':[^:]*iana-etc-[0-9]*/' <<< "$PATH")"
                                   export IANA_PATH="${IANA_PATH#:}"/etc
-                                  (foot --app-id="kitty_floating" --hold bat --plain --language=nimble "$IANA_PATH"/* ) & disown;;
+                                  (kitty --app-id="kitty_floating" --hold bat --plain --language=nimble "$IANA_PATH"/* ) & disown;;
 
   *" rdap "*                   )  printf "\x1bc"; echo "─── 💋 rdap who is who ? ───"
                                   read -re WEBSITE; [[ -z "$WEBSITE" ]] && continue
