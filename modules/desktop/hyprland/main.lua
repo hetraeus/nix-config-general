@@ -118,7 +118,7 @@ hl.config({
   },
 
   scrolling = {
-    column_width = 0.66,
+    column_width = 1,
   },
 })
 
@@ -192,6 +192,7 @@ hl.window_rule({ match = { title = "^(Copy Files)$" }, float = true })
 hl.window_rule({ match = { title = "^(File Properties)$" }, float = true })
 hl.window_rule({ match = { title = "^(Authentication Required)$" }, float = true })
 hl.window_rule({ match = { class = "^(fmenu-movie)$" }, float = true, size = "48% 48%" })
+hl.window_rule({ match = { class = "^(thunar)$", title = "^(Rename )" }, float = true })
 hl.window_rule({
   name = "satty_test",
   match = { class = "^(com.gabm.satty)$" },
@@ -201,6 +202,7 @@ hl.window_rule({
   no_initial_focus = true,
   fullscreen_state = "3",
 })
+hl.window_rule({ match = { class = "^(kitty)$" }, scrolling_width = "0.66" })
 
 hl.window_rule({
   match       = { class = "^(com.github.hluk.copyq)$" },
@@ -209,7 +211,6 @@ hl.window_rule({
   move        = "(cursor_x-(window_w*0.2)) (cursor_y-(window_h*0.07))",
   no_anim     = true,
 })
-hl.window_rule({ match = { class = "^(mov_foot)$" }, workspace = "3" })
 hl.window_rule({ match = { class = "^(terminal_media_player)$" }, workspace = "3", float = true })
 hl.window_rule({
   match = { class = "^(fmenu_panel)$" },
