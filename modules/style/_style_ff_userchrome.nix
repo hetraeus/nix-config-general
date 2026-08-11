@@ -6,11 +6,6 @@ in {
 
   programs.firefox.policies.ExtensionSettings  = { # about:support
 
-    # "{3c078156-979c-498b-8990-85f7987dd929}"   = { # tree style sidebar
-    #   install_url = "https://addons.mozilla.org/firefox/downloads/latest/sidebery/latest.xpi";
-    #   installation_mode = "force_installed";
-    #   };
-
     "{7a7a4a92-a2a0-41d1-9fd7-1e92480d612d}"   = { # my custom css - stylus
       install_url = "https://addons.mozilla.org/firefox/downloads/latest/styl-us/latest.xpi";
       installation_mode = "force_installed";
