@@ -197,10 +197,9 @@ flake.homeModules.desktop_shell = { pkgs, lib, config, self, ... }: {
   xdg.configFile."rofi/themes/board.rasi".source = ./board.rasi;
   programs.rofi.theme = lib.mkForce "${config.xdg.configHome}/rofi/themes/board.rasi";
 
-  systemd.user.services.sway-audio-idle-inhibit = {
+  systemd.user.services.wayland-pipewire-idle-inhibit = {
     Unit = {
       Description   = "Idle inhibition";
-      Documentation = "https://github.com/ErikReider/SwayAudioIdleInhibit";
       PartOf        = "graphical-session.target";
       After         = "graphical-session.target";
       ConditionEnvironment   = "WAYLAND_DISPLAY";
@@ -208,7 +207,7 @@ flake.homeModules.desktop_shell = { pkgs, lib, config, self, ... }: {
 
     Service     = {
       Type      = "simple";
-      ExecStart = "${lib.getExe pkgs.sway-audio-idle-inhibit}";
+      ExecStart = "${lib.getExe pkgs.wayland-pipewire-idle-inhibit}";
       Restart   = "on-failure";
 
       # CapabilityBoundingSet = [
