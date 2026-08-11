@@ -6,8 +6,8 @@ inputs = {
 # But they can be composed via "follows"
 # They can be overridden via flake.lock
 # They can be abstracted via flake-parts or higher-level generators
-#  nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
   nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+  multiverse.url = "github:fzakaria/nixpkgs-multiverse";
 
   nixos-hardware.url = "github:NixOS/nixos-hardware/master";
   stylix.url         = "github:nix-community/stylix/release-26.05";
