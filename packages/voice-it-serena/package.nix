@@ -2,8 +2,8 @@
 
   model        ="serena";
   lang         =    "it";
-  quality      =  "high";
   lang_variant = "it_IT";
+  quality      =  "high";
 
   baseurl      = "https://huggingface.co/rhasspy/piper-voices/resolve/main";
   format       = "onnx";

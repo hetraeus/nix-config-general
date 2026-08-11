@@ -2,8 +2,8 @@
 
   model        =  "ryan";
   lang         =    "en";
-  quality      =  "high";
   lang_variant = "en_US";
+  quality      =  "high";
 
   baseurl      = "https://huggingface.co/rhasspy/piper-voices/resolve/main";
   format       = "onnx";
