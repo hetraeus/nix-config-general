@@ -172,12 +172,30 @@ programs.zsh.dotDir = "${config.xdg.configHome}/zsh";
     };
 
   xdg.desktopEntries.firefox_private = {
-    name         = "Firefox private";
+    name         = "firefox_private";
     genericName  = "private incognito mode browser";
     icon         = "firefox-nightly";
     terminal     = false;
     categories   = [ "Network" "WebBrowser" ];
     exec         = "${lib.getExe config.programs.firefox.package} --private-window";
+    };
+
+  xdg.desktopEntries.firefox_test_css = let
+    ff_css = pkgs.writeShellApplication {
+      name          = "wrun-or-raise";
+      text = ''
+        TMP_DIR="/tmp/firefox-clean"
+        mkdir --parents "$TMP_DIR"
+        ${lib.getExe config.programs.firefox.package} --no-remote --profile "$TMP_DIR"
+        '';
+        };
+    in {
+    name         = "firefox_test_css";
+    genericName  = "ctrl+shift+alt+i test firefox css with browser toolbox";
+    icon         = "firefox-dev";
+    terminal     = false;
+    categories   = [ "Network" "WebBrowser" ];
+    exec         = "${lib.getExe ff_css}";
     };
 
   stylix.image =
