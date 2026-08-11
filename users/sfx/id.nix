@@ -29,7 +29,7 @@
     self.homeModules.desktop_screenshot
     self.homeModules.desktop_shell
     self.homeModules.desktop_waybar
-    self.homeModules.desktop_voice_ryan
+    self.homeModules.desktop_voices
 
     self.homeModules.terminal_fidgets
     self.homeModules.terminal_gui
