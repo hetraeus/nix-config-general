@@ -5,11 +5,27 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+static const char *icon_cache_dir(void)
+{
+    static char *cache_dir = NULL;
+    if (cache_dir) return cache_dir;
+
+    const char *runtime_dir = g_getenv("XDG_RUNTIME_DIR");
+    if (!runtime_dir || !*runtime_dir) {
+        runtime_dir = g_get_tmp_dir();
+    }
+
+    cache_dir = g_build_filename(runtime_dir, "fileicon", NULL);
+    g_mkdir_with_parents(cache_dir, 0700);
+
+    return cache_dir;
+}
+
 static char *render_pixbuf_to_tmp(GdkPixbuf *pixbuf, const char *cache_key)
 {
-    const char *tmp = g_get_tmp_dir();
+    const char *cache_dir = icon_cache_dir();
     guint hash = g_str_hash(cache_key);
-    char *tmp_path = g_strdup_printf("%s/fileicon_%u.png", tmp, hash);
+    char *tmp_path = g_strdup_printf("%s/fileicon_%u.png", cache_dir, hash);
 
     struct stat st;
     if (stat(tmp_path, &st) == 0 && st.st_size > 0) {
