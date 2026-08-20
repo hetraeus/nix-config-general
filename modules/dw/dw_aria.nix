@@ -21,7 +21,7 @@ in {
     in [
       pkgs.aria2
       (self.legacyPackages.${pkgs.stdenv.hostPlatform.system}.torrent-web-dashboardWith {
-        pkgs = pkgs_pinned_1;
+        pkgs = dashboard_will_work;
         })
     ];
 
