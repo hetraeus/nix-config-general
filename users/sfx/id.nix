@@ -91,8 +91,8 @@ in {
   programs.keepassxc.settings.Browser.UpdateBinaryPath = false;
   home.file.".gnupg" = { source = config.lib.file.mkOutOfStoreSymlink "${config.xdg.dataHome}/../config/.gnupg"; };
 
-  home.stateVersion  =               "24.11";
 
+  home.stateVersion = "24.11";
 # TODO delete this block
 gtk.gtk4.theme = lib.mkDefault null;
 xdg.userDirs.setSessionVariables = lib.mkDefault false;
@@ -178,11 +178,17 @@ programs.zsh.dotDir = "${config.xdg.configHome}/zsh";
 
   xdg.desktopEntries.firefox_test_css = let
     ff_css = pkgs.writeShellApplication {
-      name          = "wrun-or-raise";
+      name = "app";
       text = ''
         TMP_DIR="/tmp/firefox-clean"
         mkdir --parents "$TMP_DIR"
-        ${lib.getExe config.programs.firefox.package} --no-remote --profile "$TMP_DIR"
+        printf '\x1b]99;p=body;%s\n%s\n%s\n%s\x1b\\' \
+          "about:config" \
+          "devtools.debugger.remote-enabled true" \
+          "devtools.chrome.enabled true" \
+          "ctrl+shift+alt+I"
+
+        ${lib.getExe config.programs.firefox.package} --no-remote --profile "$TMP_DIR" "about:config"
         '';
         };
     in {
