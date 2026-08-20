@@ -54,6 +54,7 @@ flake.nixosConfigurations.${hostname} = inputs.nixpkgs.lib.nixosSystem {
     self.nixosModules.desktop_shell
     self.nixosModules.sound_control
 
+    inputs.multiverse.nixosModules.default
     inputs.nixos-hardware.nixosModules.common-pc-ssd # this adds services.fstrim.enable
 
    # INFO: waiting for tuned https://github.com/NixOS/nixos-hardware/pull/1474
@@ -86,6 +87,23 @@ flake.nixosConfigurations.${hostname} = inputs.nixpkgs.lib.nixosSystem {
    # }
    # ...
    {
+
+     multiverse = {
+       enable = true;
+       config.allowUnfree = true;
+
+       # Attributes pinned to an exact version, each resolved against whichever
+       # revision last shipped it.
+       # pins = {
+       #   vscode = "1.107.0";
+       #   ripgrep = "13.0.0";
+       # };
+
+       # The same idea, maintained by `mvs lock` instead of by hand: a set of
+       # commits, each moved on its own by `mvs lock update <attr>`.
+       lock = ./multiverse.lock;
+     };
+     
      networking.hostName = "${hostname}";
      programs.hyprland.enable             = true; # NEEDED AS A NIXOS MODULE by xdg portals
      programs.hyprland.withUWSM           = true;
