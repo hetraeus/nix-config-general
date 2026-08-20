@@ -1,11 +1,6 @@
-{ flake.nixosModules.blacklodgeModules = { modulesPath, pkgs, lib, ... }: {
+{ flake.nixosModules.blacklodgeModules = { pkgs, lib, ... }: {
 
-  imports = [
-    # Set by nixos-generate-config for future uses
-    # https://discourse.nixos.org/t/whats-the-rationale-behind-not-detected-nix/5403
-    (modulesPath + "/installer/scan/not-detected.nix")
-    ];
-
+  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.graphics.enable      = true;
   hardware.graphics.enable32Bit = true;
   hardware.graphics.extraPackages   = [               pkgs.libvdpau-va-gl ];
@@ -60,8 +55,6 @@
     # erased on every boot when the partition is encrypted. Best to use /dev/disk/by-partuuid/
     randomEncryption.enable = lib.mkForce false;
     } ];
-
-  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 
   };
 }

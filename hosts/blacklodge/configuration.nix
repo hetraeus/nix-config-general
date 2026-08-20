@@ -3,11 +3,9 @@
 # https://search.nixos.org/options
 { inputs, self, ... }: let
   hostname = "blacklodge";
-  system = "x86_64-linux";
   in {
 
 flake.nixosConfigurations.${hostname} = inputs.nixpkgs.lib.nixosSystem {
-  inherit system;
   specialArgs = { inherit inputs self; };
 
   modules = [
@@ -104,11 +102,11 @@ flake.nixosConfigurations.${hostname} = inputs.nixpkgs.lib.nixosSystem {
        lock = ./multiverse.lock;
      };
      
-     networking.hostName = "${hostname}";
-     programs.hyprland.enable             = true; # NEEDED AS A NIXOS MODULE by xdg portals
-     programs.hyprland.withUWSM           = true;
-     security.pam.services.hyprlock       = {};
-     security.pam.services.swaylock       = {};
+     networking.hostName   = "${hostname}";
+     programs.hyprland.enable       = true; # NEEDED AS A NIXOS MODULE by xdg portals
+     programs.hyprland.withUWSM     = true;
+     security.pam.services.hyprlock = {};
+     security.pam.services.swaylock = {};
 
      # Some programs need SUID wrappers, can be configured further or are
      # started in user sessions.

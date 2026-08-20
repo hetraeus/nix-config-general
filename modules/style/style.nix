@@ -10,14 +10,15 @@ in {
     ./_style_notification_panel.nix
     ];
   home.packages = [
+    pkgs.cabin
+    pkgs.noto-fonts-cjk-sans
+    self.packages.${pkgs.stdenv.hostPlatform.system}.fmenu-prewfont
     (self.legacyPackages.${pkgs.stdenv.hostPlatform.system}.fmenu-iconsWith {
       fmenu-icons.iconsPack    = config.stylix.icons.package;
       fmenu-icons.iconsVariant = config.stylix.icons.light;
       })
-    pkgs.cabin
-    pkgs.noto-fonts-cjk-sans
-    self.packages.${pkgs.stdenv.hostPlatform.system}.fmenu-prewfont
-  ];
+    ];
+
   fonts.fontconfig.enable = true;
   stylix.targets.hyprland.hyprpaper.enable = false;
   stylix.fonts  = {
