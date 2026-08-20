@@ -47,10 +47,7 @@ in {
 #    builtins.readFile ./floating.lua +
     builtins.readFile ./main.lua     +
     ''
-    hl.bind("mouse:275", function()
-        hl.dsp.exec_cmd("${lib.getExe piemenu_launch} kb")
-    end)
-
+    hl.bind("mouse:275", hl.dsp.exec_cmd("${lib.getExe piemenu_launch} kb"), { mouse = true })
     hl.bind("mouse:276", hl.dsp.exec_cmd("${lib.getExe piemenu_launch} wm"), { mouse = true })
     hl.bind("SUPER + S"        , hl.dsp.exec_cmd("${lib.getExe sbuku}     askme"))
     hl.bind("SUPER + SHIFT + S", hl.dsp.exec_cmd("${lib.getExe sbuku} clipboard"))
