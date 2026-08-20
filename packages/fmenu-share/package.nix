@@ -22,6 +22,16 @@
           'body': <'\"$(printf '%q' "$BODY")\"'>,
           'attachments': <\"''${ATTACHMENTS%,}\">}"
       }
+
+      STYLIX_FILE="''${XDG_CONFIG_HOME:-~/.config}"/stylix/palette.json
+      if [[ -f "$STYLIX_FILE" ]]; then
+        color_bgplus="#$(grep 'base02' "$STYLIX_FILE" | cut --fields=4 --delimiter='"')"
+        color_fgplus="#$(grep 'base05' "$STYLIX_FILE" | cut --fields=4 --delimiter='"')"
+      else
+        color_bgplus="#37474f"
+        color_fgplus="#cdd3de"
+      fi
+      
       CHOICE="⛓  copy paths
       📲 my phone
       🐊 croc
@@ -49,7 +59,9 @@
       📦 cpio.xz
       📦 tar
       📦 cpio"
+
       DONE="✅ Done"
+
       export  FZF_DEFAULT_OPTS="\
       --info=hidden             \
       --layout=reverse          \
@@ -58,8 +70,8 @@
       --pointer=' '             \
       --prompt='  '             \
       --scroll-off=5            \
-      --color='gutter:-1,bg+:#3e8fb0,fg+:#ffffff'
-      " # TODO: remove color hardcoding
+      --color='gutter:-1,bg+:$color_bgplus,fg+:$color_fgplus'"
+
       while ! "''${finished:-false}"; do
       operation="$(fzf --header="$(printf '%s\n' "$@")" <<< \
       "$CHOICE
