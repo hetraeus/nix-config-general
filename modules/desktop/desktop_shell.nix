@@ -87,7 +87,7 @@
       } {
       type    = "regexp";
       operand = "process.command";
-      data    = "^(/etc/profiles/per-user/sfx/bin/weather .*)$";
+      data    = "^(/etc/profiles/per-user/${config.users_list.principalUser}/bin/weather .*)$";
       }];
   };};
   };
