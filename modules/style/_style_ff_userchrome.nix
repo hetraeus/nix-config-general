@@ -27,9 +27,9 @@ in {
 
     "browser.toolbars.bookmarks.visibility" = { Value = "never"; Status = "locked"; };
 
-
-    "devtools.chrome.enabled"          = { Value =  true; Status = "locked"; };
-    "devtools.debugger.remote-enabled" = { Value =  true; Status = "locked"; };
+    # WARN don't do this. Use a clean profile
+    # "devtools.chrome.enabled"          = { Value =  true; Status = "locked"; };
+    # "devtools.debugger.remote-enabled" = { Value =  true; Status = "locked"; };
     };
 
   stylix.targets.firefox.enable = true;
@@ -44,14 +44,12 @@ in {
 
     '';
 
-  programs.firefox.profiles."user".userChrome =
-  # let
-  # autohide = pkgs.fetchurl {
-  #     url = "https://github.com/MrOtherGuy/firefox-csshacks/raw/refs/heads/master/chrome/autohide_sidebar.css";
-  #     hash = "sha256-iKdI7zFASsUWbUiiMdlVHKL3hHc4/TRmGOg2iZomBgM=";
-  #     };
-  # in builtins.readFile autohide +
-  ''
+  programs.firefox.profiles."user".userChrome = let
+    autohide = pkgs.fetchurl {
+      url = "https://raw.githubusercontent.com/MrOtherGuy/firefox-csshacks/refs/heads/master/chrome/autohide_tabstoolbar_v2.css";
+      hash = "sha256-ERBWry+dVaslQSU7IkGLtqc3HRMO2v2OhBsj+yzEDSg=";
+      };
+  in ''
   /*
   Find what is breaking with:
   mkdir --parents /tmp/firefox-clean
@@ -62,21 +60,15 @@ in {
     devtools.debugger.remote-enabled true
   then ctrl+shift+alt+I
   */
-
-
-  /* Correct the autohide css variables */
-  :where(#main-window) #browser{
-    --uc-sidebar-width: 2rem;
-    --uc-sidebar-hover-width: 24rem;
+  :root{
+  --tab-collapsed-width: 1.2rem !important;
   }
-  #sidebar-box{
-    --uc-autohide-sidebar-delay: 300ms; /* Wait 0.6s before hiding sidebar */
-    --uc-autohide-transition-duration: 0ms;
-  }
-
+  '' + builtins.readFile autohide + ''
   #nav-bar,
   .browserContainer > findbar,
-  #sidebar-main,
+  #sidebar-container,
+  #sidebar-wrapper,
+  sidebar-main,
   #identity-icon-box,
   #nav-bar-customization-target,
   .urlbar-background,
@@ -84,12 +76,15 @@ in {
     background-color: ${config.lib.stylix.colors.withHashtag.base00} !important;
     }
 
+  sidebar-main{
+    --tab-pinned-horizontal-count: 7;
+  }
+
   .statuspanel-label,
   statuspanel,
   #statuspanel,
   #urlbar,
   .findbar-textbox,
-  rlbar-input-box,
   findbar {
     font-family:  ${ff_chromefont} !important;
     }
