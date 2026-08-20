@@ -69,12 +69,7 @@
     shell        = inputs.nixpkgs.legacyPackages."${config.nixpkgs.hostPlatform.system}".zsh;
     isNormalUser = true;
     uid          = config.users_list.principalUserUid;
-    extraGroups  = [ # user can:
-      "wheel"        # use sudo to escalate privileges
-      "wireshark"    # use dumpcap / wireshark to examine network packets
-      "samba"        # create samba/CIFS usershares
-      "libvirtd"     # libvirt virtual machines without password request
-    ];};
+    };
 
   nix.settings.trusted-users = [ config.users_list.principalUser ]; # needed to let devenv manage its cache
   };

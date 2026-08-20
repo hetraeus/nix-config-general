@@ -16,6 +16,9 @@ services.samba = {
 #   enable = true;
 #   openFirewall = true;
 # };
+  # let main user to create samba/CIFS usershares
+  users.users."${config.users_list.principalUser}".extraGroups  = [ "samba" ];
+
 
 services.samba.usershares.enable = true;
 services.samba.settings = {

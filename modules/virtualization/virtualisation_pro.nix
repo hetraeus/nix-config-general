@@ -16,6 +16,8 @@ config = {
 
   environment.systemPackages = [ pkgs.quickemu ];
 
+  # let main user to manage libvirt virtual machines without password request
+  users.users."${config.users_list.principalUser}".extraGroups  = [ "libvirtd" ];
   programs.virt-manager.enable              = true;
   virtualisation.libvirtd.enable            = true;
   virtualisation.libvirtd.qemu.runAsRoot    = false;
@@ -26,7 +28,6 @@ config = {
   # WARN: This allows users arbitrary access to USB devices.
   # virtualisation.spiceUSBRedirection.enable = true;
 
-  #users.users."${config.users_list.principalUser}".extraGroups  = [ "libvirtd" ];     # libvirt virtual machines without password request
 
   specialisation.gpupassthrough.configuration = lib.mkIf cfg.passthrough.enable {
     environment.systemPackages = [ self.packages.${pkgs.stdenv.hostPlatform.system}.fmenu-iommu-verify-success ];

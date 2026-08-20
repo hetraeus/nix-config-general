@@ -3,12 +3,14 @@
   # WARN: vulnix gives MANY false positives!
   environment.systemPackages = [ pkgs.sops pkgs.age ];
 
+  # let sudo and run0 to escalate privileges
+  users.users."${config.users_list.principalUser}".extraGroups  = [ "wheel" ];
+ 
   security.sudo.enable = false;
   security.run0.enableSudoAlias = lib.mkForce true;
   # security.sudo-rs.enable    = true;
   # This prevents users that are not members of wheel from exploiting vulnerabilities in sudo such as CVE-2021-3156
   # security.sudo-rs.execWheelOnly = lib.mkForce true;
-  #users.users."${config.users_list.principalUser}".extraGroups  = [ "wheel" ];
 
   programs.gnupg.agent.enable = true;
   programs.gnupg.agent.pinentryPackage = pkgs.pinentry-qt;

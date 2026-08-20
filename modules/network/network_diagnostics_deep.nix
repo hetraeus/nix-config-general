@@ -1,4 +1,4 @@
-{ flake.nixosModules.network_diagnostics_deep = { pkgs, lib, ... }: {
+{ flake.nixosModules.network_diagnostics_deep = { pkgs, lib, config, ... }: {
   programs.mtr.enable = true;
   programs.bandwhich.enable = true;
   # programs.wireshark.enable  = true;
@@ -24,4 +24,7 @@
     pkgs.iproute2 # ss
     pkgs.netdiscover
     ];
+  # let main user to examine network packets with dumpcap / wireshark
+  users.users."${config.users_list.principalUser}".extraGroups  = [ "wireshark" ];
+
 };}
