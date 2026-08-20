@@ -124,7 +124,7 @@ in {
                 "a":       AddToPlaylist,
                 "d":       Delete,
                 "i":       ShowInfo,
-                "C":       JumpToCurrent,
+                "o":       JumpToCurrent,
             },
         ),
         search: (
