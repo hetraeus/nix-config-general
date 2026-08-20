@@ -1,4 +1,5 @@
 { flake.nixosModules.backup  = { pkgs, ... }: {
+  # TODO set up kopia
   environment.systemPackages = [ pkgs.rclone pkgs.kopia pkgs.rsync ];
   environment.shellAliases.rsync = "rsync --progress ";
   };
