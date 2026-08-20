@@ -46,6 +46,7 @@
     self.homeModules.discord
     self.homeModules.documentation
     self.homeModules.maker
+    self.homeModules.geography
     self.homeModules.pim
     self.homeModules.gaming
     self.homeModules.office
