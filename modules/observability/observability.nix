@@ -55,6 +55,7 @@
   #programs.tuxclocker.enable = true;
   programs.iotop.enable      = true;
 
+  # TODO
   # services.grafana.enable    = true;
   # services.grafana.openFirewall = true;
   # services.grafana.settings.analytics.feedback_links_enabled = false;

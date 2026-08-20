@@ -28,7 +28,7 @@
 
 flake.homeModules.discord = {
   programs.vesktop.enable  = true;
-  stylix.targets.vesktop.enable = false; #BUG: unreadable
+  stylix.targets.vesktop.enable = false; # BUG unreadable
   };
 
 }

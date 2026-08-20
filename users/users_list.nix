@@ -18,7 +18,7 @@ imports = [
   ];
 
 config = {
-  home-manager.sharedModules = [ # always on for every user
+  home-manager.sharedModules = [ # "shared": always on for every user
     { programs.home-manager.enable = true; }
     ];
 
