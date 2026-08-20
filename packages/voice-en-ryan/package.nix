@@ -25,6 +25,6 @@
 
   in pkgs.linkFarm "voice-${lang}-${model}" [
     { name = "model.onnx"     ; path = model_onnx     ; }
-    { name = "model_onnx.json"; path = model_onnx_json; }
+    { name = "model.onnx.json"; path = model_onnx_json; }
     ];
 };}
