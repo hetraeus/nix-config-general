@@ -56,7 +56,7 @@ in {
 
     hl.bind("SUPER + ALT + Space", hl.dsp.exec_cmd("${lib.getExe' pkgs.swaynotificationcenter "swaync-client"} --toggle-panel"))
     hl.bind("SUPER + X",           hl.dsp.exec_cmd("${lib.getExe' pkgs.systemd "systemctl"} --user restart fmenu-emoticon"))
-    hl.bind("SUPER + Z",           hl.dsp.exec_cmd("${lib.getExe  pkgs.copyq}  menu clipboard"))
+    hl.bind("SUPER + Z",           hl.dsp.exec_cmd("${lib.getExe  config.services.copyq.package}  menu clipboard"))
 
     hl.bind("SUPER + ALT + D", dofile("${hypr_hide_floats}"))
     hl.bind("SUPER + D",       ${hypr_single_hide})
