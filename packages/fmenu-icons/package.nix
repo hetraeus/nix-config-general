@@ -39,7 +39,7 @@
 
         desktopItem = pkgs.makeDesktopItem {
           name        = "Icons fuzzy chooser";
-          exec        = "${pkgs.kitty} fmenu-icons";
+          exec        = "${lib.getExe pkgs.kitty} fmenu-icons";
           desktopName = "icon picker";
           categories  = [ "Graphics" ];
           icon        = "icons";
