@@ -130,13 +130,12 @@ flake.homeModules.desktop_shell = { pkgs, lib, config, self, ... }: {
 
   services.copyq.enable        = true;
   systemd.user.services.copyq.Service.Environment = lib.mkForce [ "QT_QPA_PLATFORM=wayland" ]; # TODO: remove this line
-  services.copyq.package = let
-    # BUG: https://github.com/hluk/CopyQ/issues/3108
-    pkgs_pinned_1 = import (fetchTarball {
-      url = "https://github.com/NixOS/nixpkgs/archive/e6f23dc08d3624daab7094b701aa3954923c6bbb.tar.gz";
-      sha256 = "0m0xmk8sjb5gv2pq7s8w7qxf7qggqsd3rxzv3xrqkhfimy2x7bnx";
-      }) { system = pkgs.stdenv.hostPlatform.system; };
-    in pkgs_pinned_1.copyq;
+
+  services.copyq.package  =
+    let copyq_will_appear = self.inputs.multiverse.multiverse.${pkgs.stdenv.hostPlatform.system}.at "2025-06-17";
+    # https://github.com/hluk/CopyQ/issues/3108
+    # https://qt-project.atlassian.net/browse/QTBUG-139921
+    in copyq_will_appear.copyq;
 
   # wayland.windowManager.hyprland.extraLuaFiles.desktop_shell = ''
   wayland.windowManager.hyprland.extraConfig = ''
