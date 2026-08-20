@@ -179,16 +179,18 @@ programs.zsh.dotDir = "${config.xdg.configHome}/zsh";
   xdg.desktopEntries.firefox_test_css = let
     ff_css = pkgs.writeShellApplication {
       name = "app";
-      text = ''
-        TMP_DIR="/tmp/firefox-clean"
-        mkdir --parents "$TMP_DIR"
-        printf '\x1b]99;p=body;%s\n%s\n%s\n%s\x1b\\' \
-          "about:config" \
-          "devtools.debugger.remote-enabled true" \
-          "devtools.chrome.enabled true" \
-          "ctrl+shift+alt+I"
-
-        ${lib.getExe config.programs.firefox.package} --no-remote --profile "$TMP_DIR" "about:config"
+      text = let
+        firefox = config.programs.firefox.package or pkgs.firefox;
+        in
+      ''
+        TMP_DIR=$(mktemp -d -t firefox-profile-XXXXXX)
+        cat > "$TMP_DIR/user.js" << EOF
+        user_pref("browser.aboutwelcome.enabled", false);
+        user_pref("devtools.debugger.remote-enabled", true);
+        user_pref("devtools.chrome.enabled", true);
+        EOF
+        ${lib.getExe firefox} --no-remote --profile "$TMP_DIR" about:config
+        rm -rf "$TMP_DIR"
         '';
         };
     in {
