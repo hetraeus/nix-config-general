@@ -61,7 +61,7 @@ in {
   then ctrl+shift+alt+I
   */
   :root{
-  --tab-collapsed-width: 1.2rem !important;
+  --tab-collapsed-width: 1.5rem !important;
   }
   '' + builtins.readFile autohide + ''
   #nav-bar,

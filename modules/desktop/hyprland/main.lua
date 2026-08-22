@@ -170,6 +170,7 @@ hl.layer_rule({ match = { namespace = "^(swaync-control-center)$" }, no_anim = t
 
 hl.window_rule({ match = { class = "^(org.keepassxc.KeePassXC)$" }, no_screen_share = true })
 hl.window_rule({ match = { class = ".*" }, suppress_event = "maximize" })
+hl.window_rule({ match = { class = "^(nemo)$"       }, workspace = "1" })
 hl.window_rule({ match = { class = "^(thunar)$" }, workspace = "1" })
 hl.window_rule({ match = { class = "^(pcmanfm-qt)$" }, workspace = "1" })
 hl.window_rule({ match = { class = "^(pcmanfm-qt)$", title = "^(Current)$" }, workspace = "+0" })
@@ -178,7 +179,6 @@ hl.window_rule({ match = { class = "^(thunderbird)$", title = "^(Calendar Remind
 hl.window_rule({ match = { class = "^(qimgv)$", title = "^(Edit shortcut)$" }, float = true })
 hl.window_rule({ match = { class = "^(qimgv)$", title = "^(Add shortcut)$" }, float = true })
 hl.window_rule({ match = { class = "^(wev)$" }, float = true })
-hl.window_rule({ match = { class = "^(puzzles-" }, float = true })
 hl.window_rule({ match = { class = "^(zenity)$" }, float = true })
 hl.window_rule({ match = { class = "^(gcolor3)$" }, float = true })
 hl.window_rule({ match = { class = "^(songrec)$" }, float = true })

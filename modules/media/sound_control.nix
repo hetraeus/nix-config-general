@@ -12,7 +12,6 @@
  flake.homeModules.sound_control = { pkgs, lib, self, ... }: {
 
   home.packages = [
-    pkgs.wireplumber
     pkgs.qpwgraph
     pkgs.calf
 
