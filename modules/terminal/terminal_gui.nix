@@ -5,7 +5,6 @@
 };
 
 flake.homeModules.terminal_gui = { lib, pkgs, ... }: {
-  home.packages = [ pkgs.blobdrop ];
   programs.kitty.enable = true;
   programs.kitty.shellIntegration.enableZshIntegration = false; # it's awkward
 
@@ -53,6 +52,9 @@ flake.homeModules.terminal_gui = { lib, pkgs, ... }: {
     "ctrl+plus"          = "change_font_size   current +2.0";
     "ctrl+minus"         = "change_font_size   current -2.0";
     };
+  programs.kitty.mouseBindings = {
+    "left press" = "ungrabbed mouse_selection drag_or_normal_select";
+    };
   programs.kitty.settings =  {
     bold_font             =    "auto";
     italic_font           =    "auto";
@@ -78,9 +80,5 @@ flake.homeModules.terminal_gui = { lib, pkgs, ... }: {
     clipboard_control         =  "write-clipboard write-primary";
     };
   home.shellAliases.lsi = "${lib.getExe' pkgs.kitty "kitten"} icat ";
-  xdg.configFile."kitty/open-actions.conf".text = ''
-  protocol file
-  action launch --cwd=current --type background ${lib.getExe pkgs.blobdrop} ''${FILE_PATH}
-  '';
 
 };}
