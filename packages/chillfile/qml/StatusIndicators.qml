@@ -38,7 +38,7 @@ RowLayout {
         }
         ToolTip {
             id: backupTip
-            text: "Need updates!"
+            text: "Need backups!"
             visible: false
             background: Rectangle {
                 color: root.desktop.base01
