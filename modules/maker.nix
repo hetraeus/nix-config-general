@@ -14,7 +14,7 @@
 services.opensnitch.rules.pru_api = {
   name        = "pru_api";
     enabled   = true;
-    created   = "2018-04-07T14:13:27.903996051+02:00"; # silence logs
+    created   = "2010-01-01T10:00:00.000000000+01:00"; # silence logs
     action    = "allow";
     duration  = "always";
     operator  = {
@@ -24,35 +24,10 @@ services.opensnitch.rules.pru_api = {
       type    = "simple";
       operand = "dest.port";
       data    = "443";
-      } {
-      type    = "simple";
-      operand = "dest.host";
-      data    = "preset-repo-api.prusa3d.com";
       } {
       type    = "regexp";
-      operand = "user.id";
-      data    = "^(${toString config.users_list.principalUserUid})$";
-      }];
-  };};
-
-
-services.opensnitch.rules.pru_files = {
-  name        = "pru_files";
-    enabled   = true;
-    created   = "2018-04-07T14:13:27.903996051+02:00"; # silence logs
-    action    = "allow";
-    duration  = "always";
-    operator  = {
-      type    = "list";
-      operand = "list";
-      list    = [{
-      type    = "simple";
-      operand = "dest.port";
-      data    = "443";
-      } {
-      type    = "simple";
       operand = "dest.host";
-      data    = "files.prusa3d.com";
+      data    = "^((preset-repo-api|files)\.prusa3d\.com|api\.bambulab\.com)$";
       } {
       type    = "regexp";
       operand = "user.id";
