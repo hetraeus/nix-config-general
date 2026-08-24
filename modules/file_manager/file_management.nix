@@ -22,7 +22,7 @@ in {
 
   xdg.mimeApps.enable     = true;
   home.packages = [
-    pkgs.thunar
+    pkgs.nemo-with-extensions
     pkgs.libarchive
 
     pkgs.edir
@@ -58,7 +58,7 @@ in {
 
   # wayland.windowManager.hyprland.extraLuaFiles.file_manager = ''
    wayland.windowManager.hyprland.extraConfig = ''
-    hl.bind("SUPER + E", hl.dsp.exec_cmd("${run_or_raise} thunar thunar"))
+    hl.bind("SUPER + E", hl.dsp.exec_cmd("${run_or_raise} nemo nemo"))
     '';
 
   xdg.autostart.enable = true;
@@ -133,6 +133,96 @@ in {
   MimeTypes=image/*
   Exec=${lib.getExe pkgs.kitty} --app-id=fmenu_panel ${lib.getExe fm_image_convert} %F
   '';
+
+  # Nemo Actions - place in ~/.local/share/nemo/actions/
+
+  xdg.dataFile."nemo/actions/fm_checksum.nemo_action".text = ''
+    [Nemo Action]
+    Name=checksum
+    Comment=Generate checksums for selected files
+    Exec=${lib.getExe pkgs.kitty} --app-id=fmenu_panel ${lib.getExe fm_checksums} %F
+    Icon-Name=application-x-sharedlib
+    Selection=any
+    Extensions=any;
+    Terminal=false
+  '';
+
+  xdg.dataFile."nemo/actions/fm_share.nemo_action".text = ''
+    [Nemo Action]
+    Name=share
+    Comment=Share selected files or directories
+    Exec=${lib.getExe pkgs.kitty} --app-id=fmenu_panel ${lib.getExe fm_share} %F
+    Icon-Name=share
+    Selection=any
+    Mimetypes=*;
+    Terminal=false
+  '';
+
+  xdg.dataFile."nemo/actions/fm_paste_symlinks.nemo_action".text = ''
+    [Nemo Action]
+    Name=paste symlink
+    Comment=Create symbolic links in this directory
+    Exec=${lib.getExe fm_paste_symlinks} %f
+    Icon-Name=emblem-symbolic-link
+    Selection=none
+    Extensions=any;
+    Terminal=false
+  '';
+
+  xdg.dataFile."nemo/actions/fm_image_convert.nemo_action".text = ''
+    [Nemo Action]
+    Name=image convert
+    Comment=Convert selected images
+    Exec=${lib.getExe pkgs.kitty} --app-id=fmenu_panel ${lib.getExe fm_image_convert} %F
+    Icon-Name=color
+    Selection=any
+    Mimetypes=image/*;
+    Terminal=false
+  '';
+
+  # 2. Declare your settings
+  dconf.settings = {
+    "org/cinnamon/desktop/applications/terminal" = {
+      exec = "${lib.getExe pkgs.kitty}"; # Example: "alacritty" or "kitty"
+      # exec-arg = ""; # Optional: Add command-line arguments for your terminal [citation:1][citation:9]
+    };
+    "org/nemo/preferences" = {
+      click-policy = "single";
+      confirm-move-to-trash = true;
+      disable-menu-warning = false;
+      executable-text-activation = "display";
+      show-hidden-files = true;
+      show-open-in-terminal-toolbar = true;
+      show-show-thumbnails-toolbar = false;
+      show-toggle-extra-pane-toolbar = true;
+      start-with-dual-pane = true;
+    };
+    "org/nemo/window-state" = {
+      maximized = true;
+      side-pane-view = "places";
+      sidebar-bookmark-breakpoint = 7;
+      sidebar-width = 195;
+      start-with-menu-bar = false;
+      start-with-sidebar = true;
+    };
+    "org/nemo/list-view" = {
+      default-column-order = [
+        "name" "size" "type" "date_modified"
+        "date_created_with_time" "date_accessed"
+        "date_created" "detailed_type" "where"
+        "mime_type" "date_modified_with_time"
+        "octal_permissions" "owner" "group"
+        "permissions"
+      ];
+      default-visible-columns = [
+        "name" "size" "type" "date_modified"
+        "owner" "group"
+      ];
+    };
+    "org/nemo/plugins" = {
+      disabled-extensions = [ ];
+    };
+  };
 
   # Drop here template files used by file managers -> right click -> create new
   xdg.userDirs.templates     = "${config.xdg.dataHome}/templates";

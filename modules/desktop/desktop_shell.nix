@@ -27,10 +27,10 @@
   # mount
   services.gvfs.enable     = true;
   services.udisks2.enable  = true; # needed by udiskie
-  services.tumbler.enable  = true;
-  programs.xfconf.enable   = true;
-  programs.thunar.enable   = true;
-  programs.thunar.plugins = with pkgs; [ thunar-archive-plugin thunar-volman thunar-vcs-plugin thunar-shares-plugin thunar-media-tags-plugin ];
+  # services.tumbler.enable  = true;
+  # programs.xfconf.enable   = true;
+  # programs.thunar.enable   = true;
+  # programs.thunar.plugins = with pkgs; [ thunar-archive-plugin thunar-volman thunar-vcs-plugin thunar-shares-plugin thunar-media-tags-plugin ];
 
   # Should withelist wttr.in , but sometimes is not online. Can I replace it?
 
@@ -113,7 +113,10 @@ flake.homeModules.desktop_shell = { pkgs, lib, config, self, ... }: {
     pkgs.zint-qt
     ];
 
-  services.udiskie.enable = true; # thunar is not smart enought to mount hard disks plugged from boot
+  # thunar is not smart enought to mount hard disks plugged from boot
+  # TODO what about nemo?
+  services.udiskie.enable = true;
+
   xdg.autostart.enable    = true;
   xdg.autostart.entries   = [
     "${self.packages.${pkgs.stdenv.hostPlatform.system}.chillfile}/share/applications/chillfile.desktop"
