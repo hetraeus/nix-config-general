@@ -2,6 +2,9 @@
 -- Converted from hyprlang to Lua for Hyprland 0.55+
 -- https://wiki.hypr.land/Configuring/Start/
 
+--@diagnostic disable-next-line: undefined-global
+local hl = hl
+
 --------------------------------------------------------------------------------
 -- MONITOR
 --------------------------------------------------------------------------------
