@@ -1,13 +1,34 @@
+import QtQuick
 import QtQuick.Controls
+import Quickshell
+import Quickshell.Io
 
 Menu {
     id: contextMenu
 
-    required property var desktop  // root Desktop.qml instance (shared utilities)
+    required property var desktop
 
     property string filePath: ""
     property string fileName: ""
     property bool isDir: false
+
+    onAboutToShow: {
+        console.log("[FileContextMenu] loader.item:", nemoActionsLoader.item,
+            "loader.status:", nemoActionsLoader.status,
+            "loaded:", nemoActionsLoader.item ? nemoActionsLoader.item.loaded : "n/a",
+            "actionsCount:", nemoActionsLoader.item ? nemoActionsLoader.item.actions.length : "n/a");
+        if (nemoActionsLoader.item) {
+            var applicable = nemoActionsLoader.item.getApplicableActions(
+                desktop.fileGrid.selectedPaths, filePath, isDir
+            );
+            console.log("[FileContextMenu] applicable actions:", applicable.length,
+                "selectedPaths:", JSON.stringify(desktop.fileGrid.selectedPaths),
+                "filePath:", filePath, "isDir:", isDir);
+            nemoActionsRepeater.model = applicable;
+        } else {
+            nemoActionsRepeater.model = [];
+        }
+    }
 
     MenuItem {
         text: "Copy Path"
@@ -37,16 +58,48 @@ Menu {
     }
 
     MenuItem {
-        // Hands the file to the system's default app for its type, which
-        // may itself make network requests (e.g. resolving remote
-        // includes/links). Also reachable via double-click/Enter on a
-        // file; kept here too as an explicit right-click option.
         text: "Open Externally"
         font.pixelSize: 15
         visible: !contextMenu.isDir
         onTriggered: {
             contextMenu.desktop.openFile(contextMenu.filePath);
         }
+    }
+
+    MenuSeparator {
+        visible: nemoActionsRepeater.count > 0
+    }
+
+    Repeater {
+        id: nemoActionsRepeater
+        model: []
+
+        MenuItem {
+            text: modelData.name
+            font.pixelSize: 15
+            onTriggered: {
+                if (!nemoActionsLoader.item) return;
+                var cmd = nemoActionsLoader.item.buildExecCommand(
+                    modelData.exec,
+                    contextMenu.desktop.fileGrid.selectedPaths,
+                    contextMenu.filePath
+                );
+                nemoRunProc.command = ["sh", "-c", cmd];
+                nemoRunProc.running = true;
+            }
+        }
+    }
+
+    Loader {
+        id: nemoActionsLoader
+        source: "NemoActions.qml"
+        active: true
+        asynchronous: false
+    }
+
+    Process {
+        id: nemoRunProc
+        running: false
     }
 
     MenuSeparator {}

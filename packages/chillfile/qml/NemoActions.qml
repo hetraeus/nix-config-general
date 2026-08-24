@@ -2,8 +2,9 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-QtObject {
+Item {
     id: root
+    visible: false
 
     property var actions: []
     property bool loaded: false
@@ -46,24 +47,34 @@ QtObject {
             var checkPaths = (sel === "s" || sel === "single") ? [targetPath] : selectedPaths;
 
             // ---- Extensions filter ----
-            if (act.extensions && act.extensions !== "") {
-                var exts = act.extensions.toLowerCase().split(/\s*,\s*/);
+            // Nemo action files delimit extensions with ';' (like .desktop files),
+            // e.g. "txt;doc;" or the common wildcard "any;". Trailing/empty tokens
+            // from the trailing ';' are dropped.
+            var rawExts = (act.extensions || "").toLowerCase().split(";")
+                .map(function(e) { return e.trim(); })
+                .filter(function(e) { return e.length > 0; });
+
+            var isAny = rawExts.length === 0 || rawExts.indexOf("any") >= 0;
+            var wantsDirs = rawExts.indexOf("dir") >= 0 || rawExts.indexOf("dirs") >= 0;
+            var wantsNoDirs = rawExts.indexOf("nodirs") >= 0;
+
+            if (isDir) {
+                // Directories: only excluded if the action explicitly excludes them,
+                // or if it lists concrete extensions (which only make sense for files)
+                // without also allowing "any"/"dir(s)".
+                if (wantsNoDirs) continue;
+                if (!isAny && !wantsDirs) continue;
+            } else if (!isAny) {
                 var extMatch = true;
                 for (var p = 0; p < checkPaths.length; p++) {
                     var parts = checkPaths[p].split('.');
                     var pathExt = parts.length > 1 ? parts.pop().toLowerCase() : "";
-                    if (exts.indexOf(pathExt) < 0) {
+                    if (rawExts.indexOf(pathExt) < 0) {
                         extMatch = false;
                         break;
                     }
                 }
                 if (!extMatch) continue;
-            }
-
-            // If it's a directory and the action specifies extensions,
-            // assume it's meant for files and skip it.
-            if (isDir && act.extensions && act.extensions !== "") {
-                continue;
             }
 
             result.push(act);
@@ -127,22 +138,36 @@ QtObject {
         running: false
         command: ["sh", "-c",
             "for d in \"" + (Quickshell.env("HOME") || "") + "/.local/share/nemo/actions\" /usr/share/nemo/actions; do " +
-            "  [ -d \"$d\" ] || continue; " +
+            "  echo \"[scan] checking $d\" >&2; " +
+            "  [ -d \"$d\" ] || { echo \"[scan] $d does not exist\" >&2; continue; }; " +
             "  for f in \"$d\"/*.nemo_action; do " +
             "    [ -f \"$f\" ] || continue; " +
+            "    echo \"[scan] found $f\" >&2; " +
             "    awk '/^\\[Nemo Action\\]/ {s=1; next} /^\\[/ {s=0} s {print}' \"$f\" | while IFS='=' read -r k v; do " +
             "      k=$(echo \"$k\" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//'); " +
             "      v=$(echo \"$v\" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//'); " +
             "      printf '%s\\t%s\\n' \"$k\" \"$v\"; " +
             "    done; " +
-            "    printf '---END---\\n'; " +
+            "    printf -- '---END---\\n'; " +
             "  done; " +
             "done"
         ]
         stdout: StdioCollector {
             onStreamFinished: {
+                console.log("[NemoActions] stdout length:", text.length);
+                console.log("[NemoActions] stdout raw:", JSON.stringify(text));
                 root.parseActions(text);
             }
+        }
+        stderr: StdioCollector {
+            onStreamFinished: {
+                if (text.length > 0) {
+                    console.log("[NemoActions] stderr:", text);
+                }
+            }
+        }
+        onExited: (exitCode, exitStatus) => {
+            console.log("[NemoActions] discoverProc exited, code:", exitCode);
         }
     }
 
@@ -180,9 +205,12 @@ QtObject {
 
         root.actions = newActions;
         root.loaded = true;
+        console.log("[NemoActions] parsed", newActions.length, "action(s):",
+            newActions.map(function(a) { return a.name + " (ext=" + a.extensions + ", sel=" + a.selection + ")"; }).join(" | "));
     }
 
     Component.onCompleted: {
+        console.log("[NemoActions] HOME:", Quickshell.env("HOME"));
         refresh();
     }
 }
