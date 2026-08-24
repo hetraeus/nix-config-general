@@ -1,4 +1,4 @@
-{ self,  config, pkgs, ... }: {
+{ self, config, pkgs, ... }: {
   nix.settings.experimental-features = [ "nix-command" "flakes" "pipe-operators" ];
   nixpkgs.config.allowUnfree = true;
 
@@ -112,4 +112,21 @@
         data     = "443";
         }];
       };};
+
+   multiverse = {
+     enable = true;
+     config.allowUnfree = true;
+
+     # Attributes pinned to an exact version, each resolved against whichever
+     # revision last shipped it.
+     # pins = {
+     #   vscode = "1.107.0";
+     #   ripgrep = "13.0.0";
+     # };
+
+     # The same idea, maintained by `mvs lock` instead of by hand: a set of
+     # commits, each moved on its own by `mvs lock update <attr>`.
+     lock = ./multiverse.lock;
+   };
+
 }

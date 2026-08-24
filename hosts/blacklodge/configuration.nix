@@ -85,28 +85,12 @@ flake.nixosConfigurations.${hostname} = inputs.nixpkgs.lib.nixosSystem {
    # }
    # ...
    {
-
-     multiverse = {
-       enable = true;
-       config.allowUnfree = true;
-
-       # Attributes pinned to an exact version, each resolved against whichever
-       # revision last shipped it.
-       # pins = {
-       #   vscode = "1.107.0";
-       #   ripgrep = "13.0.0";
-       # };
-
-       # The same idea, maintained by `mvs lock` instead of by hand: a set of
-       # commits, each moved on its own by `mvs lock update <attr>`.
-       lock = ./multiverse.lock;
-     };
-     
      networking.hostName   = "${hostname}";
      programs.hyprland.enable       = true; # NEEDED AS A NIXOS MODULE by xdg portals
      programs.hyprland.withUWSM     = true;
      security.pam.services.hyprlock = {};
      security.pam.services.swaylock = {};
+     zramSwap.enable = true;
 
      # Some programs need SUID wrappers, can be configured further or are
      # started in user sessions.
