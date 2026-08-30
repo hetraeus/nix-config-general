@@ -113,6 +113,15 @@ flake.homeModules.desktop_shell = { pkgs, lib, config, self, ... }: {
     pkgs.zint-qt
     ];
 
+  systemd.user.services.clipboard = {
+    Install.WantedBy    = [ "graphical-session.target" ] ;
+    Service.ExecStart   = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.clipboard-server}";
+    Service.Restart     = "on-failure";
+    Unit.Description    = "clipboard manager";
+    Unit.After          = [ "graphical-session.target" ] ;
+    Unit.PartOf         = [ "graphical-session.target" ] ;
+    };
+
   # thunar is not smart enought to mount hard disks plugged from boot
   # TODO what about nemo?
   services.udiskie.enable = true;
@@ -131,14 +140,6 @@ flake.homeModules.desktop_shell = { pkgs, lib, config, self, ... }: {
   # Hide warning about showing the program in the menu
   xdg.systemDirs.data  = [ "${config.xdg.dataHome}/flatpak/exports/share" ];
 
-  services.copyq.enable        = true;
-  systemd.user.services.copyq.Service.Environment = lib.mkForce [ "QT_QPA_PLATFORM=wayland" ]; # TODO: remove this line
-
-  services.copyq.package  =
-    let copyq_will_appear = self.inputs.multiverse.multiverse.${pkgs.stdenv.hostPlatform.system}.at "2025-06-17";
-    # https://github.com/hluk/CopyQ/issues/3108
-    # https://qt-project.atlassian.net/browse/QTBUG-139921
-    in copyq_will_appear.copyq;
 
   # wayland.windowManager.hyprland.extraLuaFiles.desktop_shell = ''
   wayland.windowManager.hyprland.extraConfig = ''
