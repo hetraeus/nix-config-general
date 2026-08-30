@@ -29,6 +29,8 @@ inputs = {
   nvf.url       = "github:notashelf/nvf";
   nvf.inputs.nixpkgs.follows = "nixpkgs";
 
+  omasnap-nixpkgs.url = "github:yechielw/nixpkgs/c6a32c930a87bc5a6ce8852f4edf6f231cde5ba5";
+
   };
 
 nixConfig = {
