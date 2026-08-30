@@ -8,6 +8,9 @@ inputs = {
 # They can be abstracted via flake-parts or higher-level generators
   nixpkgs.url        = "github:NixOS/nixpkgs/nixos-26.05";
   multiverse.url     = "github:fzakaria/nixpkgs-multiverse";
+  omniflake.url      = "github:fzakaria/omniflake";
+  omniflake.inputs.nixpkgs.follows = "nixpkgs";
+
   flake-parts.url    = "github:hercules-ci/flake-parts";
   import-tree.url    = "github:vic/import-tree";
   nixos-hardware.url = "github:NixOS/nixos-hardware/master";
