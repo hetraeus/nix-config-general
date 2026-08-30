@@ -36,7 +36,7 @@
 
   services.opensnitch.rules.flk-flatpak = {
     name        = "flk-flatpak";
-    created     = "2018-04-07T14:13:27.903996051+02:00"; # silence logs
+    created     = "2010-01-01T10:00:00.000000Z"; # silence logs
     enabled     = true;
     action      = "allow";
     duration    = "always";
@@ -62,7 +62,7 @@
   services.opensnitch.rules.wttr_weather = {
     name      = "wttr_weather";
     enabled   = true;
-    created   = "2011-01-01T10:00:00.000000000+00:00"; # silence logs
+    created     = "2010-01-01T10:00:00.000000Z"; # silence logs
     action    = "allow";
     duration  = "always";
     operator  = {

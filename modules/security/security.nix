@@ -17,7 +17,7 @@
 
   services.opensnitch.rules.git_allow = {
     name        = "git_allow";
-    created     = "2010-01-01T10:00:00.000000000+01:00"; # silence logs
+    created     = "2010-01-01T10:00:00.000000Z"; # silence logs
     enabled     = true;
     action      = "allow";
     duration    = "always";
@@ -46,7 +46,7 @@
 
   services.opensnitch.rules.dev_node_allowed = {
     name        = "dev_node_allowed";
-    created     = "2010-01-01T10:00:00.000000000+01:00"; # silence logs
+    created     = "2010-01-01T10:00:00.000000Z"; # silence logs
     enabled     = true;
     action      = "allow";
     duration    = "always";
@@ -75,7 +75,7 @@
 
   services.opensnitch.rules.dev_github_allowed = {
     name        = "dev_github_allowed";
-    created     = "2010-01-01T10:00:00.000000000+01:00"; # silence logs
+    created     = "2010-01-01T10:00:00.000000Z"; # silence logs
     enabled     = true;
     action      = "allow";
     duration    = "always";

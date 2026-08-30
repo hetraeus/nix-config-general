@@ -12,7 +12,7 @@
     enabled     = true;
     action      = "allow";
     duration    = "always";
-    created     = "2018-04-07T14:13:27.903996051+02:00"; # silence logs
+    created     = "2010-01-01T10:00:00.000000Z"; # silence logs
     operator    = {
       type      = "list";
       operand   = "list";

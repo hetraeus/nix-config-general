@@ -8,7 +8,7 @@
 
   services.opensnitch.rules.eee_kdeconnect_one = {
     name        = "eee_kdeconnect_nix";
-    created     = "2018-04-07T14:13:27.903996051+02:00"; # silence logs
+    created     = "2010-01-01T10:00:00.000000Z"; # silence logs
     enabled     = true;
     action      = "allow";
     duration    = "always";
@@ -17,23 +17,23 @@
       operand   = "list";
       sensitive = false;
       list      = [{
-        type     = "regexp";
-        operand  = "process.path";
-        data     = "^/nix/store/[a-z0-9]{32}-kdeconnect-kde-.*/bin/.kdeconnectd-wrapped$";
-         } {
-         type    = "network";
-         operand = "source.network";
-         data    = "192.168.1.0/16";
-         } {
-         type    = "network";
-         operand = "dest.network";
-         data    = "192.168.1.0/16";
-         }];
+        type    = "regexp";
+        operand = "process.path";
+        data    = "^/nix/store/[a-z0-9]{32}-kdeconnect-kde-.*/bin/.kdeconnectd-wrapped$";
+        } {
+        type    = "network";
+        operand = "source.network";
+        data    = "192.168.1.0/16";
+        } {
+        type    = "network";
+        operand = "dest.network";
+        data    = "192.168.1.0/16";
+        }];
     };};
 
   services.opensnitch.rules.eee_kdeconnect_zero = {
     name        = "eee_kdeconnect_nix";
-    created     = "2018-04-07T14:13:27.903996051+02:00"; # silence logs
+    created     = "2010-01-01T10:00:00.000000Z"; # silence logs
     enabled     = true;
     action      = "allow";
     duration    = "always";
@@ -42,23 +42,23 @@
       operand   = "list";
       sensitive = false;
       list      = [{
-        type     = "regexp";
-        operand  = "process.path";
-        data     = "^/nix/store/[a-z0-9]{32}-kdeconnect-kde-.*/bin/.kdeconnectd-wrapped$";
-         } {
-         type    = "network";
-         operand = "source.network";
-         data    = "192.168.0.0/16";
-         } {
-         type    = "network";
-         operand = "dest.network";
-         data    = "192.168.0.0/16";
-         }];
+        type    = "regexp";
+        operand = "process.path";
+        data    = "^/nix/store/[a-z0-9]{32}-kdeconnect-kde-.*/bin/.kdeconnectd-wrapped$";
+        } {
+        type    = "network";
+        operand = "source.network";
+        data    = "192.168.0.0/16";
+        } {
+        type    = "network";
+        operand = "dest.network";
+        data    = "192.168.0.0/16";
+        }];
     };};
 
   services.opensnitch.rules.eee_kdeconnect_255 = {
     name        = "eee_kdeconnect_255";
-    created     = "2011-01-01T10:00:00.003996051+02:00"; # silence logs
+    created     = "2010-01-01T10:00:00.000000Z"; # silence logs
     enabled     = true;
     action      = "deny";
     duration    = "always";

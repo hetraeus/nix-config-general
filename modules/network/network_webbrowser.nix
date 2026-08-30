@@ -30,7 +30,7 @@ services.opensnitch.rules.kkk_firefox-80_443 = {
 
 services.opensnitch.rules.koo_firefox-whatsapp-5222 = {
   name        = "koo_firefox-whatsapp-5222";
-  created     = "2018-04-07T14:13:27.903996051+02:00"; # silence logs
+  created     = "2010-01-01T10:00:00.000000Z"; # silence logs
   enabled     = true;
   action      = "allow";
   duration    = "always";
@@ -62,7 +62,7 @@ services.opensnitch.rules.koo_firefox-whatsapp-5222 = {
 
 services.opensnitch.rules.kop_firefox-whatsapp-ip-5222 = {
   name        = "kop_firefox-whatsapp-5222";
-  created     = "2018-04-07T14:13:27.903996051+02:00"; # silence logs
+  created     = "2010-01-01T10:00:00.000000Z"; # silence logs
   enabled     = true;
   action      = "allow";
   duration    = "always";
@@ -96,7 +96,7 @@ services.opensnitch.rules.kop_firefox-whatsapp-ip-5222 = {
 services.opensnitch.rules.kkk_vivaldi-80_443 = {
   name        = "kkk_vivaldi-80_443";
   enabled     = true;
-  created     = "2018-04-07T14:13:27.903996051+02:00"; # silence logs
+  created     = "2010-01-01T10:00:00.000000Z"; # silence logs
   action      = "allow";
   duration    = "always";
   operator    = {

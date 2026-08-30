@@ -3,7 +3,7 @@
   services.opensnitch.rules.ai_mistral = {
     name      = "ai_mistral";
     enabled   = true;
-    created   = "2011-01-01T10:00:00.000000000+00:00"; # silence logs
+    created   = "2010-01-01T10:00:00.000000Z"; # silence logs
     action    = "allow";
     duration  = "always";
     operator  = {
@@ -28,7 +28,7 @@
       } {
       type    = "regexp";
       operand = "process.command";
-      data    = "^(/etc/profiles/per-user/.*/bin/vibe(| .*))$";
+      data    = "^(/etc/profiles/per-user/${config.users_list.principalUser}/bin/vibe(| .*))$";
       }];
   };};
 

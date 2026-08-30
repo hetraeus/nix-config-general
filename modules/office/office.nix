@@ -16,7 +16,7 @@
 
   services.opensnitch.rules.cups_snmp = {
     name        = "cups_snmp";
-    created     = "2018-04-07T14:13:27.903996051+02:00"; # silence logs
+    created     = "2010-01-01T10:00:00.000000Z"; # silence logs
     enabled     = true;
     action      = "allow";
     duration    = "always";
@@ -25,21 +25,21 @@
       operand   = "list";
       sensitive = false;
       list      = [{
-        type     = "regexp";
-        operand  = "process.path";
-        data     = "^/nix/store/[a-z0-9]{32}-cups-.*/lib/cups/backend/snmp";
+        type    = "regexp";
+        operand = "process.path";
+        data    = "^/nix/store/[a-z0-9]{32}-cups-.*/lib/cups/backend/snmp";
         } {
         type    = "regexp";
         operand = "dest.ip";
         data    = "^(192\.168\.(1|122)\.255)$";
         } {
-        type     = "simple";
-        operand  = "protocol";
-        data     = "udp";
+        type    = "simple";
+        operand = "protocol";
+        data    = "udp";
         } {
-        type     = "simple";
-        operand  = "dest.port";
-        data     = "161";
+        type    = "simple";
+        operand = "dest.port";
+        data    = "161";
         }];
     };};
 
@@ -51,31 +51,31 @@
   # printers marketed as Apple-compatible. Allow them with:
   services.avahi = { enable = true; nssmdns4 = true; openFirewall = true; };
   services.opensnitch.rules.awk_translator = {
-    name        = "awk_translator";
-      enabled   = true;
-      created     = "2018-04-07T14:13:27.903996051+02:00"; # silence logs
-      action    = "allow";
-      duration  = "always";
-      operator  = {
-        type    = "list";
-        operand = "list";
-        list    = [{
-        type    = "simple";
-        operand = "process.path";
-        data    = "${lib.getExe pkgs.gawk}";
-        } {
-        type    = "simple";
-        operand = "dest.port";
-        data    = "80";
-        } {
-        type    = "simple";
-        operand = "dest.host";
-        data    = "translate.googleapis.com";
-        } {
-        type    = "regexp";
-        operand = "user.id";
-        data    = "^(${toString config.users_list.principalUserUid})$";
-        }];
+    name      = "awk_translator";
+    enabled   = true;
+    created   = "2010-01-01T10:00:00.000000Z"; # silence logs
+    action    = "allow";
+    duration  = "always";
+    operator  = {
+      type    = "list";
+      operand = "list";
+      list    = [{
+      type    = "simple";
+      operand = "process.path";
+      data    = "${lib.getExe pkgs.gawk}";
+      } {
+      type    = "simple";
+      operand = "dest.port";
+      data    = "80";
+      } {
+      type    = "simple";
+      operand = "dest.host";
+      data    = "translate.googleapis.com";
+      } {
+      type    = "regexp";
+      operand = "user.id";
+      data    = "^(${toString config.users_list.principalUserUid})$";
+      }];
     };};
 
 };

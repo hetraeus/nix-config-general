@@ -1,30 +1,29 @@
 { flake.nixosModules.media_mpv = { pkgs, lib, config, ... }: {
   
   services.opensnitch.rules.sub_sub = {
-    name        = "sub_sub";
-      enabled   = true;
-      created     = "2011-11-11T11:11:11.000000000+02:00"; # silence logs
-      action    = "allow";
-      duration  = "always";
-      operator  = {
-        type    = "list";
-        operand = "list";
-        list    = [{
-        type    = "simple";
-        operand = "dest.port";
-        data    = "443";
-        } {
-        type    = "regexp";
-        operand = "dest.host";
-        data    = "^(sponsor\.ajay\.app|www\.omdbapi\.com|api\.subt\.is|api\.opensubtitles\.(org|com))$";
-        }];
-      };
+    name      = "sub_sub";
+    enabled   = true;
+    created   = "2010-01-01T10:00:00.000000Z"; # silence logs
+    action    = "allow";
+    duration  = "always";
+    operator  = {
+      type    = "list";
+      operand = "list";
+      list    = [{
+      type    = "simple";
+      operand = "dest.port";
+      data    = "443";
+      } {
+      type    = "regexp";
+      operand = "dest.host";
+      data    = "^(sponsor\.ajay\.app|www\.omdbapi\.com|api\.subt\.is|api\.opensubtitles\.(org|com))$";
+      }];};
   };
 
   services.opensnitch.rules.yt_dlp_youtube = {
     name      = "yt_dlp_youtube";
     enabled   = true;
-    created   = "2011-01-01T10:00:00.000000000+00:00"; # silence logs
+    created   = "2010-01-01T10:00:00.000000Z"; # silence logs
     action    = "allow";
     duration  = "always";
     operator  = {
@@ -52,7 +51,7 @@
   services.opensnitch.rules.mpv_youtube = {
     name      = "mpv_youtube";
     enabled   = true;
-    created   = "2011-01-01T10:00:00.000000000+00:00"; # silence logs
+    created   = "2010-01-01T10:00:00.000000Z"; # silence logs
     action    = "allow";
     duration  = "always";
     operator  = {

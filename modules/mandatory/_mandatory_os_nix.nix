@@ -23,7 +23,7 @@
   programs.nh.enable = true;
   # services.opensnitch.rules.ewr_nhwrap_nix = {
   #   name        = "ewr_nhwrap_nix";
-  #   created     = "2018-04-07T14:13:27.903996051+02:00"; # silence logs
+  #   created     = "2010-01-01T10:00:00.000000Z"; # silence logs
   #   enabled     = true;
   #   action      = "allow";
   #   duration    = "always";
@@ -44,7 +44,7 @@
 
   services.opensnitch.rules.eee_nh_nix = {
     name        = "eee_nh_nix";
-    created     = "2018-04-07T14:13:27.903996051+02:00"; # silence logs
+    created     = "2010-01-01T10:00:00.000000Z"; # silence logs
     enabled     = true;
     action      = "allow";
     duration    = "always";
@@ -69,7 +69,7 @@
 
   services.opensnitch.rules.ebb_nix_nix = {
     name        = "ebb_nix_nix";
-    created     = "2018-04-07T14:13:27.903996051+02:00"; # silence logs
+    created     = "2010-01-01T10:00:00.000000Z"; # silence logs
     enabled     = true;
     action      = "allow";
     duration    = "always";
@@ -94,7 +94,7 @@
 
   services.opensnitch.rules.ebd_nixd = {
     name        = "ebd_nixd";
-    created     = "2025-02-07T20:05:02.000000Z"; # silence logs
+    created     = "2010-01-01T10:00:00.000000Z"; # silence logs
     enabled     = true;
     action      = "allow";
     duration    = "always";
@@ -116,6 +116,7 @@
    multiverse = {
      enable = true;
      config.allowUnfree = true;
+     cooldown.enable = true;
 
      # Attributes pinned to an exact version, each resolved against whichever
      # revision last shipped it.

@@ -41,7 +41,7 @@ in {
   services.opensnitch.rules.fff_sync_time = {
     name        = "fff_sync_time";
     enabled     = true;
-    created     = "2025-02-07T20:05:02.000000Z"; # silence logs
+    created     = "2010-01-01T10:00:00.000000Z"; # silence logs
     action      = "allow";
     duration    = "always";
     operator    = {
@@ -66,7 +66,7 @@ in {
   services.opensnitch.rules.bbb_let_apps_to_resolve = {
     name        = "bbb_let_apps_to_resolve";
     enabled     = true;
-    created     = "2025-02-07T20:05:02.000000Z"; # silence logs
+    created     = "2010-01-01T10:00:00.000000Z"; # silence logs
     action      = "allow";
     duration    = "always";
     operator    = {
@@ -96,7 +96,7 @@ in {
   in {
     name        = "bcc_let_dns_client_to_resolve";
     enabled     = true;
-    created     = "2011-01-01T10:00:00.000000Z"; # silence logs
+    created     = "2010-01-01T10:00:00.000000Z"; # silence logs
     action      = "allow";
     duration    = "always";
     operator    = {
@@ -125,7 +125,7 @@ in {
   services.opensnitch.rules.conn_cloudflare = {
     name        = "conn_cloudflare";
     enabled     = true;
-    created     = "2011-01-01T10:00:00.000000Z"; # silence logs
+    created     = "2010-01-01T10:00:00.000000Z"; # silence logs
     action      = "allow";
     duration    = "always";
     operator    = {
@@ -158,7 +158,7 @@ in {
   services.opensnitch.rules.rra_disable_multicast_ipv4 = {
     name        = "rra_disable_multicast_ipv4";
     enabled     = true;
-    created     = "2018-04-07T14:13:27.903996051+02:00"; # silence logs
+    created     = "2010-01-01T10:00:00.000000Z"; # silence logs
     action      = "deny";
     duration    = "always";
     operator    = {
@@ -174,7 +174,7 @@ in {
   services.opensnitch.rules.rra_disable_multicast_ipv6 = {
     name        = "rra_disable_multicast_ipv6";
     enabled     = true;
-    created     = "2018-04-07T14:13:27.903996051+02:00"; # silence logs
+    created     = "2010-01-01T10:00:00.000000Z"; # silence logs
     action      = "deny";
     duration    = "always";
     operator    = {
@@ -190,7 +190,7 @@ in {
   services.opensnitch.rules.rra_disable_unicast_ipv6 = {
     name        = "rra_disable_unicast_ipv6";
     enabled     = true;
-    created     = "2018-04-07T14:13:27.903996051+02:00"; # silence logs
+    created     = "2010-01-01T10:00:00.000000Z"; # silence logs
     action      = "deny";
     duration    = "always";
     operator    = {
@@ -213,7 +213,7 @@ in {
   services.opensnitch.rules.aee_allow_internal_sockets_ipv4 = {
     name        = "aee_allow_internal_sockets_ipv4";
     enabled     = true;
-    created     = "2018-04-07T14:13:27.903996051+02:00"; # silence logs
+    created     = "2010-01-01T10:00:00.000000Z"; # silence logs
     action      = "allow";
     duration    = "always";
     operator    = {
@@ -238,7 +238,7 @@ in {
   services.opensnitch.rules.aep_allow_internal_sockets_ipv6 = {
     name        = "aep_allow_internal_sockets_ipv6";
     enabled     = true;
-    created     = "2018-04-07T14:13:27.903996051+02:00"; # silence logs
+    created     = "2010-01-01T10:00:00.000000Z"; # silence logs
     action      = "allow";
     duration    = "always";
     operator    = {
@@ -275,7 +275,7 @@ in {
   services.opensnitch.rules.aaa_curl = {
     name      = "aaa_curl";
     enabled   = true;
-    created   = "2018-04-07T14:13:27.903996051+02:00"; # silence logs
+    created   = "2010-01-01T10:00:00.000000Z"; # silence logs
     action    = "allow";
     duration  = "always";
     operator  = {
@@ -288,7 +288,7 @@ in {
   services.opensnitch.rules.acc_w3m = {
     name      = "acc_w3m";
     enabled   = true;
-    created   = "2018-04-07T14:13:27.903996051+02:00"; # silence logs
+    created   = "2010-01-01T10:00:00.000000Z"; # silence logs
     action    = "allow";
     duration  = "always";
     operator  = {
@@ -299,7 +299,7 @@ in {
 
   services.opensnitch.rules.zaa_block_tmp_var_shm = {
     name      = "zaa_block_tmp_var_shm";
-    created   = "2018-04-07T14:13:27.903996051+02:00"; # silence logs
+    created   = "2010-01-01T10:00:00.000000Z"; # silence logs
     enabled   = true;
     action    = "deny";
     duration  = "always";

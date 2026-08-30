@@ -60,35 +60,35 @@ services.samba.settings = {
 
 
 services.opensnitch.rules.smb_enable_nmb = {
-  name        = "smb_enable_nmbd";
-    enabled   = true;
-    created     = "2018-04-07T14:13:27.903996051+02:00"; # silence logs
-    action    = "allow";
-    duration  = "always";
-    operator  = {
-      type    = "list";
-      operand = "list";
-      list    = [{
-      type    = "simple";
-      operand = "process.path";
-      data    = "${config.services.samba.package}/bin/nmbd";
-      } {
-      type    = "regexp";
-      operand = "source.port";
-      data    = "^(137|138)$";
-      } {
-      type    = "regexp";
-      operand = "dest.port";
-      data    = "^(137|138)$";
-      } {
-      type    = "simple";
-      operand = "protocol";
-      data    = "udp";
-      } {
-      type    = "regexp";
-      operand = "dest.ip";
-      data    = "^(192\.168\.(1|122)\.255)$";
-      }];
+  name      = "smb_enable_nmbd";
+  enabled   = true;
+  created   = "2010-01-01T10:00:00.000000Z"; # silence logs
+  action    = "allow";
+  duration  = "always";
+  operator  = {
+    type    = "list";
+    operand = "list";
+    list    = [{
+    type    = "simple";
+    operand = "process.path";
+    data    = "${config.services.samba.package}/bin/nmbd";
+    } {
+    type    = "regexp";
+    operand = "source.port";
+    data    = "^(137|138)$";
+    } {
+    type    = "regexp";
+    operand = "dest.port";
+    data    = "^(137|138)$";
+    } {
+    type    = "simple";
+    operand = "protocol";
+    data    = "udp";
+    } {
+    type    = "regexp";
+    operand = "dest.ip";
+    data    = "^(192\.168\.(1|122)\.255)$";
+    }];
   };};
 
 };}

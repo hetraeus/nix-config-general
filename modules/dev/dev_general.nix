@@ -3,7 +3,7 @@
   services.opensnitch.rules.src_git_gravatar = {
     name      = "src_git_gravatar";
     enabled   = true;
-    created   = "2011-01-01T10:00:00.000000000+00:00"; # silence logs
+    created   = "2010-01-01T10:00:00.000000Z"; # silence logs
     action    = "allow";
     duration  = "always";
     operator  = {
@@ -31,7 +31,7 @@
   services.opensnitch.rules.schemastore = {
     name      = "schemastore";
     enabled   = true;
-    created   = "2010-01-01T10:00:00.000000000+00:00"; # silence logs
+    created   = "2010-01-01T10:00:00.000000Z"; # silence logs
     action    = "allow";
     duration  = "always";
     operator  = {
@@ -51,7 +51,7 @@
   services.opensnitch.rules.zed_api_dev = {
     name      = "zed_api_dev";
     enabled   = true;
-    created   = "2010-01-01T10:00:00.000000000+00:00"; # silence logs
+    created   = "2010-01-01T10:00:00.000000Z"; # silence logs
     action    = "allow";
     duration  = "always";
     operator  = {
@@ -71,7 +71,7 @@
   services.opensnitch.rules.zed_local = {
     name      = "zed_local";
     enabled   = true;
-    created   = "2011-01-01T10:00:00.000000000+00:00"; # silence logs
+    created   = "2010-01-01T10:00:00.000000Z"; # silence logs
     action    = "allow";
     duration  = "always";
     operator  = {
@@ -91,7 +91,7 @@
   services.opensnitch.rules.zed_extensions = {
     name      = "zed_extensions";
     enabled   = true;
-    created   = "2011-01-01T10:00:00.000000000+00:00"; # silence logs
+    created   = "2010-01-01T10:00:00.000000Z"; # silence logs
     action    = "allow";
     duration  = "always";
     operator  = {
@@ -119,7 +119,7 @@
   services.opensnitch.rules.llm_ollama = {
     name      = "llm_ollama";
     enabled   = true;
-    created   = "2011-01-01T10:00:00.000000000+00:00"; # silence logs
+    created   = "2010-01-01T10:00:00.000000Z"; # silence logs
     action    = "allow";
     duration  = "always";
     operator  = {
@@ -147,7 +147,7 @@
   services.opensnitch.rules.ai_antigravity = {
     name      = "ai_antigravity";
     enabled   = true;
-    created   = "2011-01-01T10:00:00.000000000+00:00"; # silence logs
+    created   = "2010-01-01T10:00:00.000000Z"; # silence logs
     action    = "allow";
     duration  = "always";
     operator  = {
@@ -175,7 +175,7 @@
   services.opensnitch.rules.nix-init = {
     name      = "nix-init";
     enabled   = true;
-    created   = "2011-01-01T10:00:00.000000000+02:00"; # silence logs
+    created   = "2010-01-01T10:00:00.000000Z"; # silence logs
     action    = "allow";
     duration  = "always";
     operator  = {
@@ -231,7 +231,7 @@ flake.homeModules.dev_general = { lib, pkgs, config, ... } : {
        }];
 
     userSettings.languages.Nix.language_servers = [ "nixd" "!nil" ];
-    extraPackages = [ pkgs.basedpyright pkgs.nixd pkgs.python3Packages.python-lsp-server pkgs.kotlin-language-server ];
+    extraPackages = [ pkgs.basedpyright pkgs.nixd pkgs.python3Packages.python-lsp-server pkgs.kotlin-language-server pkgs.clang-tools pkgs.kdePackages.qtdeclarative ];
     extensions = [
       "assembly" # useful for mindustry scripts too!
       "ansible"
@@ -247,6 +247,7 @@ flake.homeModules.dev_general = { lib, pkgs, config, ... } : {
       "lua"
       "nix"
       "pylsp"
+      "QML"
       "rst"
       "sql"
       "vale"
@@ -279,6 +280,7 @@ xdg.mimeApps.defaultApplications = let
     pkgs.git-lfs
     pkgs.sourcegit
     pkgs.godot
+    pkgs.tabularis
     # pkgs.beekeeper-studio # BUG: https://github.com/beekeeper-studio/beekeeper-studio/pull/3023 meanwhile use flatpak
 
     ];

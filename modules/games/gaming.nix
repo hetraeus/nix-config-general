@@ -4,7 +4,7 @@
 
   services.opensnitch.rules.dny_ruffle = {
     name        = "dny_ruffle";
-    created     = "2018-04-07T14:13:27.903996051+02:00"; # silence logs
+    created     = "2010-01-01T10:00:00.000000Z"; # silence logs
     enabled     = true;
     action      = "deny";
     duration    = "always";
@@ -21,7 +21,7 @@
 
   services.opensnitch.rules.ggg_mindustry = {
     name        = "ggg_mindustry";
-    created     = "2018-04-07T14:13:27.903996051+02:00"; # silence logs
+    created     = "2010-01-01T10:00:00.000000Z"; # silence logs
     enabled     = true;
     action      = "allow";
     duration    = "always";
