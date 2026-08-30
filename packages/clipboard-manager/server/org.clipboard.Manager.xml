@@ -1,0 +1,15 @@
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+ "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node>
+  <interface name="org.clipboard.Manager">
+    <method name="GetHistory">
+      <annotation name="org.qtproject.QtDBus.QtTypeName.Out0" value="QList&lt;HistoryEntry&gt;"/>
+      <arg name="entries" type="a(sss)" direction="out"/>
+    </method>
+    <method name="SetSelection">
+      <arg name="index" type="i" direction="in"/>
+    </method>
+    <method name="IgnoreNext"/>   <!-- new method -->
+    <signal name="HistoryChanged"/>
+  </interface>
+</node>
