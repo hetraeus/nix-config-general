@@ -83,7 +83,7 @@ Item {
             id: infoText
             color: commentColor
             font.family: delegateRoot.fontFamily
-            font.pointSize: 8
+            font.pointSize: 10   // increased from 8
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             anchors.margins: 4
