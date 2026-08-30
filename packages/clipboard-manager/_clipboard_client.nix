@@ -36,5 +36,6 @@
 
     meta = {
       description = "Quickshell clipboard manager client";
+      mainProgram = "clipboard-client";
     };
 }

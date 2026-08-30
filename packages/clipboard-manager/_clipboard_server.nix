@@ -22,10 +22,19 @@ stdenv.mkDerivation {
   ];
   env.LC_ALL = "C.UTF-8";
   cmakeDir = "../server";
+  
+  cmakeFlags = [
+    "-DBUILD_TESTING=OFF"
+    "-DCMAKE_EXPORT_NO_PACKAGE_REGISTRY=ON"
+  ];
 
   postFixup = ''
     wrapProgram $out/bin/clipboard-server \
       --prefix PATH : ${wl-clipboard}/bin \
       --prefix PATH : $out/bin
   '';
+    meta = {
+      description = "Quickshell clipboard manager server";
+      mainProgram = "clipboard-server";
+    };
 }

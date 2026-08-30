@@ -1,12 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 project(clipboard-server)
 
-# --- Silencing unused-variable warnings from Nix ---
-option(BUILD_TESTING "Build tests" OFF)
-if(NOT DEFINED CMAKE_EXPORT_NO_PACKAGE_REGISTRY)
-    set(CMAKE_EXPORT_NO_PACKAGE_REGISTRY OFF CACHE BOOL "Disable export of package registry" FORCE)
-endif()
-
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
