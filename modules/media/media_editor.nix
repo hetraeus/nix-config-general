@@ -6,7 +6,6 @@
     pkgs.gimp3Plugins.gmic
     pkgs.pixieditor
     pkgs.inkscape
-    pkgs.satty
     pkgs.krita
     pkgs.krita-plugin-gmic
     pkgs.gmic-qt
