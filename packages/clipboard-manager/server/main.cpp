@@ -148,8 +148,15 @@ static int storeAny()
         if (data.isEmpty())
             return 0;
 
+        // --- NEW: skip text that is 1 or 2 characters long after trimming ---
+        QString text = QString::fromUtf8(data);
+        if (text.trimmed().length() <= 2) {
+            qDebug() << "Skipping short text entry (length <= 2):" << text;
+            return 0;
+        }
+
         HistoryStorage storage;
-        storage.addEntry("text", QString::fromUtf8(data));
+        storage.addEntry("text", text);
         return 0;
     }
 

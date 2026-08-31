@@ -41,16 +41,16 @@ Scope {
                 }
 
                 var c00 = toColor(colors.base00)
-                var c02 = toColor(colors.base02)
                 var c03 = toColor(colors.base03)
                 var c05 = toColor(colors.base05)
+                var c0e = toColor(colors.base0E)
 
                 if (c00) root.bgColor = c00
-                if (c02) root.selColor = c02
                 if (c03) root.commentColor = c03
                 if (c05) root.fgColor = c05
+                if (c0e) root.selColor = c0e
 
-                console.log("Stylix colors loaded:", c00, c02, c03, c05)
+                console.log("Stylix colors loaded:", c00, c0e, c03, c05)
             } catch (e) {
                 console.warn("Failed to parse stylix palette:", e)
             }
