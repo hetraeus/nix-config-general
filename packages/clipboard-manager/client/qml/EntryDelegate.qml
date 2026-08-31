@@ -12,6 +12,7 @@ Item {
     property bool isCurrent: false
     property color highlightColor: "transparent"
     property color textColor: "white"
+    property color selectedTextColor: "black"
     property color commentColor: "gray"
     property string fontFamily: "Iosevka NFM"
 
@@ -33,6 +34,9 @@ Item {
         if (entry.type === "pinned") return lineCount(entry.text)
         return 0
     }
+
+    signal clicked(int index)
+    signal activated()
 
     Rectangle {
         anchors.fill: parent
@@ -65,7 +69,7 @@ Item {
                 elide: Text.ElideRight
                 wrapMode: Text.Wrap
                 maximumLineCount: 2
-                color: textColor
+                color: isCurrent ? selectedTextColor : textColor
                 font.family: delegateRoot.fontFamily
                 font.pointSize: 11
                 textFormat: Text.PlainText
@@ -81,9 +85,9 @@ Item {
         // Bottom‑right info: line count for text, MIME type for image.
         Text {
             id: infoText
-            color: commentColor
+            color: isCurrent ? selectedTextColor : commentColor
             font.family: delegateRoot.fontFamily
-            font.pointSize: 10   // increased from 8
+            font.pointSize: 10
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             anchors.margins: 4
@@ -103,10 +107,8 @@ Item {
     MouseArea {
         anchors.fill: parent
         onClicked: {
-            var listView = delegateRoot.parent
-            if (listView && listView.hasOwnProperty("currentIndex")) {
-                listView.currentIndex = index
-            }
+            delegateRoot.clicked(index)
+            delegateRoot.activated()
         }
     }
 }

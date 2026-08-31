@@ -43,7 +43,7 @@ Scope {
                 var c00 = toColor(colors.base00)
                 var c03 = toColor(colors.base03)
                 var c05 = toColor(colors.base05)
-                var c0e = toColor(colors.base0E)
+                var c0e = toColor(colors.base0E) // accent
 
                 if (c00) root.bgColor = c00
                 if (c03) root.commentColor = c03
@@ -229,6 +229,32 @@ Scope {
                String(date.getSeconds()).padStart(2, '0') + offsetStr;
     }
 
+    // ----- Activation helpers (used by Return and click) -----
+    function activateHistoryItem() {
+        if (root.selectedIndex < root.historyFiltered.length) {
+            var histIndex = root.historyFiltered[root.selectedIndex]
+            root.callSetSelection(histIndex, function() {
+                Qt.quit()
+            })
+        }
+    }
+
+    function activatePinnedItem() {
+        if (root.selectedIndex < root.pinnedFiltered.length) {
+            var pinIndex = root.pinnedFiltered[root.selectedIndex]
+            var entry = root.pinnedModel[pinIndex]
+            if (entry.text === "💌 e-mail") {
+                ignoreProc.callIgnore(function() {
+                    root.pasteMail()
+                })
+            } else {
+                ignoreProc.callIgnore(function() {
+                    wlCopyProc.copy(entry.text)
+                })
+            }
+        }
+    }
+
     // ----- D-Bus call for IgnoreNext (to prevent pinned entries from being logged) -----
     Process {
         id: ignoreProc
@@ -326,9 +352,9 @@ Scope {
                     root.cursorY = pos.y
                 } catch (e) {
                     console.warn("Failed to parse cursor position:", e)
-                }
-                panel.visible = true
             }
+                panel.visible = true
+        }
         }
     }
 
@@ -399,83 +425,62 @@ Scope {
                 anchors.margins: 8
                 spacing: 4
 
-                TextField {
-                    id: filterField
-                    Layout.fillWidth: true
+                    TextField {
+                        id: filterField
+                        Layout.fillWidth: true
                     Layout.preferredHeight: 30
-                    placeholderText: "Filter..."
-                    color: root.fgColor
-                    font.family: root.fontFamily
-                    horizontalAlignment: Text.AlignHCenter
-                    cursorDelegate: Item { }
-                    background: Rectangle {
-                        color: "transparent"
-                        border.color: "transparent"
-                        border.width: 0
-                    }
-                    text: root.filterText
-                    onTextChanged: root.filterText = text
-
-                    Keys.onEscapePressed: Qt.quit()
-
-                    Keys.onUpPressed: function(event) {
-                        if (root.selectedIndex > 0) {
-                            root.selectedIndex--
+                        placeholderText: "Filter..."
+                        color: root.fgColor
+                        font.family: root.fontFamily
+                        horizontalAlignment: Text.AlignHCenter
+                        cursorDelegate: Item { }
+                        background: Rectangle {
+                            color: "transparent"
+                            border.color: "transparent"
+                            border.width: 0
                         }
-                        event.accepted = true
-                    }
+                        text: root.filterText
+                        onTextChanged: root.filterText = text
 
-                    Keys.onDownPressed: function(event) {
-                        var maxIndex = (root.currentPage === 0 ? root.historyFiltered.length : root.pinnedFiltered.length) - 1
-                        if (root.selectedIndex < maxIndex)
-                            root.selectedIndex++
-                        event.accepted = true
-                    }
+                        Keys.onEscapePressed: Qt.quit()
 
-                    Keys.onLeftPressed: function(event) {
-                        if (root.currentPage === 0) {
-                            root.currentPage = 1
+                        Keys.onUpPressed: function(event) {
+                            if (root.selectedIndex > 0) {
+                                root.selectedIndex--
+                            }
+                            event.accepted = true
+                        }
+
+                        Keys.onDownPressed: function(event) {
+                            var maxIndex = (root.currentPage === 0 ? root.historyFiltered.length : root.pinnedFiltered.length) - 1
+                            if (root.selectedIndex < maxIndex)
+                                root.selectedIndex++
+                            event.accepted = true
+                        }
+
+                        Keys.onLeftPressed: function(event) {
+                            if (root.currentPage === 0) {
+                                root.currentPage = 1
+                                event.accepted = true
+                            }
+                        }
+
+                        Keys.onRightPressed: function(event) {
+                            if (root.currentPage === 1) {
+                                root.currentPage = 0
+                                event.accepted = true
+                            }
+                        }
+
+                        Keys.onReturnPressed: function(event) {
+                            if (root.currentPage === 0) {
+                                root.activateHistoryItem()
+                            } else {
+                                root.activatePinnedItem()
+                            }
                             event.accepted = true
                         }
                     }
-
-                    Keys.onRightPressed: function(event) {
-                        if (root.currentPage === 1) {
-                            root.currentPage = 0
-                            event.accepted = true
-                        }
-                    }
-
-                    Keys.onReturnPressed: function(event) {
-                        if (root.currentPage === 0) {
-                            if (root.selectedIndex < root.historyFiltered.length) {
-                                var histIndex = root.historyFiltered[root.selectedIndex]
-                                root.callSetSelection(histIndex, function() {
-                                    // Optionally wait a tiny bit before quitting to let the server process
-                                    // Actually, the server is separate, so we can quit immediately after dbus call.
-                                    Qt.quit()
-                                })
-                            }
-                        } else {
-                            // Pinned page – set ignore window, then copy via wl-copy
-                            if (root.selectedIndex < root.pinnedFiltered.length) {
-                                var pinIndex = root.pinnedFiltered[root.selectedIndex]
-                                var entry = root.pinnedModel[pinIndex]
-                                if (entry.text === "💌 e-mail") {
-                                    // First ignore, then read mail
-                                    ignoreProc.callIgnore(function() {
-                                        root.pasteMail()
-                                    })
-                                } else {
-                                    ignoreProc.callIgnore(function() {
-                                        wlCopyProc.copy(entry.text)
-                                    })
-                                }
-                            }
-                        }
-                        event.accepted = true
-                    }
-                }
 
                 // Container that clips and holds the sliding pages
                 Item {
@@ -513,8 +518,11 @@ Scope {
                                 isCurrent: index === historyList.currentIndex
                                 highlightColor: root.selColor
                                 textColor: root.fgColor
+                                selectedTextColor: root.bgColor
                                 commentColor: root.commentColor
                                 fontFamily: root.fontFamily
+                                onClicked: root.selectedIndex = index
+                                onActivated: root.activateHistoryItem()
                             }
                             highlight: Rectangle { color: root.selColor; radius: 4 }
                             highlightFollowsCurrentItem: true
@@ -536,8 +544,11 @@ Scope {
                                 isCurrent: index === pinnedList.currentIndex
                                 highlightColor: root.selColor
                                 textColor: root.fgColor
+                                selectedTextColor: root.bgColor
                                 commentColor: root.commentColor
                                 fontFamily: root.fontFamily
+                                onClicked: root.selectedIndex = index
+                                onActivated: root.activatePinnedItem()
                             }
                             highlight: Rectangle { color: root.selColor; radius: 4 }
                             highlightFollowsCurrentItem: true
