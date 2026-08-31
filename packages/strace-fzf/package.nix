@@ -7,7 +7,7 @@
       | fzf                    \
       --ansi                   \
       --raw --gutter-raw=' '   \
-      --color='fg:#969696,bg+:#04727d,fg+:#fac6c1,hl+:#d7005f,hl:#d7005f,query:#d7005f,info:#757676,gutter:-1' \
+      --color='fg:#b6b6b6,bg+:#04727d,fg+:#fac6c1,hl+:#d7005f,hl:#d7005f,query:#d7005f,info:#757676,gutter:-1,nomatch:#888888' \
       --exact --track --no-sort
     '';
   };
