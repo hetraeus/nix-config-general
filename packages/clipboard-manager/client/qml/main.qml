@@ -3,592 +3,186 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import Quickshell
 import Quickshell.Wayland
-import Quickshell.Io
 
 Scope {
     id: root
 
-    property string fontFamily: "Iosevka NFM"
+    Theme { id: theme }
+    ClipboardService { id: service }
 
-    property color bgColor: "#1a1a2e"
-    property color selColor: "#008080"
-    property color fgColor: "#f0f0f0"
-    property color commentColor: "#4a4a4a"
-
-    // true when selectedIndex was last changed by mouse hover/click
-    property bool mouseSelection: false
-
-    readonly property string stylixPath: Quickshell.env("HOME") + "/.config/stylix/palette.json"
-
-    FileView {
-        id: stylixFile
-        path: root.stylixPath
-        onTextChanged: {
-            var raw = text().trim()
-            if (raw.length === 0) {
-                console.log("Stylix palette file empty, keeping fallback colors")
-                return
-            }
-            try {
-                var palette = JSON.parse(raw)
-                var colors = palette.palette || palette
-
-                function toColor(hex) {
-                    if (!hex) return null
-                    hex = hex.toString().trim()
-                    if (hex.charAt(0) !== "#") hex = "#" + hex
-                    return hex
-                }
-
-                var c00 = toColor(colors.base00)
-                var c03 = toColor(colors.base03)
-                var c05 = toColor(colors.base05)
-                var c0e = toColor(colors.base0E)
-
-                if (c00) root.bgColor = c00
-                if (c03) root.commentColor = c03
-                if (c05) root.fgColor = c05
-                if (c0e) root.selColor = c0e
-
-                console.log("Stylix colors loaded:", c00, c0e, c03, c05)
-            } catch (e) {
-                console.warn("Failed to parse stylix palette:", e)
-            }
-        }
-    }
-
+    // --- State ---
     property var historyModel: []
     property var pinnedModel: [
         { type: "pinned", text: formatLocalDateTime(new Date()) },
         { type: "pinned", text: formatLocalDateTime(new Date()).slice(0, 10) },
         { type: "pinned", text: "💌 e-mail" }
     ]
-
     property string filterText: ""
     property var historyFiltered: []
     property var pinnedFiltered: []
     property int currentPage: 0
     property int selectedIndex: 0
-
-    function updateFilters() {
-        var lower = filterText.toLowerCase()
-        var hist = []
-        for (var i = 0; i < historyModel.length; i++) {
-            var entry = historyModel[i]
-            var display = entry.type === "image" ? "Image" : (entry.content || "")
-            if (display.toLowerCase().indexOf(lower) !== -1)
-                hist.push(i)
-        }
-        historyFiltered = hist
-
-        var pin = []
-        for (var j = 0; j < pinnedModel.length; j++) {
-            var p = pinnedModel[j]
-            if (p.text.toLowerCase().indexOf(lower) !== -1)
-                pin.push(j)
-        }
-        pinnedFiltered = pin
-
-        var maxIndex = (currentPage === 0 ? historyFiltered.length : pinnedFiltered.length) - 1
-        if (selectedIndex > maxIndex) selectedIndex = Math.max(0, maxIndex)
-
-        var list = currentPage === 0 ? historyList : pinnedList
-        if (list.count > 0) {
-            list.currentIndex = selectedIndex
-            list.positionViewAtIndex(selectedIndex, ListView.Beginning)
-        }
-    }
-
-    onFilterTextChanged: updateFilters()
-    onHistoryModelChanged: updateFilters()
-    onCurrentPageChanged: {
-        filterField.text = ""
-        selectedIndex = 0
-        var list = currentPage === 0 ? historyList : pinnedList
-        if (list.count > 0) {
-            list.currentIndex = 0
-            list.positionViewAtIndex(0, ListView.Beginning)
-        }
-    }
-    onSelectedIndexChanged: {
-        var list = currentPage === 0 ? historyList : pinnedList
-        if (list.count > 0 && selectedIndex < list.count) {
-            list.currentIndex = selectedIndex
-            if (!mouseSelection) {
-                list.positionViewAtIndex(selectedIndex, ListView.Beginning)
-            }
-            mouseSelection = false
-        }
-    }
-
+    property bool mouseSelection: false
     property int cursorX: 0
     property int cursorY: 0
 
     readonly property string homeDir: Quickshell.env("HOME") || ""
     readonly property string historyPath: homeDir + "/.cache/clipboard-manager/history.json"
 
-    Process {
-        id: historyReader
-        running: false
-        stdout: StdioCollector {
-            onStreamFinished: {
-                var raw = this.text.trim()
-                if (raw.length > 0) {
-                    root.tryParseRaw(raw)
-                } else {
-                    console.warn("File empty – no entries yet")
-                    root.historyModel = []
-                    updateFilters()
-                }
-            }
+    // --- Logic ---
+    function updateFilters() {
+        var lower = filterText.toLowerCase()
+        var hist = [], pin = []
+        for (var i = 0; i < historyModel.length; i++) {
+            var entry = historyModel[i]
+            var display = entry.type === "image" ? "Image" : (entry.content || "")
+            if (display.toLowerCase().indexOf(lower) !== -1) hist.push(i)
         }
-        onExited: function(exitCode) {
-            if (exitCode !== 0) {
-                console.warn("Failed to read history file, exit:", exitCode)
-                root.historyModel = []
-                updateFilters()
-            }
+        historyFiltered = hist
+        for (var j = 0; j < pinnedModel.length; j++) {
+            if (pinnedModel[j].text.toLowerCase().indexOf(lower) !== -1) pin.push(j)
         }
+        pinnedFiltered = pin
+
+        var maxIndex = (currentPage === 0 ? historyFiltered.length : pinnedFiltered.length) - 1
+        if (selectedIndex > maxIndex) selectedIndex = Math.max(0, maxIndex)
     }
 
-    function readHistory() {
-        historyReader.command = ["cat", historyPath]
-        historyReader.running = true
-    }
+    onFilterTextChanged: updateFilters()
+    onHistoryModelChanged: updateFilters()
+    onCurrentPageChanged: { filterText = ""; selectedIndex = 0 }
+    onSelectedIndexChanged: { mouseSelection = false }
 
-    function tryParseRaw(raw) {
-        try {
-            var doc = JSON.parse(raw)
-            var entries = doc.entries || []
-            entries.sort(function(a, b) {
-                var ta = new Date(a.timestamp || 0).getTime()
-                var tb = new Date(b.timestamp || 0).getTime()
-                return tb - ta
-            })
-            root.historyModel = entries
-            updateFilters()
-        } catch (e) {
-            console.warn("JSON parse error:", e)
-            root.historyModel = []
-            updateFilters()
+    function activateHistoryItem() {
+        if (selectedIndex < historyFiltered.length) {
+            service.callSetSelection(historyFiltered[selectedIndex], function() { Qt.quit() })
         }
     }
 
-    Process {
-        id: setSelectionProc
-        running: false
-        property var callback: null
-
-        onExited: function(exitCode) {
-            if (exitCode !== 0) {
-                console.warn("SetSelection dbus-send failed, exit:", exitCode)
-            }
-            if (callback) {
-                var cb = callback
-                callback = null
-                cb()
+    function activatePinnedItem() {
+        if (selectedIndex < pinnedFiltered.length) {
+            var entry = pinnedModel[pinnedFiltered[selectedIndex]]
+            if (entry.text === "💌 e-mail") {
+                service.callIgnore(function() { service.readMail(Quickshell.env("XDG_RUNTIME_DIR") + "/mail") })
             } else {
-                Qt.quit()
+                service.callIgnore(function() { service.copy(entry.text, function() { Qt.quit() }) })
             }
         }
-    }
-
-    function callSetSelection(historyIndex, cb) {
-        setSelectionProc.callback = cb
-        setSelectionProc.command = [
-            "dbus-send",
-            "--session",
-            "--type=method_call",
-            "--dest=org.clipboard.Manager",
-            "/",
-            "org.clipboard.Manager.SetSelection",
-            "int32:" + historyIndex
-        ]
-        setSelectionProc.running = true
     }
 
     function formatLocalDateTime(date) {
         var offset = -date.getTimezoneOffset();
         var offsetHours = Math.floor(Math.abs(offset) / 60);
         var offsetMinutes = Math.abs(offset) % 60;
-        var offsetStr = (offset >= 0 ? '+' : '-') +
-                        String(offsetHours).padStart(2, '0') + ':' +
-                        String(offsetMinutes).padStart(2, '0');
-        return date.getFullYear() + '-' +
-               String(date.getMonth() + 1).padStart(2, '0') + '-' +
-               String(date.getDate()).padStart(2, '0') + 'T' +
-               String(date.getHours()).padStart(2, '0') + ':' +
-               String(date.getMinutes()).padStart(2, '0') + ':' +
-               String(date.getSeconds()).padStart(2, '0') + offsetStr;
-    }
-
-    function activateHistoryItem() {
-        if (root.selectedIndex < root.historyFiltered.length) {
-            var histIndex = root.historyFiltered[root.selectedIndex]
-            root.callSetSelection(histIndex, function() {
-                Qt.quit()
-            })
-        }
-    }
-
-    function activatePinnedItem() {
-        if (root.selectedIndex < root.pinnedFiltered.length) {
-            var pinIndex = root.pinnedFiltered[root.selectedIndex]
-            var entry = root.pinnedModel[pinIndex]
-            if (entry.text === "💌 e-mail") {
-                ignoreProc.callIgnore(function() {
-                    root.pasteMail()
-                })
-            } else {
-                ignoreProc.callIgnore(function() {
-                    wlCopyProc.copy(entry.text)
-                })
-            }
-        }
-    }
-
-    Process {
-        id: ignoreProc
-        running: false
-        property var callback: null
-
-        onExited: function(exitCode) {
-            if (exitCode !== 0) {
-                console.warn("IgnoreNext dbus-send failed, exit:", exitCode)
-            }
-            if (callback) {
-                var cb = callback
-                callback = null
-                cb()
-            }
-        }
-
-        function callIgnore(cb) {
-            callback = cb
-            command = [
-                "dbus-send",
-                "--session",
-                "--type=method_call",
-                "--dest=org.clipboard.Manager",
-                "/",
-                "org.clipboard.Manager.IgnoreNext"
-            ]
-            running = true
-        }
-    }
-
-    Process {
-        id: wlCopyProc
-        running: false
-        property string textToCopy: ""
-
-        onExited: function(exitCode) {
-            if (exitCode !== 0) {
-                console.warn("wl-copy failed, exit:", exitCode)
-            }
-            Qt.quit()
-        }
-
-        function copy(text) {
-            textToCopy = text
-            command = ["sh", "-c", "printf '%s' \"$1\" | wl-copy", "sh", text]
-            running = true
-        }
-    }
-
-    function pasteMail() {
-        var mailPath = Quickshell.env("XDG_RUNTIME_DIR") + "/mail"
-        var proc = mailReader
-        proc.command = ["cat", mailPath]
-        proc.running = true
-    }
-
-    Process {
-        id: mailReader
-        running: false
-        stdout: StdioCollector {
-            onStreamFinished: {
-                var content = this.text.trim()
-                if (content.length > 0) {
-                    wlCopyProc.copy(content)
-                    console.log("Mail copied to clipboard")
-                } else {
-                    console.warn("Mail file empty or not found")
-                    Qt.quit()
-                }
-            }
-        }
-        onExited: function(exitCode) {
-            if (exitCode !== 0) {
-                console.warn("Failed to read mail file, exit:", exitCode)
-                Qt.quit()
-            }
-        }
-    }
-
-    Process {
-        id: cursorProc
-        command: ["hyprctl", "cursorpos", "-j"]
-        running: false
-        stdout: StdioCollector {
-            onStreamFinished: {
-                try {
-                    var pos = JSON.parse(this.text)
-                    root.cursorX = pos.x
-                    root.cursorY = pos.y
-                } catch (e) {
-                    console.warn("Failed to parse cursor position:", e)
-            }
-                panel.visible = true
-        }
-        }
-    }
-
-    function show() {
-        readHistory()
-        cursorProc.running = true
-    }
-
-    Component.onCompleted: {
-        console.log("History path:", historyPath)
-        stylixFile.path = root.stylixPath
-        show()
+        var offsetStr = (offset >= 0 ? '+' : '-') + String(offsetHours).padStart(2, '0') + ':' + String(offsetMinutes).padStart(2, '0');
+        return date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0') + 'T' + String(date.getHours()).padStart(2, '0') + ':' + String(date.getMinutes()).padStart(2, '0') + ':' + String(date.getSeconds()).padStart(2, '0') + offsetStr;
     }
 
     function screenForCursor() {
         for (var i = 0; i < Quickshell.screens.length; i++) {
             var s = Quickshell.screens[i]
-            if (root.cursorX >= s.x && root.cursorX < s.x + s.width &&
-                root.cursorY >= s.y && root.cursorY < s.y + s.height) {
-                return s
-            }
+            if (cursorX >= s.x && cursorX < s.x + s.width && cursorY >= s.y && cursorY < s.y + s.height) return s
         }
         return Quickshell.screens[0]
     }
 
+    // --- Service Connections ---
+    Connections {
+        target: service
+        function onHistoryLoaded(rawJson) {
+            try {
+                var doc = JSON.parse(rawJson)
+                var entries = doc.entries || []
+                entries.sort(function(a, b) { return new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime() })
+                root.historyModel = entries
+                updateFilters()
+            } catch (e) { root.historyModel = []; updateFilters() }
+        }
+        function onMailLoaded(content) {
+            if (content.length > 0) service.copy(content, function() { Qt.quit() })
+            else Qt.quit()
+        }
+        function onCursorPosReady(x, y) {
+            cursorX = x; cursorY = y
+            panel.visible = true
+            focusTimer.start()
+        }
+    }
+
+    // --- UI Composition ---
     PanelWindow {
         id: panel
         screen: root.screenForCursor()
         visible: false
         color: "transparent"
-
-        anchors {
-            top: true
-            left: true
-            right: true
-            bottom: true
-        }
-
+        anchors.fill: parent
         exclusionMode: ExclusionMode.Ignore
-
         WlrLayershell.namespace: "clipboard-manager"
         WlrLayershell.layer: WlrLayer.Overlay
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
 
-        MouseArea {
-            anchors.fill: parent
-            onClicked: Qt.quit()
-        }
+        MouseArea { anchors.fill: parent; onClicked: Qt.quit() }
 
         Rectangle {
             id: popupContent
-            width: 400
-            height: 500
-            x: Math.max(0, Math.min(root.cursorX - panel.screen.x - width / 2, panel.screen.width - width))
-            y: Math.max(0, Math.min(root.cursorY - panel.screen.y - height / 4, panel.screen.height - height))
-            color: root.bgColor
-            radius: 8
-            border.color: root.commentColor
-            border.width: 1
+            width: 400; height: 500
+            x: Math.max(0, Math.min(cursorX - panel.screen.x - width / 2, panel.screen.width - width))
+            y: Math.max(0, Math.min(cursorY - panel.screen.y - height / 4, panel.screen.height - height))
+            color: theme.bgColor; radius: 8
+            border.color: theme.commentColor; border.width: 1
 
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {}
-            }
+            MouseArea { anchors.fill: parent; onClicked: {} }
 
             ColumnLayout {
-                anchors.fill: parent
-                anchors.margins: 8
-                spacing: 4
+                anchors.fill: parent; anchors.margins: 8; spacing: 4
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 30
-                    spacing: 4
-
-                    TextField {
-                        id: filterField
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 30
-                        placeholderText: "Filter..."
-                        color: root.fgColor
-                        font.family: root.fontFamily
-                        horizontalAlignment: Text.AlignHCenter
-                        cursorDelegate: Item { }
-                        background: Rectangle {
-                            color: "transparent"
-                            border.color: "transparent"
-                            border.width: 0
-                        }
-                        text: root.filterText
-                        onTextChanged: root.filterText = text
-
-                        Keys.onEscapePressed: Qt.quit()
-
-                        Keys.onUpPressed: function(event) {
-                            if (root.selectedIndex > 0) {
-                                root.selectedIndex--
-                            }
-                            event.accepted = true
-                        }
-
-                        Keys.onDownPressed: function(event) {
-                            var maxIndex = (root.currentPage === 0 ? root.historyFiltered.length : root.pinnedFiltered.length) - 1
-                            if (root.selectedIndex < maxIndex)
-                                root.selectedIndex++
-                            event.accepted = true
-                        }
-
-                        Keys.onLeftPressed: function(event) {
-                            if (root.currentPage === 0) {
-                                root.currentPage = 1
-                                event.accepted = true
-                            }
-                        }
-
-                        Keys.onRightPressed: function(event) {
-                            if (root.currentPage === 1) {
-                                root.currentPage = 0
-                                event.accepted = true
-                            }
-                        }
-
-                        Keys.onReturnPressed: function(event) {
-                            if (root.currentPage === 0) {
-                                root.activateHistoryItem()
-                            } else {
-                                root.activatePinnedItem()
-                            }
-                            event.accepted = true
-                        }
+                FilterBar {
+                    id: filterBar
+                    text: root.filterText
+                    onTextChanged: root.filterText = text
+                    currentPage: root.currentPage
+                    fgColor: theme.fgColor; fontFamily: theme.fontFamily
+                    
+                    onEscapePressed: Qt.quit()
+                    onPageToggled: root.currentPage = root.currentPage === 0 ? 1 : 0
+                    onUpPressed: if (root.selectedIndex > 0) root.selectedIndex--
+                    onDownPressed: {
+                        var maxIndex = (root.currentPage === 0 ? root.historyFiltered.length : root.pinnedFiltered.length) - 1
+                        if (root.selectedIndex < maxIndex) root.selectedIndex++
                     }
-
-                    Rectangle {
-                        id: pageToggleBtn
-                        Layout.preferredWidth: filterField.height
-                        Layout.preferredHeight: filterField.height
-                        color: "transparent"
-                        radius: 4
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: root.currentPage === 0 ? "⚑" : "🗒"
-                            color: root.fgColor
-                            font.family: root.fontFamily
-                            font.pointSize: 14
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: root.currentPage = root.currentPage === 0 ? 1 : 0
-                        }
-                    }
+                    onLeftPressed: if (root.currentPage === 0) root.currentPage = 1
+                    onRightPressed: if (root.currentPage === 1) root.currentPage = 0
+                    onReturnPressed: root.currentPage === 0 ? root.activateHistoryItem() : root.activatePinnedItem()
                 }
 
-                Item {
-                    id: pagesContainer
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    clip: true
+                PagesView {
+                    currentPage: root.currentPage
+                    historyModel: root.historyModel; historyFiltered: root.historyFiltered
+                    pinnedModel: root.pinnedModel; pinnedFiltered: root.pinnedFiltered
+                    selectedIndex: root.selectedIndex
+                    bgColor: theme.bgColor; selColor: theme.selColor
+                    fgColor: theme.fgColor; commentColor: theme.commentColor
+                    fontFamily: theme.fontFamily
 
-                    Row {
-                        id: pagesRow
-                        width: pagesContainer.width * 2
-                        height: pagesContainer.height
-
-                        Behavior on x {
-                            NumberAnimation {
-                                duration: 200
-                                easing.type: Easing.InOutQuad
-                            }
-                        }
-
-                        x: root.currentPage === 0 ? 0 : -pagesContainer.width
-
-                        ListView {
-                            id: historyList
-                            clip: true
-                            width: pagesContainer.width
-                            height: pagesContainer.height
-                            model: root.historyFiltered
-                            currentIndex: root.selectedIndex
-                            delegate: EntryDelegate {
-                                width: historyList.width
-                                height: 64
-                                entry: root.historyModel[modelData]
-                                isCurrent: index === historyList.currentIndex
-                                highlightColor: root.selColor
-                                textColor: root.fgColor
-                                selectedTextColor: root.bgColor
-                                commentColor: root.commentColor
-                                fontFamily: root.fontFamily
-                                onClicked: function(index) {
-                                    root.mouseSelection = true
-                                    root.selectedIndex = index
-                                }
-                                onActivated: function() { root.activateHistoryItem() }
-                                onHovered: function(index) {
-                                    root.mouseSelection = true
-                                    root.selectedIndex = index
-                                }
-                            }
-                            highlight: Rectangle { color: root.selColor; radius: 4 }
-                            highlightFollowsCurrentItem: true
-                            highlightMoveDuration: 100
-                        }
-
-                        ListView {
-                            id: pinnedList
-                            clip: true
-                            width: pagesContainer.width
-                            height: pagesContainer.height
-                            model: root.pinnedFiltered
-                            currentIndex: root.selectedIndex
-                            delegate: EntryDelegate {
-                                width: pinnedList.width
-                                height: 64
-                                entry: root.pinnedModel[modelData]
-                                isCurrent: index === pinnedList.currentIndex
-                                highlightColor: root.selColor
-                                textColor: root.fgColor
-                                selectedTextColor: root.bgColor
-                                commentColor: root.commentColor
-                                fontFamily: root.fontFamily
-                                onClicked: function(index) {
-                                    root.mouseSelection = true
-                                    root.selectedIndex = index
-                                }
-                                onActivated: function() { root.activatePinnedItem() }
-                                onHovered: function(index) {
-                                    root.mouseSelection = true
-                                    root.selectedIndex = index
-                                }
-                            }
-                            highlight: Rectangle { color: root.selColor; radius: 4 }
-                            highlightFollowsCurrentItem: true
-                            highlightMoveDuration: 100
-                        }
-                    }
+                    onHistoryClicked: function(index) { root.mouseSelection = true; root.selectedIndex = index }
+                    onPinnedClicked: function(index) { root.mouseSelection = true; root.selectedIndex = index }
+                    onHistoryHovered: function(index) { root.mouseSelection = true; root.selectedIndex = index }
+                    onPinnedHovered: function(index) { root.mouseSelection = true; root.selectedIndex = index }
+                    onHistoryActivated: root.activateHistoryItem()
+                    onPinnedActivated: root.activatePinnedItem()
                 }
             }
         }
+    }
 
-        Timer {
-            id: focusTimer
-            interval: 50
-            running: panel.visible
-            repeat: false
-            onTriggered: filterField.forceActiveFocus()
-        }
+    Timer {
+        id: focusTimer
+        interval: 50; repeat: false
+        onTriggered: filterBar.forceFocus()
+    }
+
+    Component.onCompleted: {
+        service.readHistory(historyPath)
+        service.getCursorPos()
     }
 }
