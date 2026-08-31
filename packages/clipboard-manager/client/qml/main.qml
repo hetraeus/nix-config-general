@@ -8,16 +8,13 @@ import Quickshell.Io
 Scope {
     id: root
 
-    // ----- Font -----
     property string fontFamily: "Iosevka NFM"
 
-    // ----- Colors (fallback) -----
     property color bgColor: "#1a1a2e"
     property color selColor: "#008080"
     property color fgColor: "#f0f0f0"
     property color commentColor: "#4a4a4a"
 
-    // ----- Stylix support -----
     readonly property string stylixPath: Quickshell.env("HOME") + "/.config/stylix/palette.json"
 
     FileView {
@@ -43,7 +40,7 @@ Scope {
                 var c00 = toColor(colors.base00)
                 var c03 = toColor(colors.base03)
                 var c05 = toColor(colors.base05)
-                var c0e = toColor(colors.base0E) // accent
+                var c0e = toColor(colors.base0E)
 
                 if (c00) root.bgColor = c00
                 if (c03) root.commentColor = c03
@@ -57,7 +54,6 @@ Scope {
         }
     }
 
-    // ----- History data -----
     property var historyModel: []
     property var pinnedModel: [
         { type: "pinned", text: formatLocalDateTime(new Date()) },
@@ -65,16 +61,14 @@ Scope {
         { type: "pinned", text: "💌 e-mail" }
     ]
 
-    // ----- Filtering -----
     property string filterText: ""
     property var historyFiltered: []
     property var pinnedFiltered: []
-    property int currentPage: 0   // 0 = history, 1 = pinned
+    property int currentPage: 0
     property int selectedIndex: 0
 
     function updateFilters() {
         var lower = filterText.toLowerCase()
-        // History filter
         var hist = []
         for (var i = 0; i < historyModel.length; i++) {
             var entry = historyModel[i]
@@ -84,7 +78,6 @@ Scope {
         }
         historyFiltered = hist
 
-        // Pinned filter
         var pin = []
         for (var j = 0; j < pinnedModel.length; j++) {
             var p = pinnedModel[j]
@@ -93,11 +86,9 @@ Scope {
         }
         pinnedFiltered = pin
 
-        // Clamp selected index to visible list length
         var maxIndex = (currentPage === 0 ? historyFiltered.length : pinnedFiltered.length) - 1
         if (selectedIndex > maxIndex) selectedIndex = Math.max(0, maxIndex)
 
-        // Update list view position
         var list = currentPage === 0 ? historyList : pinnedList
         if (list.count > 0) {
             list.currentIndex = selectedIndex
@@ -124,7 +115,6 @@ Scope {
         }
     }
 
-    // ----- Cursor position -----
     property int cursorX: 0
     property int cursorY: 0
 
@@ -178,8 +168,6 @@ Scope {
         }
     }
 
-    // ----- D-Bus call for SetSelection -----
-
     Process {
         id: setSelectionProc
         running: false
@@ -194,7 +182,6 @@ Scope {
                 callback = null
                 cb()
             } else {
-                // If no callback, just quit
                 Qt.quit()
             }
         }
@@ -229,7 +216,6 @@ Scope {
                String(date.getSeconds()).padStart(2, '0') + offsetStr;
     }
 
-    // ----- Activation helpers (used by Return and click) -----
     function activateHistoryItem() {
         if (root.selectedIndex < root.historyFiltered.length) {
             var histIndex = root.historyFiltered[root.selectedIndex]
@@ -255,7 +241,6 @@ Scope {
         }
     }
 
-    // ----- D-Bus call for IgnoreNext (to prevent pinned entries from being logged) -----
     Process {
         id: ignoreProc
         running: false
@@ -286,7 +271,6 @@ Scope {
         }
     }
 
-    // ----- Direct clipboard set via wl-copy (for pinned entries) -----
     Process {
         id: wlCopyProc
         running: false
@@ -299,7 +283,6 @@ Scope {
             Qt.quit()
         }
 
-        // Use printf with a shell command to safely pass arbitrary text
         function copy(text) {
             textToCopy = text
             command = ["sh", "-c", "printf '%s' \"$1\" | wl-copy", "sh", text]
@@ -307,9 +290,7 @@ Scope {
         }
     }
 
-    // ----- Read e‑mail file (uses wl-copy) -----
     function pasteMail() {
-        // This is called after IgnoreNext is already set
         var mailPath = Quickshell.env("XDG_RUNTIME_DIR") + "/mail"
         var proc = mailReader
         proc.command = ["cat", mailPath]
@@ -339,7 +320,6 @@ Scope {
         }
     }
 
-    // ----- Cursor position via hyprctl -----
     Process {
         id: cursorProc
         command: ["hyprctl", "cursorpos", "-j"]
@@ -417,7 +397,7 @@ Scope {
 
             MouseArea {
                 anchors.fill: parent
-                onClicked: {}  // block clicks from closing
+                onClicked: {}
             }
 
             ColumnLayout {
@@ -425,10 +405,15 @@ Scope {
                 anchors.margins: 8
                 spacing: 4
 
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 30
+                    spacing: 4
+
                     TextField {
                         id: filterField
                         Layout.fillWidth: true
-                    Layout.preferredHeight: 30
+                        Layout.preferredHeight: 30
                         placeholderText: "Filter..."
                         color: root.fgColor
                         font.family: root.fontFamily
@@ -482,7 +467,28 @@ Scope {
                         }
                     }
 
-                // Container that clips and holds the sliding pages
+                    Rectangle {
+                        id: pageToggleBtn
+                        Layout.preferredWidth: filterField.height
+                        Layout.preferredHeight: filterField.height
+                        color: "transparent"
+                        radius: 4
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: root.currentPage === 0 ? "⚑" : "🗒"
+                            color: root.fgColor
+                            font.family: root.fontFamily
+                            font.pointSize: 14
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: root.currentPage = root.currentPage === 0 ? 1 : 0
+                        }
+                    }
+                }
+
                 Item {
                     id: pagesContainer
                     Layout.fillWidth: true
@@ -503,7 +509,6 @@ Scope {
 
                         x: root.currentPage === 0 ? 0 : -pagesContainer.width
 
-                        // History list
                         ListView {
                             id: historyList
                             clip: true
@@ -521,15 +526,15 @@ Scope {
                                 selectedTextColor: root.bgColor
                                 commentColor: root.commentColor
                                 fontFamily: root.fontFamily
-                                onClicked: root.selectedIndex = index
-                                onActivated: root.activateHistoryItem()
+                                onClicked: function(index) { root.selectedIndex = index }
+                                onActivated: function() { root.activateHistoryItem() }
+                                onHovered: function(index) { root.selectedIndex = index }
                             }
                             highlight: Rectangle { color: root.selColor; radius: 4 }
                             highlightFollowsCurrentItem: true
                             highlightMoveDuration: 100
                         }
 
-                        // Pinned list
                         ListView {
                             id: pinnedList
                             clip: true
@@ -547,8 +552,9 @@ Scope {
                                 selectedTextColor: root.bgColor
                                 commentColor: root.commentColor
                                 fontFamily: root.fontFamily
-                                onClicked: root.selectedIndex = index
-                                onActivated: root.activatePinnedItem()
+                                onClicked: function(index) { root.selectedIndex = index }
+                                onActivated: function() { root.activatePinnedItem() }
+                                onHovered: function(index) { root.selectedIndex = index }
                             }
                             highlight: Rectangle { color: root.selColor; radius: 4 }
                             highlightFollowsCurrentItem: true

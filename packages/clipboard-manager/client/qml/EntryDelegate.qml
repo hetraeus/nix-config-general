@@ -16,6 +16,10 @@ Item {
     property color commentColor: "gray"
     property string fontFamily: "Iosevka NFM"
 
+    // Swallow the first positionChanged that fires when the delegate
+    // is instantiated directly under the cursor (spawn time).
+    property bool initialPositionSet: false
+
     function thumbPath(content) {
         var parts = content.split("/")
         var filename = parts[parts.length - 1]
@@ -37,6 +41,7 @@ Item {
 
     signal clicked(int index)
     signal activated()
+    signal hovered(int index)
 
     Rectangle {
         anchors.fill: parent
@@ -82,7 +87,6 @@ Item {
             }
         }
 
-        // Bottom‑right info: line count for text, MIME type for image.
         Text {
             id: infoText
             color: isCurrent ? selectedTextColor : commentColor
@@ -106,9 +110,17 @@ Item {
 
     MouseArea {
         anchors.fill: parent
+        hoverEnabled: true
         onClicked: {
             delegateRoot.clicked(index)
             delegateRoot.activated()
+        }
+        onPositionChanged: {
+            if (!delegateRoot.initialPositionSet) {
+                delegateRoot.initialPositionSet = true
+                return
+            }
+            delegateRoot.hovered(index)
         }
     }
 }
