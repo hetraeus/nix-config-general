@@ -1,6 +1,8 @@
 { flake.homeModules.dev_helix = { pkgs, ... } : {
 
   programs.helix.extraPackages = [
+    pkgs.clang-tools
+    pkgs.kdePackages.qtdeclarative
     pkgs.bash-language-server pkgs.shellcheck pkgs.gopls pkgs.nil
     pkgs.python3Packages.python-lsp-server
     pkgs.lldb pkgs.delve pkgs.taplo pkgs.terraform-ls pkgs.lua-language-server
