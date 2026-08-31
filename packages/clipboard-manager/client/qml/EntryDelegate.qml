@@ -16,8 +16,6 @@ Item {
     property color commentColor: "gray"
     property string fontFamily: "Iosevka NFM"
 
-    // Swallow the first positionChanged that fires when the delegate
-    // is instantiated directly under the cursor (spawn time).
     property bool initialPositionSet: false
 
     function thumbPath(content) {

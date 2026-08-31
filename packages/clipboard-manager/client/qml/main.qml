@@ -15,6 +15,9 @@ Scope {
     property color fgColor: "#f0f0f0"
     property color commentColor: "#4a4a4a"
 
+    // true when selectedIndex was last changed by mouse hover/click
+    property bool mouseSelection: false
+
     readonly property string stylixPath: Quickshell.env("HOME") + "/.config/stylix/palette.json"
 
     FileView {
@@ -111,7 +114,10 @@ Scope {
         var list = currentPage === 0 ? historyList : pinnedList
         if (list.count > 0 && selectedIndex < list.count) {
             list.currentIndex = selectedIndex
-            list.positionViewAtIndex(selectedIndex, ListView.Beginning)
+            if (!mouseSelection) {
+                list.positionViewAtIndex(selectedIndex, ListView.Beginning)
+            }
+            mouseSelection = false
         }
     }
 
@@ -526,9 +532,15 @@ Scope {
                                 selectedTextColor: root.bgColor
                                 commentColor: root.commentColor
                                 fontFamily: root.fontFamily
-                                onClicked: function(index) { root.selectedIndex = index }
+                                onClicked: function(index) {
+                                    root.mouseSelection = true
+                                    root.selectedIndex = index
+                                }
                                 onActivated: function() { root.activateHistoryItem() }
-                                onHovered: function(index) { root.selectedIndex = index }
+                                onHovered: function(index) {
+                                    root.mouseSelection = true
+                                    root.selectedIndex = index
+                                }
                             }
                             highlight: Rectangle { color: root.selColor; radius: 4 }
                             highlightFollowsCurrentItem: true
@@ -552,9 +564,15 @@ Scope {
                                 selectedTextColor: root.bgColor
                                 commentColor: root.commentColor
                                 fontFamily: root.fontFamily
-                                onClicked: function(index) { root.selectedIndex = index }
+                                onClicked: function(index) {
+                                    root.mouseSelection = true
+                                    root.selectedIndex = index
+                                }
                                 onActivated: function() { root.activatePinnedItem() }
-                                onHovered: function(index) { root.selectedIndex = index }
+                                onHovered: function(index) {
+                                    root.mouseSelection = true
+                                    root.selectedIndex = index
+                                }
                             }
                             highlight: Rectangle { color: root.selColor; radius: 4 }
                             highlightFollowsCurrentItem: true
