@@ -2,9 +2,9 @@
 
   home-manager.users.${config.users_list.principalUser}.imports = [
     inputs.stylix.homeModules.stylix
+    inputs.omniflake.flakes.nvf.homeManagerModules.nvf
+    inputs.omniflake.flakes.nix-index-database.homeModules.default
     inputs.sops-nix.homeManagerModules.sops
-    inputs.nvf.homeManagerModules.nvf
-    inputs.nix-index-database.homeModules.default
 
     self.homeModules."${config.users_list.principalUser}Modules"
     self.homeModules.sound_control

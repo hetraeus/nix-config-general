@@ -17,7 +17,7 @@
 
 in {
   home.packages =
-    let dashboard_will_work = self.inputs.multiverse.multiverse.${pkgs.stdenv.hostPlatform.system}.at "2025-06-17";
+    let dashboard_will_work = self.inputs.omniflake.flakes.nixpkgs-multiverse.multiverse.${pkgs.stdenv.hostPlatform.system}.at "2025-06-17";
     in [
       pkgs.aria2
       (self.legacyPackages.${pkgs.stdenv.hostPlatform.system}.torrent-web-dashboardWith {

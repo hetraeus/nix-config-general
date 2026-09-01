@@ -7,13 +7,13 @@ inputs = {
 # They can be overridden via flake.lock
 # They can be abstracted via flake-parts or higher-level generators
   nixpkgs.url        = "github:NixOS/nixpkgs/nixos-26.05";
-  multiverse.url     = "github:fzakaria/nixpkgs-multiverse";
   omniflake.url      = "github:fzakaria/omniflake";
   omniflake.inputs.nixpkgs.follows = "nixpkgs";
+  # multiverse.url     = "github:fzakaria/nixpkgs-multiverse";
 
   flake-parts.url    = "github:hercules-ci/flake-parts";
-  import-tree.url    = "github:vic/import-tree";
-  nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+  # import-tree.url    = "github:vic/import-tree";
+  # nixos-hardware.url = "github:NixOS/nixos-hardware/master";
   wrappers.url       = "github:Lassulus/wrappers";
   multios-usb.url    = "github:Mexit/MultiOS-USB";
 
@@ -26,11 +26,11 @@ inputs = {
   sops-nix.url       = "github:Mic92/sops-nix";
   sops-nix.inputs.nixpkgs.follows  = "nixpkgs";
 
-  nix-index-database.url = "github:nix-community/nix-index-database";
-  nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
+  # nix-index-database.url = "github:nix-community/nix-index-database";
+  # nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
 
-  nvf.url       = "github:notashelf/nvf";
-  nvf.inputs.nixpkgs.follows = "nixpkgs";
+  # nvf.url       = "github:notashelf/nvf";
+  # nvf.inputs.nixpkgs.follows = "nixpkgs";
 
   omasnap-nixpkgs.url = "github:yechielw/nixpkgs/c6a32c930a87bc5a6ce8852f4edf6f231cde5ba5";
 
@@ -57,7 +57,7 @@ outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } {
       config.allowUnfree = true;
     };};
   imports = [
-    (inputs.import-tree [ ./hosts ./users ./modules ./packages ])
+    (inputs.omniflake.flakes.import-tree [ ./hosts ./users ./modules ./packages ])
      inputs.home-manager.flakeModules.home-manager
      ];
 };}  

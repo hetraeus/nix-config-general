@@ -52,8 +52,8 @@ flake.nixosConfigurations.${hostname} = inputs.nixpkgs.lib.nixosSystem {
     self.nixosModules.desktop_shell
     self.nixosModules.sound_control
 
-    inputs.multiverse.nixosModules.default
-    inputs.nixos-hardware.nixosModules.common-pc-ssd # this adds services.fstrim.enable
+    inputs.omniflake.flakes.nixpkgs-multiverse.nixosModules.default
+    inputs.omniflake.flakes.nixos-hardware.nixosModules.common-pc-ssd # this adds services.fstrim.enable
 
    # INFO: waiting for tuned https://github.com/NixOS/nixos-hardware/pull/1474
    { services.tuned.enable = true;}
@@ -63,8 +63,8 @@ flake.nixosConfigurations.${hostname} = inputs.nixpkgs.lib.nixosSystem {
    # Intel, this adds:
    # hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
    # Note that upstream doesn't expose a Coffee Lake module in its flake
-   inputs.nixos-hardware.nixosModules.common-cpu-intel
-   inputs.nixos-hardware.nixosModules.common-gpu-intel
+   inputs.omniflake.flakes.nixos-hardware.nixosModules.common-cpu-intel
+   inputs.omniflake.flakes.nixos-hardware.nixosModules.common-gpu-intel
 
    # TODO enable this when hwinfo mappings are done
    # https://github.com/nix-community/nixos-facter/issues
