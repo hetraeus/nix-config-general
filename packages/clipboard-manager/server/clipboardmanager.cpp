@@ -15,6 +15,28 @@ static QString watcherPidPath()
     return QDir::home().filePath(".cache/clipboard-manager/watcher.pid");
 }
 
+// Runs wl-copy with the given extra args, writing `data` to its stdin.
+// Used to set both the regular clipboard and the primary selection so
+// that Ctrl+V *and* middle-click / mouse paste both pick up the entry.
+static bool runWlCopy(const QStringList &extraArgs, const QByteArray &data)
+{
+    QProcess proc;
+    proc.setProgram("wl-copy");
+    proc.setArguments(extraArgs);
+    proc.start();
+    if (!proc.waitForStarted(1000)) {
+        qWarning() << "Failed to start wl-copy" << extraArgs;
+        return false;
+    }
+    proc.write(data);
+    proc.closeWriteChannel();
+    if (!proc.waitForFinished(2000)) {
+        qWarning() << "wl-copy did not finish in time" << extraArgs;
+        return false;
+    }
+    return true;
+}
+
 ClipboardManager::ClipboardManager(QObject *parent)
     : QObject(parent)
 {
@@ -143,37 +165,27 @@ void ClipboardManager::SetSelection(int index)
     HistoryStorage::markIgnoreWindow(1500);
 
     if (entry.type == "text") {
-        QProcess proc;
-        proc.setProgram("wl-copy");
-        proc.start();
-        if (proc.waitForStarted(1000)) {
-            proc.write(entry.content.toUtf8());
-            proc.closeWriteChannel();
-            if (!proc.waitForFinished(2000)) {
-                qWarning() << "wl-copy did not finish in time";
-            }
-        } else {
-            qWarning() << "Failed to start wl-copy for text";
+        QByteArray bytes = entry.content.toUtf8();
+        if (!runWlCopy({}, bytes)) {
+            qWarning() << "Failed to set clipboard selection for text";
+        }
+        if (!runWlCopy({ "--primary" }, bytes)) {
+            qWarning() << "Failed to set primary selection for text";
         }
     } else if (entry.type == "image") {
         QImage img;
         if (img.load(entry.content)) {
-            QProcess proc;
-            proc.setProgram("wl-copy");
-            proc.setArguments({ "--type", "image/png" });
-            proc.start();
-            if (proc.waitForStarted(1000)) {
-                QByteArray bytes;
-                QBuffer buf(&bytes);
-                buf.open(QIODevice::WriteOnly);
-                img.save(&buf, "PNG");
-                proc.write(bytes);
-                proc.closeWriteChannel();
-                if (!proc.waitForFinished(2000)) {
-                    qWarning() << "wl-copy (image) did not finish in time";
-                }
-            } else {
-                qWarning() << "Failed to start wl-copy for image";
+            QByteArray bytes;
+            QBuffer buf(&bytes);
+            buf.open(QIODevice::WriteOnly);
+            img.save(&buf, "PNG");
+            buf.close();
+
+            if (!runWlCopy({ "--type", "image/png" }, bytes)) {
+                qWarning() << "Failed to set clipboard selection for image";
+            }
+            if (!runWlCopy({ "--type", "image/png", "--primary" }, bytes)) {
+                qWarning() << "Failed to set primary selection for image";
             }
         } else {
             qWarning() << "Failed to load image from" << entry.content;

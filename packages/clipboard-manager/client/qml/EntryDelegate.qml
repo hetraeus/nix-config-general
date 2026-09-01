@@ -10,7 +10,9 @@ Item {
 
     property var entry: ({})
     property bool isCurrent: false
+    property bool isHovered: false
     property color highlightColor: "transparent"
+    property color hoverColor: "#404060"
     property color textColor: "white"
     property color selectedTextColor: "black"
     property color commentColor: "gray"
@@ -19,6 +21,7 @@ Item {
     property bool initialPositionSet: false
 
     function thumbPath(content) {
+        if (!content) return ""
         var parts = content.split("/")
         var filename = parts[parts.length - 1]
         var runtime = Quickshell.env("XDG_RUNTIME_DIR")
@@ -32,6 +35,7 @@ Item {
     }
 
     readonly property int contentLineCount: {
+        if (!entry) return 0
         if (entry.type === "text") return lineCount(entry.content)
         if (entry.type === "pinned") return lineCount(entry.text)
         return 0
@@ -43,7 +47,11 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        color: isCurrent ? highlightColor : "transparent"
+        color: {
+            if (isCurrent) return highlightColor
+            if (isHovered) return hoverColor
+            return "transparent"
+        }
         radius: 4
 
         Row {
@@ -56,8 +64,8 @@ Item {
                 width: 56
                 height: 56
                 fillMode: Image.PreserveAspectCrop
-                source: entry.type === "image" ? thumbPath(entry.content) : ""
-                visible: entry.type === "image"
+                source: (entry && entry.type === "image") ? thumbPath(entry.content) : ""
+                visible: (entry && entry.type === "image") ? true : false
                 asynchronous: true
                 onStatusChanged: function(status) {
                     if (status === Image.Error) visible = false
@@ -66,7 +74,7 @@ Item {
 
             Text {
                 id: mainText
-                width: parent.width - (entry.type === "image" ? 70 : 10)
+                width: parent.width - ((entry && entry.type === "image") ? 70 : 10)
                 height: parent.height
                 verticalAlignment: Text.AlignVCenter
                 elide: Text.ElideRight
@@ -77,6 +85,7 @@ Item {
                 font.pointSize: 11
                 textFormat: Text.PlainText
                 text: {
+                    if (!entry) return ""
                     if (entry.type === "pinned") return entry.text
                     else if (entry.type === "text") return entry.content
                     else if (entry.type === "image") return "🖼️ Image"
@@ -95,6 +104,7 @@ Item {
             anchors.margins: 4
 
             text: {
+                if (!entry) return ""
                 if (entry.type === "image" && entry.mimeType)
                     return entry.mimeType
                 else if (entry.type === "text" && contentLineCount >= 3)
@@ -111,14 +121,10 @@ Item {
         hoverEnabled: true
         onClicked: {
             delegateRoot.clicked(index)
-            delegateRoot.activated()
         }
-        onPositionChanged: {
-            if (!delegateRoot.initialPositionSet) {
-                delegateRoot.initialPositionSet = true
-                return
-            }
+        onEntered: {
             delegateRoot.hovered(index)
         }
+        // onExited is handled by the ListView's outer MouseArea
     }
 }

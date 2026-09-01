@@ -49,7 +49,7 @@ RowLayout {
         radius: 4
         Text {
             anchors.centerIn: parent
-            text: root.currentPage === 0 ? "⚑" : "🗒"
+            text: root.currentPage === 0 ? "📌" : "🗒"
             color: root.fgColor
             font.family: root.fontFamily
             font.pointSize: 14

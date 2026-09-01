@@ -22,7 +22,7 @@ Scope {
     property var pinnedFiltered: []
     property int currentPage: 0
     property int selectedIndex: 0
-    property bool mouseSelection: false
+    property int hoveredIndex: -1   // mouse hover only, no scrolling
     property int cursorX: 0
     property int cursorY: 0
 
@@ -51,11 +51,17 @@ Scope {
     onFilterTextChanged: updateFilters()
     onHistoryModelChanged: updateFilters()
     onCurrentPageChanged: { filterText = ""; selectedIndex = 0 }
-    onSelectedIndexChanged: { mouseSelection = false }
 
     function activateHistoryItem() {
         if (selectedIndex < historyFiltered.length) {
-            service.callSetSelection(historyFiltered[selectedIndex], function() { Qt.quit() })
+            var idx = historyFiltered[selectedIndex]
+            service.callSetSelection(idx, function() {
+                // After bump, the entry is at the top of the history.
+                // Reset selection and hover to point to it, then quit.
+                root.selectedIndex = 0
+                root.hoveredIndex = -1
+                Qt.quit()
+            })
         }
     }
 
@@ -115,11 +121,15 @@ Scope {
         screen: root.screenForCursor()
         visible: false
         color: "transparent"
-        anchors.fill: parent
-        exclusionMode: ExclusionMode.Ignore
+
         WlrLayershell.namespace: "clipboard-manager"
         WlrLayershell.layer: WlrLayer.Overlay
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
+        WlrLayershell.anchors.top: true
+        WlrLayershell.anchors.bottom: true
+        WlrLayershell.anchors.left: true
+        WlrLayershell.anchors.right: true
+        WlrLayershell.exclusiveZone: 0
 
         MouseArea { anchors.fill: parent; onClicked: Qt.quit() }
 
@@ -142,32 +152,57 @@ Scope {
                     onTextChanged: root.filterText = text
                     currentPage: root.currentPage
                     fgColor: theme.fgColor; fontFamily: theme.fontFamily
-                    
+
                     onEscapePressed: Qt.quit()
                     onPageToggled: root.currentPage = root.currentPage === 0 ? 1 : 0
-                    onUpPressed: if (root.selectedIndex > 0) root.selectedIndex--
+                    onUpPressed: {
+                        if (root.selectedIndex > 0) root.selectedIndex--
+                    }
                     onDownPressed: {
                         var maxIndex = (root.currentPage === 0 ? root.historyFiltered.length : root.pinnedFiltered.length) - 1
                         if (root.selectedIndex < maxIndex) root.selectedIndex++
                     }
-                    onLeftPressed: if (root.currentPage === 0) root.currentPage = 1
-                    onRightPressed: if (root.currentPage === 1) root.currentPage = 0
-                    onReturnPressed: root.currentPage === 0 ? root.activateHistoryItem() : root.activatePinnedItem()
+                    onLeftPressed: {
+                        if (root.currentPage === 0) root.currentPage = 1
+                    }
+                    onRightPressed: {
+                        if (root.currentPage === 1) root.currentPage = 0
+                    }
+                    onReturnPressed: {
+                        root.currentPage === 0 ? root.activateHistoryItem() : root.activatePinnedItem()
+                    }
                 }
 
                 PagesView {
                     currentPage: root.currentPage
-                    historyModel: root.historyModel; historyFiltered: root.historyFiltered
-                    pinnedModel: root.pinnedModel; pinnedFiltered: root.pinnedFiltered
+                    historyModel: root.historyModel
+                    historyFiltered: root.historyFiltered
+                    pinnedModel: root.pinnedModel
+                    pinnedFiltered: root.pinnedFiltered
                     selectedIndex: root.selectedIndex
-                    bgColor: theme.bgColor; selColor: theme.selColor
-                    fgColor: theme.fgColor; commentColor: theme.commentColor
+                    hoveredIndex: root.hoveredIndex
+                    bgColor: theme.bgColor
+                    selColor: theme.selColor
+                    hoverColor: "#404060"
+                    fgColor: theme.fgColor
+                    commentColor: theme.commentColor
                     fontFamily: theme.fontFamily
+                    scrollOff: 2
 
-                    onHistoryClicked: function(index) { root.mouseSelection = true; root.selectedIndex = index }
-                    onPinnedClicked: function(index) { root.mouseSelection = true; root.selectedIndex = index }
-                    onHistoryHovered: function(index) { root.mouseSelection = true; root.selectedIndex = index }
-                    onPinnedHovered: function(index) { root.mouseSelection = true; root.selectedIndex = index }
+                    onHistoryClicked: function(index) {
+                        root.selectedIndex = index
+                        root.activateHistoryItem()
+                    }
+                    onPinnedClicked: function(index) {
+                        root.selectedIndex = index
+                        root.activatePinnedItem()
+                    }
+                    onHistoryHovered: function(index) {
+                        root.hoveredIndex = index
+                    }
+                    onPinnedHovered: function(index) {
+                        root.hoveredIndex = index
+                    }
                     onHistoryActivated: root.activateHistoryItem()
                     onPinnedActivated: root.activatePinnedItem()
                 }

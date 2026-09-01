@@ -2,8 +2,19 @@ import QtQuick 2.15
 import Quickshell
 import Quickshell.Io
 
-QtObject {
+Item {
     id: root
+
+    readonly property string historyPath: (Quickshell.env("HOME") || "") + "/.cache/clipboard-manager/history.json"
+
+    property var historyWatcher: FileView {
+        path: root.historyPath
+        onTextChanged: {
+            // Reload when the file changes
+            root.readHistory(root.historyPath)
+        }
+    }
+
 
     // --- History Reader ---
     Process {
@@ -57,7 +68,9 @@ QtObject {
     }
     function copy(text, cb) {
         wlCopyProc.callback = cb
-        wlCopyProc.command = ["sh", "-c", "printf '%s' \"$1\" | wl-copy", "sh", text]
+        wlCopyProc.command = ["sh", "-c",
+            "printf '%s' \"$1\" | wl-copy && printf '%s' \"$1\" | wl-copy --primary",
+            "sh", text]
         wlCopyProc.running = true
     }
 
@@ -76,22 +89,12 @@ QtObject {
     }
 
     // --- Cursor Position ---
-    Process {
-        id: cursorProc
-        running: false
-        stdout: StdioCollector {
-            onStreamFinished: {
-                try {
-                    var pos = JSON.parse(text)
-                    root.cursorPosReady(pos.x, pos.y)
-                } catch (e) { root.cursorPosReady(0, 0) }
-            }
-        }
-    }
     signal cursorPosReady(int x, int y)
     function getCursorPos() {
-        cursorProc.command = ["hyprctl", "cursorpos", "-j"]
-        cursorProc.running = true
+        var x = parseInt(Quickshell.env("CLIPBOARD_X"))
+        var y = parseInt(Quickshell.env("CLIPBOARD_Y"))
+        if (isNaN(x)) x = 0
+        if (isNaN(y)) y = 0
+        root.cursorPosReady(x, y)
     }
 }
-

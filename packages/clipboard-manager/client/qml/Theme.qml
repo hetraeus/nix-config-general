@@ -2,7 +2,7 @@ import QtQuick 2.15
 import Quickshell
 import Quickshell.Io
 
-QtObject {
+Item {
     id: root
     property string fontFamily: "Iosevka NFM"
     property color bgColor: "#1a1a2e"
