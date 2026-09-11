@@ -33,7 +33,7 @@
 
 
   wayland.windowManager.hyprland.extraConfig = let
-    run-or-raise = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.wrun-or-raise}";
+    run-or-raise = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.wlr-focus}";
     wpvol        = "${lib.getExe' pkgs.wireplumber "wpctl"} set-volume @DEFAULT_AUDIO_SINK@ 6%";
     in ''
       hl.bind("ALT + P", hl.dsp.exec_cmd("${run-or-raise} com.saivert.pwvucontrol pwvucontrol"))

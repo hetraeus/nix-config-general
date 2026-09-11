@@ -17,7 +17,7 @@ fm_checksums     = self.packages.${pkgs.stdenv.hostPlatform.system}.fmenu-checks
 fm_share         = self.packages.${pkgs.stdenv.hostPlatform.system}.fmenu-share;
 fm_image_convert = self.packages.${pkgs.stdenv.hostPlatform.system}.fmenu-image-convert;
 xxx              = self.packages.${pkgs.stdenv.hostPlatform.system}.xxx;
-run_or_raise     = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.wrun-or-raise}";
+run_or_raise     = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.wlr-focus}";
 in {
 
   xdg.mimeApps.enable     = true;
