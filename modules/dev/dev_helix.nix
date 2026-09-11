@@ -23,6 +23,9 @@
       "del"         = "delete_selection";
       "backspace"   = "delete_char_backward";
       "A-x"         = "command_palette";
+      "C-backspace" = "delete_word_backward";
+      "C-del"       = "delete_word_forward";
+      "C-left"      = "move_prev_word_end";
       };
 
     normal          = {
@@ -36,6 +39,8 @@
       "A-x"         = "command_palette";
       "A-backspace" = "delete_word_backward";
       "A-del"       = "delete_word_forward";
+      "C-backspace" = "delete_word_backward";
+      "C-del"       = "delete_word_forward";
       "X"           = "extend_line_above";
       };
 
