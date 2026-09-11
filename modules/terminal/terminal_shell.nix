@@ -23,7 +23,7 @@
   environment.pathsToLink = [ "/share/zsh" ]; # get completion for system packages
   programs.zsh = {
     enable      = true;
-    setOptions  = [ "aliases" "auto_pushd" "auto_param_slash" "extended_glob" "no_share_history" "hist_ignore_space" "hist_reduce_blanks" "hist_ignore_all_dups" "hist_expire_dups_first" "interactive_comments" "prompt_subst" "noclobber" ];
+    setOptions  = [ "aliases" "auto_pushd" "auto_param_slash" "combining_chars" "extended_glob" "no_share_history" "hist_ignore_space" "hist_reduce_blanks" "hist_ignore_all_dups" "hist_expire_dups_first" "interactive_comments" "prompt_subst" "noclobber" ];
     enableLsColors        = true;
     enableCompletion      = true;
     enableBashCompletion  = true; # for azure-cli and potentially more
