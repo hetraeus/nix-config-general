@@ -1,24 +1,20 @@
 { perSystem = { pkgs, ... }: let
 
-  model        =  "ryan";
-  lang         =    "en";
-  lang_variant = "en_US";
-  quality      =  "high";
-
-  baseurl      = "https://huggingface.co/rhasspy/piper-voices/resolve/main";
-  format       = "onnx";
-  composed_url = "${baseurl}/${lang}/${lang_variant}/${model}/${quality}/${lang_variant}-${model}-${quality}.${format}";
+  model    =  "ryan";
+  lang     =    "en";
+  url_json = "https://huggingface.co/rhasspy/piper-voices/raw/main/en/en_US/ryan/high/en_US-ryan-high.onnx.json";
+  url_onnx = "https://huggingface.co/rhasspy/piper-voices/raw/main/en/en_US/ryan/high/en_US-ryan-high.onnx";
 
   in {
   packages."voice-${lang}-${model}" = let
 
   model_onnx_json = pkgs.fetchurl {
-    url = "${composed_url}.json";
+    url  = url_json;
     hash = "sha256-xtO5jwgxXLS+vw1J1Q/E/0kbUDxkuUDNPVyihUO0gBE=";
     name = "model.onnx.json";
     };
   model_onnx     = pkgs.fetchurl {
-    url = "${composed_url}";
+    url  = url_onnx;
     hash = "sha256-s5kNdgbhg+yNv7pwpGBwdPFi3hoMQS4BgNH/YLsVTso=";
     name = "model.onnx";
     };

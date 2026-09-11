@@ -1,25 +1,21 @@
 { perSystem = { pkgs, ... }: let
 
-  model        ="serena";
-  lang         =    "it";
-  lang_variant = "it_IT";
-  quality      =  "high";
-
-  baseurl      = "https://huggingface.co/rhasspy/piper-voices/resolve/main";
-  format       = "onnx";
-  composed_url = "${baseurl}/${lang}/${lang_variant}/${model}/${quality}/${lang_variant}-${model}-${quality}.${format}";
+  model    ="serena";
+  lang     =    "it";
+  url_json = "https://huggingface.co/committa/it_IT-serena-high/raw/main/it_IT-serena-high.onnx.json";
+  url_onnx = "https://huggingface.co/committa/it_IT-serena-high/raw/main/it_IT-serena-high.onnx";
 
   in {
   packages."voice-${lang}-${model}" = let
 
   model_onnx_json = pkgs.fetchurl {
-    url = "${composed_url}.json";
-    hash = "sha256-zn4zGa7jtoerbovo1J6uNQ5e+ULq+VGJ3sgPuJEQ1O4=";
+    url  = url_json;
+    hash = "sha256-YFl7rHN6IHZlkf4k0TFd+aOBHcNQnmm8OUze4Z7Muuc=";
     name = "model.onnx.json";
     };
   model_onnx     = pkgs.fetchurl {
-    url = "${composed_url}";
-    hash = "sha256-dDJA2ubsqxLNw+7pJgy/aIoE4GZ3XQzii4AH2tEvQtA=";
+    url  = url_onnx;
+    hash = "sha256-dGL73wNyf7TAwWEoatU4/mQ2t+SxwwWe9SkwAyR1lV8=";
     name = "model.onnx";
     };
 
