@@ -23,8 +23,20 @@
     };
 
     wayland.windowManager.hyprland.extraConfig = ''
+      hl.layer_rule({ match = { namespace = "^(omasnap)$" }, no_anim = true })
+
+      hl.permission({
+        binary="${omasnap}/bin/.omasnap-wrapped",
+        type="screencopy",
+        mode="allow"
+      })
       hl.permission({
         binary="${lib.getExe pkgs.grim}",
+        type="screencopy",
+        mode="allow"
+      })
+      hl.permission({
+        binary="${lib.getExe inputs.omasnap-nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system}.grim}",
         type="screencopy",
         mode="allow"
       })

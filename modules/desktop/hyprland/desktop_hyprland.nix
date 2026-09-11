@@ -78,14 +78,6 @@ in {
     hl.bind("SUPER + CONTROL + Z", hl.dsp.exec_cmd("fmenu-text-style"))
     hl.bind("SUPER + Space", hl.dsp.exec_cmd("${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.hyprmenu-launch}"))
 
---    hl.bind("mouse:275", function()
---      longPressTriggered = true
---      local pos = hl.get_cursor_pos()
---      hl.dispatch(hl.dsp.exec_cmd(
---        string.format("${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.cursor-ring} '%.0f, %.0f'", tonumber(pos.x), tonumber(pos.y))
---      ))
---    end, { long_press = true })
-
     '';
 
 

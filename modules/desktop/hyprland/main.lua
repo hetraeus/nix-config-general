@@ -166,6 +166,7 @@ hl.gesture({ fingers = 3, direction = "horizontal", action = "scroll_move" })
 hl.layer_rule({ match = { namespace = "^(rofi)$"                  }, no_anim = true })
 hl.layer_rule({ match = { namespace = "^(swaync-control-center)$" }, no_anim = true })
 hl.layer_rule({ match = { namespace = "^(clipboard-manager)$"     }, no_anim = true })
+hl.layer_rule({ match = { namespace = "^(noctalia-.*)$"     }, no_anim = true })
 
 --------------------------------------------------------------------------------
 -- WINDOW RULES
