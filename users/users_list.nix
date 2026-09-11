@@ -26,6 +26,6 @@ config = {
     backupFileExtension = "backup";
     useGlobalPkgs       = true;
     useUserPackages     = true;
-    extraSpecialArgs    = { inherit self' self; };
+    extraSpecialArgs    = { inherit self; };
     };
 };};}

@@ -12,7 +12,7 @@
   console.earlySetup = true;
 
   boot = {
-    initrd.availableKernelModules   = [ "bcachefs" "xhci_pci" "usb_storage" ];
+    initrd.availableKernelModules   = [ "xhci_pci" "usb_storage" ];
     initrd.kernelModules            = [ ];
     kernelParams                    = [ ];
     kernelPackages                  = pkgs.linuxPackages_zen.extend ( lfinal: lprev: {
@@ -20,7 +20,6 @@
         preBuild = old.preBuild or "" + ''
           makeFlagsArray+=(EXTRA_FLAGS="-Wno-microsoft-anon-tag -fms-extensions")
           '';});});
-    supportedFilesystems            = [ "bcachefs" ];
     loader.efi.canTouchEfiVariables = true;
     tmp.useTmpfs                    = true; # NOTE: Large Nix builds can fail if the mounted tmpfs is not large enough!
     };
