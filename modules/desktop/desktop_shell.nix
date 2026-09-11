@@ -59,6 +59,27 @@
        }];
     };};
 
+  services.opensnitch.rules.api-openmeteo = { # used by noctalia shell
+    name        = "api-openmeteo";
+    created     = "2010-01-01T10:00:00.000000Z"; # silence logs
+    enabled     = true;
+    action      = "allow";
+    duration    = "always";
+    operator    = {
+      type      = "list";
+      operand   = "list";
+      sensitive = false;
+      list      = [{
+       type     = "regexp";
+       operand  = "dest.host";
+       data     = "^(api\.open-meteo\.com)$";
+       } {
+       type     = "simple";
+       operand  = "dest.port";
+       data     = "443";
+       }];
+    };};
+
   services.opensnitch.rules.wttr_weather = {
     name      = "wttr_weather";
     enabled   = true;
