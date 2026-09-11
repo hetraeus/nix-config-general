@@ -24,7 +24,7 @@ xdg.desktopEntries.invertColors = {
 
   # wayland.windowManager.hyprland.extraLuaFiles.display_support = let
   wayland.windowManager.hyprland.extraConfig = let
-  run-or-raise = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.wrun-or-raise}" ;
+  run-or-raise = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.wlr-focus}" ;
   in ''
     hl.bind("SUPER + P", hl.dsp.exec_cmd("${run-or-raise} wdisplays ${lib.getExe pkgs.wdisplays}"))
     hl.permission({binary="${lib.getExe' pkgs.wdisplays ".wdisplays-wrapped"}", type="screencopy", mode="allow"})

@@ -5,7 +5,7 @@
     piemenu-launch.base0D = "${config.lib.stylix.colors.withHashtag.base0D}";
     };
 
-  run_or_raise         = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.wrun-or-raise}";
+  run_or_raise         = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.wlr-focus}";
   sbuku                = self.packages.${pkgs.stdenv.hostPlatform.system}.sbuku;
   hypr_hide_floats     = self.packages.${pkgs.stdenv.hostPlatform.system}.hypr-hide-floats;
   rasi_theme           = pkgs.writeTextFile { name = "rasi_theme"; text = builtins.readFile ../board.rasi ; };
