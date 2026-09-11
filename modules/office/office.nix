@@ -141,6 +141,30 @@ flake.homeModules.office = { pkgs, lib, config, self, ... }: {
   programs.ripgrep-all.enable = true;
   programs.vivaldi.enable = true; # backup browser
 
+  # TODO wait 26.11
+  # programs.libreoffice.settings = {
+  #   "/org.openoffice.Office.BasicIDE/Autocomplete" = {
+  #     CodeComplete = true;
+  #     };
+  #   "/org.openoffice.Office.Calc/Formula/Syntax" = {
+  #     EnglishFunctionName = true;
+  #     };
+  #   "/org.openoffice.Office.Calc/Layout/Other/MeasureUnit" = {
+  #     Metric = 2;
+  #     };
+  #   "/org.openoffice.Office.Calc/Grid/Option" = {
+  #     VisibleGrid = false;
+  #     };
+  #   "/org.openoffice.Office.Paths/Paths/org.openoffice.OfficePaths:NamedPath['Work']" = {
+  #     WritePath = config.xdg.userDirs.projects;
+  #     };
+  #   "/org.openoffice.Office.Common/Misc" = {
+  #     ShowTipOfTheDay = false;
+  #     FirstRun = false;
+  #     SymbolStyle = "sukapura_dark_svg";
+  #     };
+  #   };
+
   xdg.configFile."pdfarranger_config.ini" = { # disable "content-loss-warning"
     source = ./pdfarranger_config.ini ;
     target = "pdfarranger/config.ini" ;
