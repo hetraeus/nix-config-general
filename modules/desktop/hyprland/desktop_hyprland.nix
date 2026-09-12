@@ -47,8 +47,40 @@ in {
 #    builtins.readFile ./floating.lua +
     builtins.readFile ./main.lua     +
     ''
-    hl.bind("mouse:275", hl.dsp.exec_cmd("${lib.getExe piemenu_launch} kb"), { mouse = true })
-    hl.bind("mouse:276", hl.dsp.exec_cmd("${lib.getExe piemenu_launch} wm"), { mouse = true })
+    hl.bind("mouse:275", function()
+      local cursor = hl.get_cursor_pos()
+      local cmd = string.format(
+        "CLIPBOARD_X=%d CLIPBOARD_Y=%d %s kb", 
+        math.floor(cursor.x), 
+        math.floor(cursor.y), 
+        "${lib.getExe piemenu_launch}"
+      )
+      hl.dispatch(hl.dsp.exec_cmd(cmd))
+    end , { mouse = true })
+
+    hl.bind("mouse:276", function()
+      local cursor = hl.get_cursor_pos()
+      local cmd = string.format(
+        "CLIPBOARD_X=%d CLIPBOARD_Y=%d %s wm", 
+        math.floor(cursor.x), 
+        math.floor(cursor.y), 
+        "${lib.getExe piemenu_launch}"
+      )
+      hl.dispatch(hl.dsp.exec_cmd(cmd))
+    end , { mouse = true })
+
+    hl.bind("SUPER + Z", function()
+      local cursor = hl.get_cursor_pos()
+      local cmd = string.format(
+        "CLIPBOARD_X=%d CLIPBOARD_Y=%d %s", 
+        math.floor(cursor.x), 
+        math.floor(cursor.y), 
+        "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.clipboard-client}"
+      )
+      hl.dispatch(hl.dsp.exec_cmd(cmd))
+    end , { mouse = true })
+
+
     hl.bind("SUPER + S"        , hl.dsp.exec_cmd("${lib.getExe sbuku}     askme"))
     hl.bind("SUPER + SHIFT + S", hl.dsp.exec_cmd("${lib.getExe sbuku} clipboard"))
 
