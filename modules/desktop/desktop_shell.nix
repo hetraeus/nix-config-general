@@ -1,4 +1,4 @@
-{ flake.nixosModules.desktop_shell = { pkgs, config, lib, ... }: {
+{ inputs, ... }: { flake.nixosModules.desktop_shell = { pkgs, config, lib, ... }: {
 
   environment.systemPackages = [
     pkgs.brightnessctl
@@ -59,8 +59,8 @@
        }];
     };};
 
-  services.opensnitch.rules.api-openmeteo = { # used by noctalia shell
-    name        = "api-openmeteo";
+  services.opensnitch.rules.shell-noctalia = {
+    name        = "shell-noctalia";
     created     = "2010-01-01T10:00:00.000000Z"; # silence logs
     enabled     = true;
     action      = "allow";
@@ -72,7 +72,7 @@
       list      = [{
        type     = "regexp";
        operand  = "dest.host";
-       data     = "^(api\.open-meteo\.com)$";
+       data     = "^(api\.open-meteo\.com|noctalia\.cachix\.org)$";
        } {
        type     = "simple";
        operand  = "dest.port";
@@ -133,6 +133,8 @@ flake.homeModules.desktop_shell = { pkgs, lib, config, self, ... }: {
     pkgs.zbar
     pkgs.zint-qt
     ];
+  programs.noctalia.enable = true;
+  programs.noctalia.systemd.enable = true;
 
   systemd.user.services.clipboard = {
     Install.WantedBy    = [ "graphical-session.target" ] ;
@@ -150,11 +152,6 @@ flake.homeModules.desktop_shell = { pkgs, lib, config, self, ... }: {
   xdg.autostart.enable    = true;
   xdg.autostart.entries   = [
     "${self.packages.${pkgs.stdenv.hostPlatform.system}.chillfile}/share/applications/chillfile.desktop"
-    (pkgs.makeDesktopItem {
-      name = "password_dialog";
-      desktopName = "password dialog";
-      exec = lib.getExe' pkgs.lxqt.lxqt-policykit "lxqt-policykit-agent";
-      } + /share/applications/password_dialog.desktop )
     ];
 
   # BUG: https://github.com/gmodena/nix-flatpak/issues/31
