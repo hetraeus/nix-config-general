@@ -5,6 +5,7 @@
     inputs.omniflake.flakes.nvf.homeManagerModules.nvf
     inputs.omniflake.flakes.nix-index-database.homeModules.default
     inputs.sops-nix.homeManagerModules.sops
+    inputs.noctalia.homeModules.default
 
     self.homeModules."${config.users_list.principalUser}Modules"
     self.homeModules.sound_control
@@ -25,10 +26,10 @@
     self.homeModules.desktop_emoji
     self.homeModules.desktop_hyprland
     self.homeModules.desktop_lock
-    self.homeModules.desktop_notification
     self.homeModules.desktop_screenshot
     self.homeModules.desktop_shell
-    self.homeModules.desktop_waybar
+    # self.homeModules.desktop_notification
+    # self.homeModules.desktop_waybar
     self.homeModules.desktop_voices
 
     self.homeModules.terminal_fidgets
