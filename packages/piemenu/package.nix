@@ -34,7 +34,7 @@
 
       in pkgs.writeShellApplication {
         name          = "piemenu-launch";
-        runtimeInputs = [ pkgs.procps pkgs.rofi self'.packages.mouse-pos ];
+        runtimeInputs = [ pkgs.procps pkgs.rofi ];
         text = ''
           pkill --exact "rofi" && exit
           case "''${1:-kb}" in
@@ -42,16 +42,17 @@
             "wm") COMMAND=${lib.getExe' piemenu-2 "piemenu_2"};;
             "*" ) exit ;;
           esac
-          CURPOS="$(mouse-pos)"
-          CURX="$(( ''${CURPOS% *} - 135 ))"
-          CURY="$(( ''${CURPOS#* } - 125 ))"
+          CURX="$(( ''${CLIPBOARD_X:-0} - 135 ))"
+          CURY="$(( ''${CLIPBOARD_Y:-0} - 125 ))"
+          echo "CURX=$CURX CURY=$CURY" >> /tmp/piemenu_debug.log
+
           rofi                        \
           -p ""                       \
           -monitor -3                 \
           -selected-row 17            \
           -show   piemenu             \
           -theme  ${rasi-theme}       \
-          -modes "piemenu:$COMMAND"   \
+          -modes "piemenu:''${COMMAND:-kb}"   \
           -theme-str "${rasi-colors}
           window { x-offset: ''${CURX}px; y-offset: ''${CURY}px; }"
         '';
