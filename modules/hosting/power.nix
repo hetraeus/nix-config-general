@@ -42,4 +42,18 @@ security.polkit.extraConfig = ''
     }
   });
   '';
-};}
+};
+
+flake.homeModules.power = { pkgs, lib, config, ... }: let
+  dpms_ctrl = status : pkgs.writeShellApplication {
+    name = "dpms_ctrl";
+    text = ''
+      hyprctl dispatch 'hl.dsp.dpms({ action = "${status}" })'
+      '';
+  };
+in {
+ home.packages = [ (dpms_ctrl "toggle") ]; # needed by kdeconnect
+ };
+
+
+}

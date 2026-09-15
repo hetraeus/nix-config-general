@@ -25,12 +25,12 @@
     self.homeModules.desktop_display
     self.homeModules.desktop_emoji
     self.homeModules.desktop_hyprland
-    self.homeModules.desktop_lock
     self.homeModules.desktop_screenshot
     self.homeModules.desktop_shell
     # self.homeModules.desktop_notification
     # self.homeModules.desktop_waybar
     self.homeModules.desktop_voices
+    self.homeModules.power
 
     self.homeModules.terminal_fidgets
     self.homeModules.terminal_gui
