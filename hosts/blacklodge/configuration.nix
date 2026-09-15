@@ -44,6 +44,7 @@ flake.nixosConfigurations.${hostname} = inputs.nixpkgs.lib.nixosSystem {
     self.nixosModules.maker
     self.nixosModules.pim
     self.nixosModules.gaming
+    self.nixosModules.geography
     self.nixosModules.office
     self.nixosModules.backup
     self.nixosModules.i18n_en_de_it
