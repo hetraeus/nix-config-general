@@ -45,7 +45,7 @@ in {
 
   wayland.windowManager.hyprland.extraConfig =
 #    builtins.readFile ./floating.lua +
-    builtins.readFile ./main.lua     +
+    builtins.readFile ./main.lua +
     ''
     hl.bind("mouse:275", function()
       local cursor = hl.get_cursor_pos()
@@ -61,9 +61,9 @@ in {
     hl.bind("mouse:276", function()
       local cursor = hl.get_cursor_pos()
       local cmd = string.format(
-        "CLIPBOARD_X=%d CLIPBOARD_Y=%d %s wm", 
-        math.floor(cursor.x), 
-        math.floor(cursor.y), 
+        "CLIPBOARD_X=%d CLIPBOARD_Y=%d %s wm",
+        math.floor(cursor.x),
+        math.floor(cursor.y),
         "${lib.getExe piemenu_launch}"
       )
       hl.dispatch(hl.dsp.exec_cmd(cmd))
@@ -87,7 +87,7 @@ in {
     hl.bind("ALT + SHIFT + D", hl.dsp.exec_cmd("${run_or_raise} songrec songrec"))
 
     hl.bind("SUPER + ALT + Space", hl.dsp.exec_cmd("noctalia msg panel-open control-center notifications"))
-    hl.bind("SUPER + X",           hl.dsp.exec_cmd("${lib.getExe' pkgs.systemd "systemctl"} --user restart fmenu-emoticon"))
+    hl.bind("SUPER + X",           hl.dsp.exec_cmd("${lib.getExe' pkgs.systemd "systemctl"}     --user restart fmenu-emoticon"))
 
     hl.bind("SUPER + ALT + D", dofile("${hypr_hide_floats}"))
     hl.bind("SUPER + D",               ${hypr_single_hide}  )
