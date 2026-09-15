@@ -1,5 +1,6 @@
 { flake.nixosModules.sound_control = { ... }: {
 
+  security.rtkit.enable = true;
   services.pipewire    = {
     enable             = true;
     alsa.enable        = true;
@@ -22,7 +23,7 @@
     self.packages.${pkgs.stdenv.hostPlatform.system}.freeze-sound
     ];
 
-  services.easyeffects.enable = true;
+  #services.easyeffects.enable = true; # 2026-08-30 : crackling audio
   # don't forget to add your headphones equalizer from
   # https://autoeq.app/
   # and convert it to a json preset through easyeffects
