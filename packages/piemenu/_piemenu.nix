@@ -25,6 +25,7 @@ in writeShellApplication {
   runtimeInputs = [
     clicker
     self'.packages.visual-brightness
+    self'.packages.wlr-close
 
     brightnessctl
     coreutils

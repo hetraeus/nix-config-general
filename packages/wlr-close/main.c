@@ -1,8 +1,11 @@
 #define _GNU_SOURCE
 #include <getopt.h>
+#include <signal.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <wayland-client.h>
 
 #include "wlr-foreign-toplevel-management-unstable-v1-client-protocol.h"
@@ -10,6 +13,28 @@
 /* ---------- globals ---------- */
 static struct zwlr_foreign_toplevel_manager_v1 *manager;
 static struct zwlr_foreign_toplevel_handle_v1 *active_toplevel;
+static volatile int got_signal = 0;
+static struct wl_display *display = NULL;
+
+/* ---------- signal handler for graceful shutdown ---------- */
+static void
+signal_handler(int sig)
+{
+    (void)sig;
+    got_signal = 1;
+}
+
+static void
+setup_signals(void)
+{
+    struct sigaction sa = {0};
+    sa.sa_handler = signal_handler;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    sigaction(SIGINT, &sa, NULL);
+    sigaction(SIGTERM, &sa, NULL);
+    sigaction(SIGHUP, &sa, NULL);
+}
 
 /* ---------- toplevel handle listener ---------- */
 static void
@@ -135,12 +160,27 @@ static const struct wl_registry_listener registry_listener = {
     .global_remove = registry_global_remove,
 };
 
+/* ---------- cleanup function ---------- */
+static void
+cleanup(struct wl_display *disp)
+{
+    if (manager) {
+        zwlr_foreign_toplevel_manager_v1_destroy(manager);
+        manager = NULL;
+    }
+    if (disp) {
+        wl_display_disconnect(disp);
+    }
+}
+
 /* ---------- main ---------- */
 static void
 usage(const char *argv0)
 {
-    fprintf(stderr, "usage: %s\n", argv0);
+    fprintf(stderr, "usage: %s [-h]\n", argv0);
     fprintf(stderr, "  Closes the active toplevel window.\n");
+    fprintf(stderr, "\nOptions:\n");
+    fprintf(stderr, "  -h, --help    Show this help message and exit\n");
 }
 
 int
@@ -159,7 +199,10 @@ main(int argc, char **argv)
         }
     }
 
-    struct wl_display *display = wl_display_connect(NULL);
+    /* Setup signal handlers for graceful shutdown */
+    setup_signals();
+
+    display = wl_display_connect(NULL);
     if (!display) {
         fprintf(stderr, "wlr-close: cannot connect to Wayland display\n");
         return 1;
@@ -168,44 +211,63 @@ main(int argc, char **argv)
     struct wl_registry *registry = wl_display_get_registry(display);
     wl_registry_add_listener(registry, &registry_listener, NULL);
 
-    /* globals */
-    if (wl_display_roundtrip(display) < 0)
+    /* First roundtrip: discover globals */
+    if (got_signal || wl_display_dispatch_pending(display) < 0 || wl_display_roundtrip(display) < 0)
         goto proto_error;
 
     if (!manager) {
         fprintf(stderr, "wlr-close: compositor does not support "
                         "wlr-foreign-toplevel-management\n");
-        wl_display_disconnect(display);
+        cleanup(display);
         return 1;
     }
 
-    /* list of toplevels */
-    if (wl_display_roundtrip(display) < 0)
-        goto proto_error;
-    /* initial app_id/title/state events for each toplevel */
-    if (wl_display_roundtrip(display) < 0)
-        goto proto_error;
-    /* ensure late state events have been delivered */
-    if (wl_display_roundtrip(display) < 0)
+    /* Second roundtrip: receive initial toplevel list */
+    if (got_signal || wl_display_dispatch_pending(display) < 0 || wl_display_roundtrip(display) < 0)
         goto proto_error;
 
+    /* Additional roundtrips to ensure late state events are delivered */
+    if (got_signal) {
+        fprintf(stderr, "wlr-close: interrupted by signal\n");
+        cleanup(display);
+        return 130;  /* Standard exit code for SIGINT */
+    }
+
+    if (wl_display_dispatch_pending(display) < 0 || wl_display_roundtrip(display) < 0)
+        goto proto_error;
+
+    if (got_signal) {
+        fprintf(stderr, "wlr-close: interrupted by signal\n");
+        cleanup(display);
+        return 130;
+    }
+
+    if (wl_display_dispatch_pending(display) < 0 || wl_display_roundtrip(display) < 0)
+        goto proto_error;
+
+    /* Final check for active toplevel with proper guarding */
     if (!active_toplevel) {
         fprintf(stderr, "wlr-close: no active toplevel found\n");
-        wl_display_disconnect(display);
+        cleanup(display);
         return 1;
     }
 
+    /* Send close request */
     zwlr_foreign_toplevel_handle_v1_close(active_toplevel);
 
-    /* flush the request */
+    /* Flush the request and wait for completion */
+    if (wl_display_flush(display) < 0)
+        goto proto_error;
+
     if (wl_display_roundtrip(display) < 0)
         goto proto_error;
 
-    wl_display_disconnect(display);
+    /* Graceful cleanup */
+    cleanup(display);
     return 0;
 
 proto_error:
     fprintf(stderr, "wlr-close: wayland connection lost\n");
-    wl_display_disconnect(display);
+    cleanup(display);
     return 1;
 }
