@@ -86,12 +86,12 @@ in {
 
     hl.bind("ALT + SHIFT + D", hl.dsp.exec_cmd("${run_or_raise} songrec songrec"))
 
-    hl.bind("SUPER + ALT + Space", hl.dsp.exec_cmd("${lib.getExe' pkgs.swaynotificationcenter "swaync-client"} --toggle-panel"))
+    hl.bind("SUPER + ALT + Space", hl.dsp.exec_cmd("noctalia msg panel-open control-center notifications"))
     hl.bind("SUPER + X",           hl.dsp.exec_cmd("${lib.getExe' pkgs.systemd "systemctl"} --user restart fmenu-emoticon"))
     hl.bind("SUPER + Z",           hl.dsp.exec_cmd("${lib.getExe  self.packages.${pkgs.stdenv.hostPlatform.system}.clipboard-client}"))
 
     hl.bind("SUPER + ALT + D", dofile("${hypr_hide_floats}"))
-    hl.bind("SUPER + D",       ${hypr_single_hide})
+    hl.bind("SUPER + D",               ${hypr_single_hide}  )
 
     hl.bind("SUPER + CONTROL + Tab",
       hl.dsp.exec_cmd("${lib.getExe pkgs.rofi} -show window -window-thumbnail -show-icons -window-format '{t}' -theme ${rasi_theme}"))
@@ -106,7 +106,7 @@ in {
       hl.dispatch(hl.dsp.focus({ window = "class:thunderbird" }))
     end)
 
-    hl.bind("SUPER + F2", hl.dsp.exec_cmd("rofi -modi drun -show drun -show-icons -theme ${rasi_theme}"))
+    hl.bind("SUPER + F2", hl.dsp.exec_cmd("noctalia msg panel-open launcher"))
     hl.bind("SUPER + CONTROL + Z", hl.dsp.exec_cmd("fmenu-text-style"))
     hl.bind("SUPER + Space", hl.dsp.exec_cmd("${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.hyprmenu-launch}"))
 
