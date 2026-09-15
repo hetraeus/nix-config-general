@@ -199,3 +199,9 @@ void ClipboardManager::IgnoreNext()
 {
     HistoryStorage::markIgnoreWindow(1500);
 }
+
+void ClipboardManager::DeleteEntry(int index)
+{
+    m_storage.removeEntry(index);
+    emit HistoryChanged();
+}

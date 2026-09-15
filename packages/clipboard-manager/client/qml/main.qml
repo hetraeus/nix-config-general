@@ -22,22 +22,21 @@ Scope {
     property var pinnedFiltered: []
     property int currentPage: 0
     property int selectedIndex: 0
-    property int hoveredIndex: -1   // mouse hover only, no scrolling
+    property int hoveredIndex: -1
     property int cursorX: 0
     property int cursorY: 0
+    property bool deleteDialogVisible: false
+    property int deleteTargetIndex: -1
 
     readonly property int historyLimit: 100
-    readonly property string homeDir: Quickshell.env("HOME") || ""
-    readonly property string historyPath: homeDir + "/.cache/clipboard-manager/history.json"
 
     // --- Logic ---
     function updateFilters() {
         var lower = filterText.toLowerCase()
         var hist = [], pin = []
         for (var i = 0; i < historyModel.length; i++) {
-            var entry = historyModel[i]
-            var display = entry.type === "image" ? "Image" : (entry.content || "")
-            if (display.toLowerCase().indexOf(lower) !== -1) hist.push(i)
+            // _searchKey is precomputed at load time
+            if (historyModel[i]._searchKey.indexOf(lower) !== -1) hist.push(i)
         }
         historyFiltered = hist
         for (var j = 0; j < pinnedModel.length; j++) {
@@ -49,7 +48,12 @@ Scope {
         if (selectedIndex > maxIndex) selectedIndex = Math.max(0, maxIndex)
     }
 
-    onFilterTextChanged: updateFilters()
+    onFilterTextChanged: {
+        updateFilters()
+        // Explicit one-way sync to the widget, replacing the old broken binding.
+        var fb = contentLoader.item ? contentLoader.item.filterBar : null
+        if (fb && fb.text !== filterText) fb.text = filterText
+    }
     onHistoryModelChanged: updateFilters()
     onCurrentPageChanged: { filterText = ""; selectedIndex = 0 }
 
@@ -57,8 +61,6 @@ Scope {
         if (selectedIndex < historyFiltered.length) {
             var idx = historyFiltered[selectedIndex]
             service.callSetSelection(idx, function() {
-                // After bump, the entry is at the top of the history.
-                // Reset selection and hover to point to it, then quit.
                 root.selectedIndex = 0
                 root.hoveredIndex = -1
                 Qt.quit()
@@ -66,13 +68,40 @@ Scope {
         }
     }
 
+    function requestDelete() {
+        if (currentPage !== 0) return          // pinned entries aren't deletable
+        if (selectedIndex >= historyFiltered.length) return
+        deleteTargetIndex = historyFiltered[selectedIndex]
+        deleteDialogVisible = true
+    }
+
+    function cancelDelete() {
+        deleteDialogVisible = false
+        deleteTargetIndex = -1
+    }
+
+    function confirmDelete() {
+        if (deleteTargetIndex < 0) { cancelDelete(); return }
+        var idx = deleteTargetIndex
+        deleteTargetIndex = -1
+        deleteDialogVisible = false
+        service.callDeleteEntry(idx, function() {
+            // The watcher will reload history.json shortly and updateFilters()
+            // will clamp selectedIndex; nothing else to do here.
+        })
+    }
+
     function activatePinnedItem() {
         if (selectedIndex < pinnedFiltered.length) {
             var entry = pinnedModel[pinnedFiltered[selectedIndex]]
             if (entry.text === "💌 e-mail") {
-                service.callIgnore(function() { service.readMail(Quickshell.env("XDG_RUNTIME_DIR") + "/mail") })
+                service.callIgnore(function() {
+                    service.readMail(Quickshell.env("XDG_RUNTIME_DIR") + "/mail")
+                })
             } else {
-                service.callIgnore(function() { service.copy(entry.text, function() { Qt.quit() }) })
+                service.callIgnore(function() {
+                    service.copy(entry.text, function() { Qt.quit() })
+                })
             }
         }
     }
@@ -96,30 +125,36 @@ Scope {
     // --- Service Connections ---
     Connections {
         target: service
+
         function onHistoryLoaded(rawJson) {
-          try {
-              var doc = JSON.parse(rawJson)
-              var entries = (doc.entries || [])
-                  .sort(function(a, b) { 
-                      return new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime() 
-                  })
-                  .slice(0, root.historyLimit)   // limit to latest entries
-              root.historyModel = entries
-              updateFilters()
-          } catch (e) {
-              root.historyModel = []
-              updateFilters()
-          }
-      }
+            try {
+                var doc = JSON.parse(rawJson)
+                var entries = (doc.entries || [])
+                    .sort(function(a, b) {
+                        return new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime()
+                    })
+                    .slice(0, root.historyLimit)
+                // Precompute lowercase search key once per entry.
+                for (var i = 0; i < entries.length; i++) {
+                    var e = entries[i]
+                    e._searchKey = (e.type === "image" ? "image" : (e.content || "")).toLowerCase()
+                }
+                root.historyModel = entries   // triggers updateFilters via onHistoryModelChanged
+            } catch (e) {
+                root.historyModel = []
+            }
+        }
 
         function onMailLoaded(content) {
             if (content.length > 0) service.copy(content, function() { Qt.quit() })
             else Qt.quit()
         }
+
         function onCursorPosReady(x, y) {
-            cursorX = x; cursorY = y
+            cursorX = x
+            cursorY = y
             panel.visible = true
-            focusTimer.start()
+            // The focus timer now lives inside the lazily-loaded content.
         }
     }
 
@@ -141,87 +176,251 @@ Scope {
 
         MouseArea { anchors.fill: parent; onClicked: Qt.quit() }
 
-        Rectangle {
-            id: popupContent
-            width: 400; height: 500
-            x: Math.max(0, Math.min(cursorX - panel.screen.x - width / 2, panel.screen.width - width))
-            y: Math.max(0, Math.min(cursorY - panel.screen.y - height / 4, panel.screen.height - height))
-            color: theme.bgColor; radius: 8
-            border.color: theme.commentColor; border.width: 1
-
-            MouseArea { anchors.fill: parent; onClicked: {} }
-
-            ColumnLayout {
-                anchors.fill: parent; anchors.margins: 8; spacing: 4
-
-                FilterBar {
-                    id: filterBar
-                    text: root.filterText
-                    onTextChanged: root.filterText = text
-                    currentPage: root.currentPage
-                    fgColor: theme.fgColor; fontFamily: theme.fontFamily
-
-                    onEscapePressed: Qt.quit()
-                    onPageToggled: root.currentPage = root.currentPage === 0 ? 1 : 0
-                    onUpPressed: {
-                        if (root.selectedIndex > 0) root.selectedIndex--
-                    }
-                    onDownPressed: {
-                        var maxIndex = (root.currentPage === 0 ? root.historyFiltered.length : root.pinnedFiltered.length) - 1
-                        if (root.selectedIndex < maxIndex) root.selectedIndex++
-                    }
-                    onLeftPressed: {
-                        if (root.currentPage === 0) root.currentPage = 1
-                    }
-                    onRightPressed: {
-                        if (root.currentPage === 1) root.currentPage = 0
-                    }
-                    onReturnPressed: {
-                        root.currentPage === 0 ? root.activateHistoryItem() : root.activatePinnedItem()
-                    }
-                }
-
-                PagesView {
-                    currentPage: root.currentPage
-                    historyModel: root.historyModel
-                    historyFiltered: root.historyFiltered
-                    pinnedModel: root.pinnedModel
-                    pinnedFiltered: root.pinnedFiltered
-                    selectedIndex: root.selectedIndex
-                    hoveredIndex: root.hoveredIndex
-                    bgColor: theme.bgColor
-                    selColor: theme.selColor
-                    hoverColor: "#404060"
-                    fgColor: theme.fgColor
-                    commentColor: theme.commentColor
-                    fontFamily: theme.fontFamily
-                    scrollOff: 2
-
-                    onHistoryClicked: function(index) {
-                        root.selectedIndex = index
-                        root.activateHistoryItem()
-                    }
-                    onPinnedClicked: function(index) {
-                        root.selectedIndex = index
-                        root.activatePinnedItem()
-                    }
-                    onHistoryHovered: function(index) {
-                        root.hoveredIndex = index
-                    }
-                    onPinnedHovered: function(index) {
-                        root.hoveredIndex = index
-                    }
-                    onHistoryActivated: root.activateHistoryItem()
-                    onPinnedActivated: root.activatePinnedItem()
-                }
-            }
+        // Defer the entire popup tree until the panel is actually shown.
+        Loader {
+            id: contentLoader
+            anchors.fill: parent
+            active: panel.visible
+            asynchronous: true
+            sourceComponent: popupComponent
         }
     }
 
-    Timer {
-        id: focusTimer
-        interval: 50; repeat: false
-        onTriggered: filterBar.forceFocus()
+        Component {
+        id: popupComponent
+
+        Item {
+            id: popupRoot
+
+            // Exposed so main.qml can reach the widgets imperatively.
+            property alias filterBar: filterBar
+            property alias pagesView: pagesView
+
+            Rectangle {
+                id: popupContent
+
+                width: 400
+                height: 500
+                x: Math.max(0, Math.min(root.cursorX - panel.screen.x - width / 2,
+                                         panel.screen.width - width))
+                y: Math.max(0, Math.min(root.cursorY - panel.screen.y - height / 4,
+                                         panel.screen.height - height))
+                color: theme.bgColor
+                radius: 8
+                border.color: theme.commentColor
+                border.width: 1
+
+                MouseArea { anchors.fill: parent; onClicked: {} }
+
+                ColumnLayout {
+                    anchors.fill: parent
+                    anchors.margins: 8
+                    spacing: 4
+
+                    FilterBar {
+                        id: filterBar
+                        onTextChanged: root.filterText = text
+                        currentPage: root.currentPage
+                        fgColor: theme.fgColor
+                        fontFamily: theme.fontFamily
+
+                        onEscapePressed: Qt.quit()
+                        onPageToggled: root.currentPage = root.currentPage === 0 ? 1 : 0
+                        onUpPressed: {
+                            if (root.selectedIndex > 0) root.selectedIndex--
+                        }
+                        onDownPressed: {
+                            var maxIndex = (root.currentPage === 0
+                                ? root.historyFiltered.length
+                                : root.pinnedFiltered.length) - 1
+                            if (root.selectedIndex < maxIndex) root.selectedIndex++
+                        }
+                        onLeftPressed:  if (root.currentPage === 0) root.currentPage = 1
+                        onRightPressed: if (root.currentPage === 1) root.currentPage = 0
+                        onReturnPressed: {
+                            root.currentPage === 0
+                                ? root.activateHistoryItem()
+                                : root.activatePinnedItem()
+                        }
+                        onDeletePressed: root.requestDelete()
+                    }
+
+                    PagesView {
+                        id: pagesView
+                        currentPage: root.currentPage
+                        historyModel: root.historyModel
+                        historyFiltered: root.historyFiltered
+                        pinnedModel: root.pinnedModel
+                        pinnedFiltered: root.pinnedFiltered
+                        selectedIndex: root.selectedIndex
+                        hoveredIndex: root.hoveredIndex
+                        bgColor: theme.bgColor
+                        selColor: theme.selColor
+                        hoverColor: "#404060"
+                        fgColor: theme.fgColor
+                        commentColor: theme.commentColor
+                        fontFamily: theme.fontFamily
+                        scrollOff: 2
+
+                        onHistoryClicked: function(index) {
+                            root.selectedIndex = index
+                            root.activateHistoryItem()
+                        }
+                        onPinnedClicked: function(index) {
+                            root.selectedIndex = index
+                            root.activatePinnedItem()
+                        }
+                        onHistoryHovered: function(index) { root.hoveredIndex = index }
+                        onPinnedHovered:  function(index) { root.hoveredIndex = index }
+                        onHistoryActivated: root.activateHistoryItem()
+                        onPinnedActivated:  root.activatePinnedItem()
+                    }
+                }
+            }
+
+            FocusScope {
+                id: deleteDialog
+                anchors.fill: popupContent
+                visible: root.deleteDialogVisible
+                z: 100
+
+                // Dimmed background. Click outside the card → cancel.
+                Rectangle {
+                    anchors.fill: parent
+                    color: "#aa000000"
+                    radius: 8
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: root.cancelDelete()
+                    }
+                }
+
+                // Inner card. Eat its own clicks so the backdrop doesn't fire.
+                Rectangle {
+                    anchors.centerIn: parent
+                    width: 280
+                    height: 130
+                    color: theme.bgColor
+                    border.color: theme.commentColor
+                    border.width: 1
+                    radius: 8
+
+                    MouseArea { anchors.fill: parent; onClicked: {} }
+
+                    ColumnLayout {
+                        anchors.fill: parent
+                        anchors.margins: 16
+                        spacing: 12
+
+                        Text {
+                            Layout.fillWidth: true
+                            text: "Delete this entry from history?"
+                            color: theme.fgColor
+                            font.family: theme.fontFamily
+                            font.pointSize: 11
+                            horizontalAlignment: Text.AlignHCenter
+                            wrapMode: Text.WordWrap
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 8
+
+                            Rectangle {
+                                id: cancelButton
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 30
+                                color: cancelHover.containsMouse || activeFocus
+                                       ? "#404060" : "transparent"
+                                border.color: activeFocus ? theme.fgColor : theme.commentColor
+                                border.width: activeFocus ? 2 : 1
+                                radius: 4
+
+                                // Default focus item inside the scope.
+                                focus: true
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "Cancel"
+                                    color: theme.fgColor
+                                    font.family: theme.fontFamily
+                                }
+                                MouseArea {
+                                    id: cancelHover
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    onClicked: root.cancelDelete()
+                                }
+                                Keys.onReturnPressed: root.cancelDelete()
+                                Keys.onEnterPressed:  root.cancelDelete()
+                            }
+
+                            Rectangle {
+                                id: deleteButton
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 30
+                                color: delHover.containsMouse || activeFocus
+                                       ? "#a04040" : "#602020"
+                                border.color: activeFocus ? theme.fgColor : theme.commentColor
+                                border.width: activeFocus ? 2 : 1
+                                radius: 4
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "Delete"
+                                    color: theme.fgColor
+                                    font.family: theme.fontFamily
+                                }
+                                MouseArea {
+                                    id: delHover
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    onClicked: root.confirmDelete()
+                                }
+                                Keys.onReturnPressed: root.confirmDelete()
+                                Keys.onEnterPressed:  root.confirmDelete()
+                            }
+                        }
+                    }
+                }
+
+                // On show, grab focus (Cancel picks it up via focus: true).
+                // On hide, hand focus back to the filter bar.
+                onVisibleChanged: {
+                    if (visible) {
+                        cancelButton.forceActiveFocus()   // <-- was: forceActiveFocus()
+                    } else {
+                        Qt.callLater(function() {
+                            var rootItem = contentLoader.item
+                            if (rootItem && rootItem.filterBar)
+                                rootItem.filterBar.forceFocus()
+                        })
+                    }
+                }
+
+                // Escape cancels from anywhere in the dialog, regardless of
+                // which button is focused.
+                Keys.onEscapePressed: root.cancelDelete()
+
+                // Keep Tab inside the dialog: cycle Cancel ↔ Delete.
+                Keys.onTabPressed: function(event) {
+                    if (cancelButton.activeFocus)
+                        deleteButton.forceActiveFocus()
+                    else
+                        cancelButton.forceActiveFocus()
+                    event.accepted = true
+                }
+            }
+
+            Component.onCompleted: focusTimer.start()
+
+            Timer {
+                id: focusTimer
+                interval: 50
+                repeat: false
+                onTriggered: filterBar.forceFocus()
+            }
+        }
     }
 
     Component.onCompleted: {

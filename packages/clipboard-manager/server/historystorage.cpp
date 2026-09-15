@@ -270,3 +270,33 @@ void HistoryStorage::bumpEntry(int index)
     save();
     lock.unlock();
 }
+
+void HistoryStorage::removeEntry(int index)
+{
+    QDir().mkpath(QFileInfo(lockPath()).absolutePath());
+    QLockFile lock(lockPath());
+    lock.setStaleLockTime(5000);
+    if (!lock.tryLock(2000)) {
+        qWarning() << "Could not acquire history lock, removeEntry() aborted";
+        return;
+    }
+
+    // Re-read from disk while holding the lock so we don't operate on a stale view.
+    load();
+    if (m_loadFailed || index < 0 || index >= m_entries.size()) {
+        lock.unlock();
+        return;
+    }
+
+    HistoryEntry entry = m_entries.takeAt(index);
+
+    // If it was an image, clean up both the full-size file and its thumbnail.
+    if (entry.type == "image" && !entry.content.isEmpty()) {
+        QFile::remove(entry.content);
+        const QString thumb = thumbDir() + "/" + QFileInfo(entry.content).fileName();
+        QFile::remove(thumb);
+    }
+
+    save();
+    lock.unlock();
+}

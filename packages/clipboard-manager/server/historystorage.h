@@ -18,6 +18,7 @@ public:
     QList<HistoryEntry> entries() const { return m_entries; }
     void clear();
     void bumpEntry(int index);
+    void removeEntry(int index);
 
     // Saves a full-size image + thumbnail to disk and returns the path to
     // the full-size image (suitable as the `content` for addEntry), or an

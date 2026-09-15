@@ -5,9 +5,9 @@ import Quickshell.Io
 Item {
     id: root
 
-    readonly property string historyPath: (Quickshell.env("HOME") || "") + "/.cache/clipboard-manager/history.json"
+    readonly property string homeDir: Quickshell.env("HOME") || ""
+    readonly property string historyPath: homeDir + "/.cache/clipboard-manager/history.json"
 
-    // Single FileView: watches AND reads the file directly (no process overhead)
     FileView {
         id: historyFile
         path: root.historyPath
@@ -27,7 +27,9 @@ Item {
     }
     function callSetSelection(historyIndex, cb) {
         setSelectionProc.callback = cb
-        setSelectionProc.command = ["dbus-send", "--session", "--type=method_call", "--dest=org.clipboard.Manager", "/", "org.clipboard.Manager.SetSelection", "int32:" + historyIndex]
+        setSelectionProc.command = ["dbus-send", "--session", "--type=method_call",
+            "--dest=org.clipboard.Manager", "/",
+            "org.clipboard.Manager.SetSelection", "int32:" + historyIndex]
         setSelectionProc.running = true
     }
 
@@ -40,7 +42,9 @@ Item {
     }
     function callIgnore(cb) {
         ignoreProc.callback = cb
-        ignoreProc.command = ["dbus-send", "--session", "--type=method_call", "--dest=org.clipboard.Manager", "/", "org.clipboard.Manager.IgnoreNext"]
+        ignoreProc.command = ["dbus-send", "--session", "--type=method_call",
+            "--dest=org.clipboard.Manager", "/",
+            "org.clipboard.Manager.IgnoreNext"]
         ignoreProc.running = true
     }
 
@@ -49,8 +53,8 @@ Item {
         id: wlCopyProc
         running: false
         property var callback: null
-        onExited: function(exitCode) { 
-            if (callback) { var cb = callback; callback = null; cb() } 
+        onExited: function(exitCode) {
+            if (callback) { var cb = callback; callback = null; cb() }
             else { Qt.quit() }
         }
     }
@@ -74,6 +78,21 @@ Item {
     function readMail(path) {
         mailReader.command = ["cat", path]
         mailReader.running = true
+    }
+
+    // --- D-Bus DeleteEntry ---
+    Process {
+        id: deleteEntryProc
+        running: false
+        property var callback: null
+        onExited: function(exitCode) { if (callback) { var cb = callback; callback = null; cb() } }
+    }
+    function callDeleteEntry(historyIndex, cb) {
+        deleteEntryProc.callback = cb
+        deleteEntryProc.command = ["dbus-send", "--session", "--type=method_call",
+            "--dest=org.clipboard.Manager", "/",
+            "org.clipboard.Manager.DeleteEntry", "int32:" + historyIndex]
+        deleteEntryProc.running = true
     }
 
     // --- Cursor Position ---

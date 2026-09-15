@@ -20,6 +20,7 @@ RowLayout {
     signal rightPressed()
     signal returnPressed()
     signal pageToggled()
+    signal deletePressed()          // <-- new
 
     function forceFocus() { filterField.forceActiveFocus() }
 
@@ -33,7 +34,17 @@ RowLayout {
         horizontalAlignment: Text.AlignHCenter
         cursorDelegate: Item { }
         background: Rectangle { color: "transparent"; border.color: "transparent"; border.width: 0 }
-        
+
+        // Intercept keys before TextField's own handling so Shift+Delete reaches us.
+        Keys.priority: Keys.BeforeItem
+
+        Keys.onPressed: function(event) {
+            if (event.key === Qt.Key_Delete && (event.modifiers & Qt.ShiftModifier)) {
+                root.deletePressed()
+                event.accepted = true
+            }
+        }
+
         Keys.onEscapePressed: root.escapePressed()
         Keys.onUpPressed: root.upPressed()
         Keys.onDownPressed: root.downPressed()

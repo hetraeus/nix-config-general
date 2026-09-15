@@ -13,7 +13,7 @@ Item {
     property var pinnedModel: []
     property var pinnedFiltered: []
     property int selectedIndex: 0
-    property int hoveredIndex: -1   // mouse hover only, no scrolling
+    property int hoveredIndex: -1
 
     property color bgColor: "#1a1a2e"
     property color selColor: "#008080"
@@ -27,10 +27,29 @@ Item {
     signal pinnedActivated()
     signal historyClicked(int index)
     signal pinnedClicked(int index)
-    signal historyHovered(int index)   // index or -1 to clear
+    signal historyHovered(int index)
     signal pinnedHovered(int index)
 
-    // Scroll the list to keep the selected index with scrollOff entries above/below
+    // Which page's ListView is currently instantiated. The outgoing page stays
+    // alive during the slide animation, then is torn down.
+    property bool page0Alive: true
+    property bool page1Alive: false
+
+    onCurrentPageChanged: {
+        if (currentPage === 0) page0Alive = true
+        else page1Alive = true
+        pageDestroyTimer.restart()
+    }
+
+    Timer {
+        id: pageDestroyTimer
+        interval: 250   // slightly longer than the slide animation
+        onTriggered: {
+            if (root.currentPage === 0) root.page1Alive = false
+            else root.page0Alive = false
+        }
+    }
+
     function scrollToListView(listView, index) {
         if (!listView || index < 0 || index >= listView.count) return
         var dh = 64
@@ -45,12 +64,11 @@ Item {
     }
 
     onSelectedIndexChanged: {
-        // Defer to let currentIndex update
         Qt.callLater(function() {
             if (currentPage === 0)
-                scrollToListView(historyList, selectedIndex)
+                scrollToListView(historyLoader.item, selectedIndex)
             else
-                scrollToListView(pinnedList, selectedIndex)
+                scrollToListView(pinnedLoader.item, selectedIndex)
         })
     }
 
@@ -58,9 +76,28 @@ Item {
         id: pagesRow
         width: root.width * 2
         height: root.height
-        Behavior on x { NumberAnimation { duration: 200; easing.type: Easing.InOutQuad } }
         x: root.currentPage === 0 ? 0 : -root.width
+        Behavior on x { NumberAnimation { duration: 200; easing.type: Easing.InOutQuad } }
 
+        Loader {
+            id: historyLoader
+            width: root.width
+            height: root.height
+            active: root.page0Alive
+            sourceComponent: historyListComponent
+        }
+
+        Loader {
+            id: pinnedLoader
+            width: root.width
+            height: root.height
+            active: root.page1Alive
+            sourceComponent: pinnedListComponent
+        }
+    }
+
+    Component {
+        id: historyListComponent
         ListView {
             id: historyList
             clip: true
@@ -84,9 +121,9 @@ Item {
                 selectedTextColor: root.bgColor
                 commentColor: root.commentColor
                 fontFamily: root.fontFamily
-                onClicked: function(idx) { root.historyClicked(index) }
+                onClicked: root.historyClicked(index)
                 onActivated: root.historyActivated()
-                onHovered: function(idx) {
+                onHovered: {
                     root.hoveredIndex = index
                     root.historyHovered(index)
                 }
@@ -104,7 +141,10 @@ Item {
 
             highlight: Rectangle { color: root.selColor; radius: 4 }
         }
+    }
 
+    Component {
+        id: pinnedListComponent
         ListView {
             id: pinnedList
             clip: true
@@ -128,9 +168,9 @@ Item {
                 selectedTextColor: root.bgColor
                 commentColor: root.commentColor
                 fontFamily: root.fontFamily
-                onClicked: function(idx) { root.pinnedClicked(index) }
+                onClicked: root.pinnedClicked(index)
                 onActivated: root.pinnedActivated()
-                onHovered: function(idx) {
+                onHovered: {
                     root.hoveredIndex = index
                     root.pinnedHovered(index)
                 }

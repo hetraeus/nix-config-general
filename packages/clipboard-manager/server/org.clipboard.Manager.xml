@@ -9,7 +9,10 @@
     <method name="SetSelection">
       <arg name="index" type="i" direction="in"/>
     </method>
-    <method name="IgnoreNext"/>   <!-- new method -->
+    <method name="DeleteEntry">
+      <arg name="index" type="i" direction="in"/>
+    </method>
+    <method name="IgnoreNext"/>
     <signal name="HistoryChanged"/>
   </interface>
 </node>

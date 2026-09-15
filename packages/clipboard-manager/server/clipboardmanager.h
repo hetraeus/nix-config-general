@@ -19,6 +19,7 @@ public:
 public slots:
     QList<HistoryEntry> GetHistory() { m_storage.load(); return m_storage.entries(); }
     void SetSelection(int index);
+    void DeleteEntry(int index);
     void IgnoreNext();
 
 signals:

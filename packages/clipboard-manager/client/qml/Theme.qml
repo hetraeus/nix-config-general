@@ -10,7 +10,8 @@ Item {
     property color fgColor: "#f0f0f0"
     property color commentColor: "#4a4a4a"
 
-    readonly property string stylixPath: Quickshell.env("HOME") + "/.config/stylix/palette.json"
+    readonly property string homeDir: Quickshell.env("HOME") || ""
+    readonly property string stylixPath: homeDir + "/.config/stylix/palette.json"
 
     FileView {
         id: stylixFile

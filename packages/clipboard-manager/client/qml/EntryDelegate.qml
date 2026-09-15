@@ -6,7 +6,6 @@ Item {
     id: delegateRoot
     width: parent ? parent.width : 400
     height: 64
-    clip: true
 
     property var entry: ({})
     property bool isCurrent: false
@@ -67,6 +66,8 @@ Item {
                 source: (entry && entry.type === "image") ? thumbPath(entry.content) : ""
                 visible: (entry && entry.type === "image") ? true : false
                 asynchronous: true
+                sourceSize.width: 56
+                sourceSize.height: 56
                 onStatusChanged: function(status) {
                     if (status === Image.Error) visible = false
                 }
@@ -78,8 +79,7 @@ Item {
                 height: parent.height
                 verticalAlignment: Text.AlignVCenter
                 elide: Text.ElideRight
-                wrapMode: Text.Wrap
-                maximumLineCount: 2
+                wrapMode: Text.NoWrap
                 color: isCurrent ? selectedTextColor : textColor
                 font.family: delegateRoot.fontFamily
                 font.pointSize: 11
@@ -119,12 +119,7 @@ Item {
     MouseArea {
         anchors.fill: parent
         hoverEnabled: true
-        onClicked: {
-            delegateRoot.clicked(index)
-        }
-        onEntered: {
-            delegateRoot.hovered(index)
-        }
-        // onExited is handled by the ListView's outer MouseArea
+        onClicked: delegateRoot.clicked(index)
+        onEntered: delegateRoot.hovered(index)
     }
 }
