@@ -38,7 +38,7 @@ case "$@" in
   ""   ) coproc wvkbd-start-stop                        > /dev/null 2>&1; exit;;
   "󱣵"   ) coproc grimscreen                              > /dev/null 2>&1; exit;;
   "󰳽"   ) coproc clicker oneshot                         > /dev/null 2>&1; exit;;
-  "㊋"  ) coproc wdotool windowclose "$(wdotool getactivewindow)" > /dev/null 2>&1; exit;;
+  "㊋"  ) wlr-close; exit;;
   ""   ) coproc wdotool keydown Super_L                 > /dev/null 2>&1; exit;;
   "⎋"   ) coproc hyprctl dispatch 'hl.dsp.window.float()'
                    dotoolc <<< "key super+space"           > /dev/null 2>&1; exit;;
