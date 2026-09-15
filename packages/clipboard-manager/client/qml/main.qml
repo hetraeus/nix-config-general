@@ -26,6 +26,7 @@ Scope {
     property int cursorX: 0
     property int cursorY: 0
 
+    readonly property int historyLimit: 100
     readonly property string homeDir: Quickshell.env("HOME") || ""
     readonly property string historyPath: homeDir + "/.cache/clipboard-manager/history.json"
 
@@ -96,14 +97,21 @@ Scope {
     Connections {
         target: service
         function onHistoryLoaded(rawJson) {
-            try {
-                var doc = JSON.parse(rawJson)
-                var entries = doc.entries || []
-                entries.sort(function(a, b) { return new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime() })
-                root.historyModel = entries
-                updateFilters()
-            } catch (e) { root.historyModel = []; updateFilters() }
-        }
+          try {
+              var doc = JSON.parse(rawJson)
+              var entries = (doc.entries || [])
+                  .sort(function(a, b) { 
+                      return new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime() 
+                  })
+                  .slice(0, root.historyLimit)   // limit to latest entries
+              root.historyModel = entries
+              updateFilters()
+          } catch (e) {
+              root.historyModel = []
+              updateFilters()
+          }
+      }
+
         function onMailLoaded(content) {
             if (content.length > 0) service.copy(content, function() { Qt.quit() })
             else Qt.quit()
@@ -217,7 +225,6 @@ Scope {
     }
 
     Component.onCompleted: {
-        service.readHistory(historyPath)
         service.getCursorPos()
     }
 }

@@ -7,28 +7,16 @@ Item {
 
     readonly property string historyPath: (Quickshell.env("HOME") || "") + "/.cache/clipboard-manager/history.json"
 
-    property var historyWatcher: FileView {
+    // Single FileView: watches AND reads the file directly (no process overhead)
+    FileView {
+        id: historyFile
         path: root.historyPath
         onTextChanged: {
-            // Reload when the file changes
-            root.readHistory(root.historyPath)
+            root.historyLoaded(text().trim())
         }
     }
 
-
-    // --- History Reader ---
-    Process {
-        id: historyReader
-        running: false
-        stdout: StdioCollector {
-            onStreamFinished: root.historyLoaded(text.trim())
-        }
-    }
     signal historyLoaded(string rawJson)
-    function readHistory(path) {
-        historyReader.command = ["cat", path]
-        historyReader.running = true
-    }
 
     // --- D-Bus SetSelection ---
     Process {
