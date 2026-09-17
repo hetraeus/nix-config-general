@@ -1,6 +1,6 @@
 { perSystem = { pkgs, lib, ... }: {
   packages.gping-default = let
-    gping-gateway-dns-example = pkgs.writeShellApplication {
+    script = pkgs.writeShellApplication {
       name          = "gping-gateway-dns-example";
       runtimeInputs = [ pkgs.gping pkgs.gawk pkgs.jq pkgs.iproute2 pkgs.systemd ];
       text = ''
@@ -12,16 +12,9 @@
         gping --watch-interval 1 "''${ALL_TARGETS[@]}"
       '';
     };
-    script = pkgs.writeShellApplication {
-      name          = "term-gping-gateway-dns-example";
-      runtimeInputs = [ pkgs.kitty gping-gateway-dns-example ];
-      text = ''
-        kitty --app-id="kitty_floating" --hold ${lib.getExe gping-gateway-dns-example}
-      '';
-    };
     desktopItem = pkgs.makeDesktopItem {
       name        = "gping";
-      exec        = "gping-gateway-dns-example";
+      exec        = ''${lib.getExe pkgs.kitty} --app-id="kitty_floating" --hold ${lib.getExe script}'';
       desktopName = "gping";
       genericName = "gateway google.com dns router 10.0.0.0 192.168. 172.16";
       categories  = [ "Utility" ];
