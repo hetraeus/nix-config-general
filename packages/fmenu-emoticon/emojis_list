@@ -892,9 +892,9 @@
 🚏 transport busstop
 🛣  transport highway motorway road
 🛤  transport track railway train
-🛢  transport drum oil
-⛽ transport diesel fuelpump gas station
-🚨 transport beacon car light police revolving
+🛢  transport drum oil crude
+⛽ transport diesel fuelpump gasoline station car
+🚨 transport beacon car light police revolving alarm siren warning danger red
 🚥 horizontal light signal traffic
 🚦 light signal vertical traffic
 🛑 octagonal sign stop
@@ -913,14 +913,14 @@
 🛬 airplane aeroplane arrivals arriving landing
 🪂 parachute hang-glide parasail skydive
 💺 seat chair
-🚁 helicopter vehicle
+🚁 helicopter vehicle flight
 🚟 railway suspension
 🚠 gondola mountain cableway
 🚡 aerial cable car gondola tramway
 🛰  satellite space
-🚀 rocket space
-🛸 flying saucer UFO aliens
-🛎  bellhop hotel
+🚀 rocket space space let's go V2 von braun
+🛸 flying saucer UFO aliens kidnap
+🛎  bellhop hotel ring bell
 🧳 luggage packing travel
 ⌛ hourglass done sand timer
 ⏳ hourglass not done sand timer
