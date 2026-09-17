@@ -6,7 +6,7 @@
     };
 
   run_or_raise         = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.wlr-focus}";
-  sbuku                = self.packages.${pkgs.stdenv.hostPlatform.system}.sbuku;
+  skup                 = self.packages.${pkgs.stdenv.hostPlatform.system}.skup;
   hypr_hide_floats     = self.packages.${pkgs.stdenv.hostPlatform.system}.hypr-hide-floats;
   rasi_theme           = pkgs.writeTextFile { name = "rasi_theme"; text = builtins.readFile ../board.rasi ; };
 
@@ -81,13 +81,13 @@ in {
     end , { mouse = true })
 
 
-    hl.bind("SUPER + S"        , hl.dsp.exec_cmd("${lib.getExe sbuku}     askme"))
-    hl.bind("SUPER + SHIFT + S", hl.dsp.exec_cmd("${lib.getExe sbuku} clipboard"))
+    hl.bind("SUPER + S"        , hl.dsp.exec_cmd("${lib.getExe skup}     askme"))
+    hl.bind("SUPER + SHIFT + S", hl.dsp.exec_cmd("${lib.getExe skup} clipboard"))
 
     hl.bind("ALT + SHIFT + D", hl.dsp.exec_cmd("${run_or_raise} songrec songrec"))
 
     hl.bind("SUPER + ALT + Space", hl.dsp.exec_cmd("noctalia msg panel-open control-center notifications"))
-    hl.bind("SUPER + X",           hl.dsp.exec_cmd("${lib.getExe' pkgs.systemd "systemctl"}     --user restart fmenu-emoticon"))
+    hl.bind("SUPER + X",           hl.dsp.exec_cmd("${lib.getExe' self.packages.${pkgs.stdenv.hostPlatform.system}.fmenu-emoticon}"))
 
     hl.bind("SUPER + ALT + D", dofile("${hypr_hide_floats}"))
     hl.bind("SUPER + D",               ${hypr_single_hide}  )
@@ -106,7 +106,7 @@ in {
     end)
 
     hl.bind("SUPER + F2", hl.dsp.exec_cmd("noctalia msg panel-open launcher"))
-    hl.bind("SUPER + CONTROL + Z", hl.dsp.exec_cmd("fmenu-text-style"))
+    -- hl.bind("SUPER + CONTROL + Z", hl.dsp.exec_cmd("fmenu-text-style"))
     hl.bind("SUPER + Space", hl.dsp.exec_cmd("${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.hyprmenu-launch}"))
 
     '';

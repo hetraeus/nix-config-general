@@ -1,0 +1,17 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "skup"
+version = "0.1.0"
+description = "Robust rofi-based search launcher"
+requires-python = ">=3.10"
+readme = { file = "README.md", content-type = "text/markdown" }
+license = { text = "LGPLv3" }
+
+[project.scripts]
+skup = "skup.main:cli"
+
+[tool.hatch.build.targets.wheel]
+packages = ["skup"]
