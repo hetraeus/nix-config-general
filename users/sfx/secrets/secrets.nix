@@ -10,9 +10,9 @@
     sopsFile =   ./aria2_torrent.yaml ;
     };
 
-  sops.secrets.sbuku_search_engines = {
-    sopsFile = ./sbuku_search_engines.yaml ;
-    path     =     "%r/search_engines.json";
+  sops.secrets.search_engines = {
+    sopsFile =   ./search_engines.yaml ;
+    path     = "%r/search_engines.json";
     };
     
   sops.secrets.mail = {
