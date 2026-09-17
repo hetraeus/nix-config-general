@@ -25,7 +25,7 @@
 
         script = pkgs.writeShellApplication {
           name          = "fmenu-icons";
-          runtimeInputs = [ pkgs.findutils pkgs.fzf pkgs.kitty ];
+          runtimeInputs = [ pkgs.findutils pkgs.fzf pkgs.kitty pkgs.imagemagick ];
           text = ''
             find -L ${iconsPack}/share/icons/${iconsVariant} \
               \( -iname '*.svg' -o -iname '*.png' \) \
