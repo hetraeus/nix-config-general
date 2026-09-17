@@ -85,7 +85,6 @@ conn_dhcp(){
 🏰 captive-portal-alt
 🏰 captive portal wifi wlan
 🍂 wlan list known
-⛩  gateway webUI
 ⚭  static ip connect
 🔥 firewall
 🎭 dns nslookup
@@ -258,22 +257,6 @@ IF IT FAILS, check credential expiration date
                                   ip route   flush  dev "$WLAN_DEV"
                                   ;;
 
-  *" qrcode"*                  )  printf "\x1bc"; echo " 󰐲  approach wifi QR code"
-                                  iwctl station "$WLAN_DEV" scan; sleep .2
-
-                                  SCANNED_WIFI="$(timeout 12 zbarcam --oneshot --nodisplay)"
-                                  [[ "$SCANNED_WIFI" != "QR-Code:WIFI:"* ]] && continue
-
-                                  ESSID="$(sed        's/.*;S://;s/;.*//' <<< "$SCANNED_WIFI")"
-                                  PASSW="$(sed        's/.*;P://;s/;.*//' <<< "$SCANNED_WIFI")"
-                                  HIDDENSTATUS="$(sed 's/.*;H:true;.*/-hidden/;s/.*;H:true$/-hidden/;s/.*;H;.*/-hidden/;s/.*;H$/-hidden/;/-hidden/!d' <<< "$SCANNED_WIFI")"
-
-                                  iwctl --passphrase "$PASSW" station "$WLAN_DEV" connect"$HIDDENSTATUS" "$ESSID"
-                                  unset SCANNED_WIFI PASSW ESSID HIDDENSTATUS
-                                  sleep 5
-###                                  tee "$XDG_RUNTIME_DIR"/pipe-fmenu-networklocal <<< "";;
-;;
-
   *"$WLAN_SERVICE"*            )  # gum confirm  " 🌫 $WLAN_SERVICE" --affirmative="🔁 restart" --negative="🍀 no" &&
                                   # { systemctl restart    "$WLAN_SERVICE"; } ;;
                                   iwctl ;;
@@ -325,10 +308,6 @@ IF IT FAILS, check credential expiration date
                                   echo "for PIN use $ iwctl wsc \"$WLAN_DEV\" start-user-pin <PIN>"
 ###                                  tee "$XDG_RUNTIME_DIR"/pipe-fmenu-networklocal <<< "";;
 ;;
-
-  *"gateway webUI"*            )  printf "\x1bc"
-                                  xdg-open "http://$(ip -json route list default | jq --raw-output '.[].gateway')"
-                                  ;;
 
   *"gping "*                   )  printf "\x1bc"
                                   gping-default
