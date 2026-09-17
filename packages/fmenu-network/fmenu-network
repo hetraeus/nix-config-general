@@ -104,7 +104,6 @@ conn_dhcp(){
 📘 azure cloud AZ900 cheatsheet
 ⎀  aws cloud
 🗒  cheatsheets
-🗍  rfc standards
 󰓌  answer question stack overflow
 ⋂⋂ IANA port numbers
 💋 rdap whois domain"
@@ -195,7 +194,6 @@ case "${operation}" in
   *" stack overflow"*           )  (kitty --app-id="kitty_floating" --hold \
                                     so --no-lucky "$(gum input --header="─── ♨ stackoverflow ───")"      ) & disown;;
   *" wlan list known"*          )  (kitty --app-id="kitty_floating" --hold iwctl known-networks list      ) & disown;;
-  *" rfc"*                      )  (kitty --app-id="kitty_floating" --hold ~/.local/bin/scripts/fmenu-rfc ) & disown;;
 
   *" azure cloud cli"*          )  az                  ;;
 

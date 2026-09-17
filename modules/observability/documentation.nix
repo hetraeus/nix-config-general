@@ -1,5 +1,27 @@
 { flake.nixosModules.documentation = { pkgs, self, ... }: {
   documentation.man.cache.enable = true; # make man -k / man --apropos / apropos working
+  
+  services.opensnitch.rules.rfc-editor = {
+    name        = "rfc-editor";
+    created     = "2010-01-01T10:00:00.000000Z"; # silence logs
+    enabled     = true;
+    action      = "allow";
+    duration    = "always";
+    operator    = {
+      type      = "list";
+      operand   = "list";
+      sensitive = false;
+      list      = [{
+       type     = "regexp";
+       operand  = "dest.host";
+       data     = "^(rsync\.rfc-editor\.org)$";
+       } {
+       type     = "simple";
+       operand  = "dest.port";
+       data     = "873";
+       }];
+    };};
+
   environment.systemPackages = [
     self.packages.${pkgs.stdenv.hostPlatform.system}.fmenu-rfc
     pkgs.inxi
