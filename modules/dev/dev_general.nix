@@ -242,6 +242,7 @@ flake.homeModules.dev_general = { lib, pkgs, config, ... } : {
       "CSharp"
       "ini"
       "kotlin"
+      "gcode"
       "json5"
       "qml"
       "lua"
@@ -281,7 +282,7 @@ xdg.mimeApps.defaultApplications = let
     pkgs.sourcegit
     pkgs.godot
     pkgs.tabularis
-    # pkgs.beekeeper-studio # BUG: https://github.com/beekeeper-studio/beekeeper-studio/pull/3023 meanwhile use flatpak
+    pkgs.beekeeper-studio # BUG: https://github.com/beekeeper-studio/beekeeper-studio/pull/3023 meanwhile use flatpak
 
     ];
   programs.git.enable = true; #lib.mkForce false; # https://discourse.nixos.org/t/cannot-login-with-gh-cli/16601
