@@ -320,6 +320,7 @@ in {
     fmenu-network
     gping-default
     self.packages.${pkgs.stdenv.hostPlatform.system}.gateway-webui
+    self.packages.${pkgs.stdenv.hostPlatform.system}.qr-code-connect
     ];
   programs.trippy.enable = true;
 

@@ -1,0 +1,57 @@
+#!/bin/bash
+set -euo pipefail
+
+# --- collect wireless interfaces -------------------------------------------
+DEVS=()
+for d in /sys/class/net/*/wireless; do
+    [[ -e "$d" ]] || continue
+    DEVS+=("$(basename "$(dirname "$d")")")
+done
+(( ${#DEVS[@]} )) || { echo "no wireless interfaces found" >&2; exit 1; }
+
+# --- run fzf in background, listening for commands -------------------------
+PORT=6266
+TMP="$(mktemp)"
+FZF_PID=""
+
+cleanup() {
+    [[ -n "$FZF_PID" ]] && kill "$FZF_PID" 2>/dev/null || true
+    rm -f "$TMP"
+}
+trap cleanup EXIT
+
+printf '%s\n' "${DEVS[@]}" \
+    | fzf --listen "$PORT" \
+          --prompt=' 󰐲  approach wifi QR code > ' > "$TMP" &
+FZF_PID=$!
+
+# give fzf a moment to start listening
+sleep 0.2
+
+# --- scan QR in the foreground ---------------------------------------------
+SCANNED_WIFI="$(timeout 12 zbarcam --oneshot --nodisplay)" || exit 1
+
+# --- tell fzf to accept the currently highlighted item ---------------------
+{ printf 'accept\n' > "/dev/tcp/127.0.0.1/$PORT"; } 2>/dev/null || true
+
+wait "$FZF_PID" || exit 1
+WLAN_DEV="$(cat "$TMP")"
+[[ -z "$WLAN_DEV" ]] && exit 1
+
+# --- parse QR --------------------------------------------------------------
+[[ "$SCANNED_WIFI" != "QR-Code:WIFI:"* ]] && exit 1
+
+ESSID="$(sed -n 's/.*[;:]S:\([^;]*\).*/\1/p' <<< "$SCANNED_WIFI")"
+PASSW="$(sed -n 's/.*[;:]P:\([^;]*\).*/\1/p' <<< "$SCANNED_WIFI")"
+
+CMD="connect"
+[[ "$SCANNED_WIFI" == *";H:true"* ]] && CMD="connect-hidden"
+
+# --- connect ---------------------------------------------------------------
+if [[ -n "$PASSW" ]]; then
+    iwctl --passphrase "$PASSW" station "$WLAN_DEV" "$CMD" "$ESSID"
+else
+    iwctl station "$WLAN_DEV" "$CMD" "$ESSID"
+fi
+
+sleep 5
