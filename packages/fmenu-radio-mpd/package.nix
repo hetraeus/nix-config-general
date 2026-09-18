@@ -1,4 +1,4 @@
-{ perSystem = { pkgs, ... }: {
+{ perSystem = { lib, pkgs, ... }: {
   packages.fmenu-radio-mpd = let
     script = pkgs.writeShellApplication {
       name          = "fmenu-radio-mpd";
@@ -55,7 +55,7 @@
       icon        = "radio";
       terminal    = false;
       categories  = [ "AudioVideo" "Audio" ];
-      exec        = "fmenu-radio-mpd";
+      exec        = "${lib.getExe pkgs.kitty} fmenu-radio-mpd";
     };
   in pkgs.buildEnv {
     name  = "fmenu-radio-mpd-wrapper";
