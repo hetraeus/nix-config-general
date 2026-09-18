@@ -87,7 +87,7 @@ in {
     hl.bind("ALT + SHIFT + D", hl.dsp.exec_cmd("${run_or_raise} songrec songrec"))
 
     hl.bind("SUPER + ALT + Space", hl.dsp.exec_cmd("noctalia msg panel-open control-center notifications"))
-    hl.bind("SUPER + X",           hl.dsp.exec_cmd("${lib.getExe' self.packages.${pkgs.stdenv.hostPlatform.system}.fmenu-emoticon}"))
+    hl.bind("SUPER + X",           hl.dsp.exec_cmd("${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.fmenu-emoticon}"))
 
     hl.bind("SUPER + ALT + D", dofile("${hypr_hide_floats}"))
     hl.bind("SUPER + D",               ${hypr_single_hide}  )
