@@ -148,11 +148,16 @@ static int storeAny()
         if (data.isEmpty())
             return 0;
 
-        // --- NEW: skip text that is 1 or 2 characters long after trimming ---
         QString text = QString::fromUtf8(data);
-        if (text.trimmed().length() <= 2) {
-            qDebug() << "Skipping short text entry (length <= 2):" << text;
+        QString trimmed = text.trimmed();
+        if (trimmed.isEmpty())
             return 0;
+
+        // skip only single ASCII letters/digits, not emojis
+        if (trimmed.length() == 1) {
+            QChar c = trimmed.at(0);
+            if (c.unicode() < 128 && (c.isLetterOrNumber() || c.isPunct()))
+                return 0;
         }
 
         HistoryStorage storage;
