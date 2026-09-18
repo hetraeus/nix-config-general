@@ -65,6 +65,7 @@
 in {
   packages.fmenu-emoticon = pkgs.symlinkJoin {
     name = "fmenu-emoticon";
+    meta.mainProgram = "fmenu-emoticon";
     paths = [ script ];
     postBuild = ''
       mkdir -p $out/share/systemd/user
