@@ -380,6 +380,26 @@
         "type": "github"
       }
     },
+    "noctalia": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789735339,
+        "narHash": "sha256-KjnprW4lpS4ISCBnoNxlI9++LACjxlsQV7WWNT4cju8=",
+        "owner": "noctalia-dev",
+        "repo": "noctalia",
+        "rev": "960d4d46bd3149a556504e7c40ecd87abb251a36",
+        "type": "github"
+      },
+      "original": {
+        "owner": "noctalia-dev",
+        "repo": "noctalia",
+        "type": "github"
+      }
+    },
     "nur": {
       "inputs": {
         "flake-parts": [
@@ -451,6 +471,7 @@
         "home-manager": "home-manager",
         "multios-usb": "multios-usb",
         "nixpkgs": "nixpkgs_2",
+        "noctalia": "noctalia",
         "omasnap-nixpkgs": "omasnap-nixpkgs",
         "omniflake": "omniflake",
         "sops-nix": "sops-nix",
