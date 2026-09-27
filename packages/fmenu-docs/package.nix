@@ -20,7 +20,10 @@
         --info=inline-right \
         --header="$DOCS
        $0")"
-      [[ -n "$CHOICE" ]] && xdg-open "$CHOICE"
+      [[ -n "$CHOICE" ]] && {
+        printf '%s' "$CHOICE"
+        xdg-open "$CHOICE"
+        }
     '';
   };
 };}
