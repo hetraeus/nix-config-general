@@ -10,12 +10,10 @@ ASKME_HELP = """\
 Enter                execute search
 Shift+Enter          select multiple queries
 Ctrl+Return          execute without saving to history
-Alt+Return           add to batch, keep going
-Escape               cancel"""
+Alt+Return           add to batch, keep going"""
 
 ENGINE_HELP = """\
-Shift+Enter          select multiple engines
-Escape               cancel"""
+Shift+Enter          select multiple engines"""
 
 
 def cli(argv: list[str] | None = None) -> int:
