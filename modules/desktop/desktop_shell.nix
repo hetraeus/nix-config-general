@@ -1,4 +1,4 @@
-{ inputs, ... }: { flake.nixosModules.desktop_shell = { pkgs, config, lib, ... }: {
+{ ... }: { flake.nixosModules.desktop_shell = { pkgs, config, lib, ... }: {
 
   environment.systemPackages = [
     pkgs.brightnessctl
@@ -137,12 +137,13 @@ flake.homeModules.desktop_shell = { pkgs, lib, config, self, ... }: {
   programs.noctalia.systemd.enable = true;
 
   systemd.user.services.clipboard = {
-    Install.WantedBy    = [ "graphical-session.target" ] ;
+    Install.WantedBy    = [ "graphical-session.target" ];
     Service.ExecStart   = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.clipboard-server}";
     Service.Restart     = "on-failure";
+    Service.RestartSec  = 1;
     Unit.Description    = "clipboard manager";
-    Unit.After          = [ "graphical-session.target" ] ;
-    Unit.PartOf         = [ "graphical-session.target" ] ;
+    Unit.After          = [ "graphical-session.target" ];
+    Unit.PartOf         = [ "graphical-session.target" ];
     };
 
   # thunar is not smart enought to mount hard disks plugged from boot
