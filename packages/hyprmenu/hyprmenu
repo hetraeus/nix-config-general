@@ -59,8 +59,18 @@ case "$@" in
   "⤥"   ) hyprctl --quiet dispatch 'hl.dsp.layout("consume")'       ; exit;;
   "⤤"   ) hyprctl --quiet dispatch 'hl.dsp.layout("promote")'       ; exit;;
   "🧛"  ) hyprctl --quiet dispatch 'hl.dsp.window.tag({ tag = "dontclose" })'; exit;;
-  "↔"   ) hyprctl --quiet dispatch "hl.dsp.window.resize({ x =  30, y = 0, relative = true })";;
-  "🡒🡐"  ) hyprctl --quiet dispatch "hl.dsp.window.resize({ x = -30, y = 0, relative = true })";;
+  "↔"   ) hyprctl --quiet eval '
+            local ws = hl.get_active_workspace()
+            if ws and ws.tiled_layout == "scrolling"
+            then hl.dispatch(hl.dsp.layout("colresize +0.1"))
+            else hl.dispatch(hl.dsp.window.resize({ x = 30, y = 0, relative = true }))
+            end';;
+  "🡒🡐"  ) hyprctl --quiet eval '
+            local ws = hl.get_active_workspace()
+            if ws and ws.tiled_layout == "scrolling"
+            then hl.dispatch(hl.dsp.layout("colresize -0.1"))
+            else hl.dispatch(hl.dsp.window.resize({ x = -30, y = 0, relative = true }))
+            end';;
   "🪁"  ) hyprctl --quiet eval '
            hl.dispatch(hl.dsp.window.float({ action = "set" }))
            hl.dispatch(hl.dsp.window.resize({ x = "1000", y = "650", relative = false }))
