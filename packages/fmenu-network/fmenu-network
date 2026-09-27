@@ -74,13 +74,11 @@ conn_dhcp(){
 
 [[ "${1:-}" == "--list" ]] && {
   echo "🧬 $0
-📈 gping google.com DNS GATEWAY
 🖇 trippy trace
 🥁 mtr google
 📉 bandwhich
 🤡 mac spoof static ip before dhcp
 🌫  dhcp connect wifi wlan
-󰐲  qrcode connect wifi wlan dhcp
 🆗 pushbutton wsc wifi wlan
 🏰 captive-portal-alt
 🏰 captive portal wifi wlan
@@ -91,8 +89,6 @@ conn_dhcp(){
 🌊 dns flush
 🔀 dns requests monitor
 🧐 https://dnscheck.tools/
-󱙴  termshark
-󱙳  wireshark
 ✊ nmap port scan
 📢 netdiscover arp scan
 👭 ss connections
@@ -175,13 +171,11 @@ done
 )"
 
 case "${operation}" in
-  *" wireshark"*                )  run0 wireshark        & disown;;
   *"trippy trace"               )  kitty trip ;;
   *" dhcp connect wifi"*        )  printf "\x1bc"; conn_dhcp     ;;
   *" watch cams"*               )  command -v fmenu-watch_cams001 && fmenu-watch_cams001 & disown;;
   *"dns requests monitor"*      )  (kitty --app-id="kitty_floating" --hold run0 resolvectl monitor         ) & disown;;
   *" bandwhich"*                )  (kitty --app-id="kitty_floating" --hold run0 --background="0" bandwhich ) & disown;;
-  *" termshark"*                )  (kitty --app-id="kitty_floating" --hold run0 termshark                  ) & disown;;
   *" firewall"*                 )  (kitty --app-id="kitty_floating" --hold run0 nft list ruleset           ) & disown;;
   *" mtr google"*               )  (kitty --app-id="kitty_floating" --hold mtr google.com 8.8.8.8          ) & disown;;
   *"AZ900"*                     )  (kitty ~/.local/bin/scripts/fmenu-cheat-az900 ) & disown;;
@@ -308,10 +302,6 @@ IF IT FAILS, check credential expiration date
                                   echo "for PIN use $ iwctl wsc \"$WLAN_DEV\" start-user-pin <PIN>"
 ###                                  tee "$XDG_RUNTIME_DIR"/pipe-fmenu-networklocal <<< "";;
 ;;
-
-  *"gping "*                   )  printf "\x1bc"
-                                  gping-default
-                                  ;;
 
   *"mac spoof"*                )  printf "\x1bc"
                                   # save macs ??
