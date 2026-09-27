@@ -69,17 +69,14 @@ in {
       hl.dispatch(hl.dsp.exec_cmd(cmd))
     end , { mouse = true })
 
+
     hl.bind("SUPER + Z", function()
       local cursor = hl.get_cursor_pos()
       local cmd = string.format(
-        "CLIPBOARD_X=%d CLIPBOARD_Y=%d %s", 
-        math.floor(cursor.x), 
-        math.floor(cursor.y), 
-        "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.clipboard-client}"
-      )
+        "busctl --user call org.clipboard.Manager / org.clipboard.Manager Show ii %d %d",
+        math.floor(cursor.x), math.floor(cursor.y))
       hl.dispatch(hl.dsp.exec_cmd(cmd))
-    end , { mouse = true })
-
+    end)
 
     hl.bind("SUPER + S"        , hl.dsp.exec_cmd("${lib.getExe skup}     askme"))
     hl.bind("SUPER + SHIFT + S", hl.dsp.exec_cmd("${lib.getExe skup} clipboard"))
