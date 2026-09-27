@@ -356,7 +356,6 @@ in {
       launch kitty  @ focus-window --match=cmdline:fmenu-network$
       '';
   in {
-    path = { PATH = [ gping-default ]; };
     Service.ExecStart = "${lib.getExe pkgs.kitty} --app-id='network_dashboard' --title='🖧 network' --session=${network_kitty_session}";
     Unit.Description  = "network_dashboard";
     Unit.After        = [ "graphical-session.target" ] ;
