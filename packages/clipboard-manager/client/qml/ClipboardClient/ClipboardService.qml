@@ -7,6 +7,56 @@ Item {
 
     readonly property string homeDir: Quickshell.env("HOME") || ""
     readonly property string historyPath: homeDir + "/.cache/clipboard-manager/history.json"
+    readonly property string runtimeDir: {
+        var r = Quickshell.env("XDG_RUNTIME_DIR")
+        return (r && r.length > 0) ? r : "/tmp"
+    }
+    readonly property string showRequestPath: runtimeDir + "/clipboard-manager/show-request"
+    readonly property string lockPath: runtimeDir + "/clipboard-client.lock"
+
+    property int lastSeq: -1
+
+    signal historyLoaded(string rawJson)
+    signal mailLoaded(string content)
+    signal showRequested(int x, int y)
+
+    // Hold an exclusive flock for the lifetime of this process. The server
+    // uses the same lock file to decide whether a client is already alive
+    // and needs to be spawned. If we can't get the lock, another client
+    // owns it and we exit immediately.
+    Process {
+        id: lockHolder
+        running: true
+        command: ["flock", "-n", root.lockPath, "sleep", "infinity"]
+        onExited: function(exitCode) {
+            if (exitCode !== 0)
+                Qt.quit()
+        }
+    }
+
+    // Watch the show-request file. The server writes "seq epoch_ms x y\n"
+    // on every Show() call. We act only on new sequence numbers with a
+    // recent timestamp, so a client restart never pops a stale panel.
+    FileView {
+        id: showRequestFile
+        path: root.showRequestPath
+        watchChanges: true
+        onTextChanged: {
+            var raw = text().trim()
+            if (raw.length === 0) return
+            var parts = raw.split(/\s+/)
+            if (parts.length < 4) return
+            var seq = parseInt(parts[0])
+            var epochMs = parseInt(parts[1])
+            var x = parseInt(parts[2])
+            var y = parseInt(parts[3])
+            if (isNaN(seq) || isNaN(epochMs) || isNaN(x) || isNaN(y)) return
+            if (seq <= root.lastSeq) return
+            root.lastSeq = seq
+            if (Date.now() - epochMs > 5000) return    // stale
+            root.showRequested(x, y)
+        }
+    }
 
     FileView {
         id: historyFile
@@ -15,8 +65,6 @@ Item {
             root.historyLoaded(text().trim())
         }
     }
-
-    signal historyLoaded(string rawJson)
 
     // --- D-Bus SetSelection ---
     Process {
@@ -55,7 +103,6 @@ Item {
         property var callback: null
         onExited: function(exitCode) {
             if (callback) { var cb = callback; callback = null; cb() }
-            else { Qt.quit() }
         }
     }
     function copy(text, cb) {
@@ -74,7 +121,6 @@ Item {
             onStreamFinished: root.mailLoaded(text.trim())
         }
     }
-    signal mailLoaded(string content)
     function readMail(path) {
         mailReader.command = ["cat", path]
         mailReader.running = true
@@ -93,15 +139,5 @@ Item {
             "--dest=org.clipboard.Manager", "/",
             "org.clipboard.Manager.DeleteEntry", "int32:" + historyIndex]
         deleteEntryProc.running = true
-    }
-
-    // --- Cursor Position ---
-    signal cursorPosReady(int x, int y)
-    function getCursorPos() {
-        var x = parseInt(Quickshell.env("CLIPBOARD_X"))
-        var y = parseInt(Quickshell.env("CLIPBOARD_Y"))
-        if (isNaN(x)) x = 0
-        if (isNaN(y)) y = 0
-        root.cursorPosReady(x, y)
     }
 }

@@ -7,6 +7,9 @@
 #include <QDebug>
 #include <QProcess>
 #include <QFile>
+#include <QStandardPaths>
+#include <QDateTime>
+#include <QProcessEnvironment>
 #include <signal.h>
 #include <unistd.h>
 
@@ -40,6 +43,11 @@ static bool runWlCopy(const QStringList &extraArgs, const QByteArray &data)
 ClipboardManager::ClipboardManager(QObject *parent)
     : QObject(parent)
 {
+    {
+      QFile f(showRequestPath());
+      if (f.open(QIODevice::WriteOnly | QIODevice::Append))
+          f.close();
+    }
     killExistingWatchers();
     startWatchers();
     setupWatcher();
@@ -204,4 +212,83 @@ void ClipboardManager::DeleteEntry(int index)
 {
     m_storage.removeEntry(index);
     emit HistoryChanged();
+}
+
+static QString xdgRuntimeDir()
+{
+    QString r = QProcessEnvironment::systemEnvironment().value("XDG_RUNTIME_DIR");
+    if (r.isEmpty())
+        r = QDir::temp().path();
+    return r;
+}
+
+QString ClipboardManager::runtimeDir()
+{
+    return xdgRuntimeDir() + "/clipboard-manager";
+}
+
+QString ClipboardManager::showRequestPath()
+{
+    return runtimeDir() + "/show-request";
+}
+
+QString ClipboardManager::clientLockPath()
+{
+    return xdgRuntimeDir() + "/clipboard-client.lock";
+}
+
+void ClipboardManager::Show(int x, int y)
+{
+    qWarning() << "Show() invoked with" << x << y;
+    writeShowRequest(x, y);
+    ensureClientRunning();
+}
+
+void ClipboardManager::writeShowRequest(int x, int y)
+{
+    qWarning() << "writeShowRequest: entering, path=" << showRequestPath();
+
+    QDir().mkpath(runtimeDir());
+
+    QFile f(showRequestPath());
+    if (!f.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        qWarning() << "writeShowRequest: open failed:" << f.errorString();
+        return;
+    }
+
+    ++m_showSeq;
+    const qint64 now = QDateTime::currentMSecsSinceEpoch();
+    QByteArray data = QByteArray::number(m_showSeq) + " " +
+                      QByteArray::number(now) + " " +
+                      QByteArray::number(x) + " " +
+                      QByteArray::number(y) + "\n";
+    f.write(data);
+    f.close();
+
+    qWarning() << "writeShowRequest: wrote" << data.trimmed();
+}
+
+void ClipboardManager::ensureClientRunning()
+{
+    // Non-blockingly test the client lock. If it succeeds, no client
+    // is holding it, so we spawn one. If it fails, a client is alive
+    // and will pick up the show request from the file.
+    QProcess flock;
+    flock.setProgram("flock");
+    flock.setArguments({ "-n", clientLockPath(), "-c", "true" });
+    flock.start();
+    if (!flock.waitForStarted(1000)) {
+        qWarning() << "Failed to start flock - is util-linux on PATH?";
+        return;
+    }
+    flock.waitForFinished(1000);
+    if (flock.exitCode() != 0)
+        return;  // lock held -> client is running
+
+    const QString client = QStandardPaths::findExecutable("clipboard-client");
+    if (client.isEmpty()) {
+        qWarning() << "clipboard-client not found in PATH";
+        return;
+    }
+    QProcess::startDetached(client, {});
 }

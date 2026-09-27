@@ -10,7 +10,7 @@ Scope {
     Theme { id: theme }
     ClipboardService { id: service }
 
-    // --- State ---
+    // --- State (unchanged) ---
     property var historyModel: []
     property var pinnedModel: [
         { type: "pinned", text: formatLocalDateTime(new Date()) },
@@ -27,15 +27,32 @@ Scope {
     property int cursorY: 0
     property bool deleteDialogVisible: false
     property int deleteTargetIndex: -1
+    property bool panelVisible: false
 
     readonly property int historyLimit: 100
 
-    // --- Logic ---
+    // --- Show / Hide API ---
+    function show() {
+        filterText = ""
+        currentPage = 0
+        selectedIndex = 0
+        hoveredIndex = -1
+        deleteDialogVisible = false
+        deleteTargetIndex = -1
+        panelVisible = true
+        maybeFocusFilterBar()
+    }
+
+    function hide() {
+        panelVisible = false
+        deleteDialogVisible = false
+    }
+
+    // --- Logic (unchanged) ---
     function updateFilters() {
         var lower = filterText.toLowerCase()
         var hist = [], pin = []
         for (var i = 0; i < historyModel.length; i++) {
-            // _searchKey is precomputed at load time
             if (historyModel[i]._searchKey.indexOf(lower) !== -1) hist.push(i)
         }
         historyFiltered = hist
@@ -50,7 +67,6 @@ Scope {
 
     onFilterTextChanged: {
         updateFilters()
-        // Explicit one-way sync to the widget, replacing the old broken binding.
         var fb = contentLoader.item ? contentLoader.item.filterBar : null
         if (fb && fb.text !== filterText) fb.text = filterText
     }
@@ -63,13 +79,13 @@ Scope {
             service.callSetSelection(idx, function() {
                 root.selectedIndex = 0
                 root.hoveredIndex = -1
-                Qt.quit()
+                root.hide()
             })
         }
     }
 
     function requestDelete() {
-        if (currentPage !== 0) return          // pinned entries aren't deletable
+        if (currentPage !== 0) return
         if (selectedIndex >= historyFiltered.length) return
         deleteTargetIndex = historyFiltered[selectedIndex]
         deleteDialogVisible = true
@@ -85,10 +101,7 @@ Scope {
         var idx = deleteTargetIndex
         deleteTargetIndex = -1
         deleteDialogVisible = false
-        service.callDeleteEntry(idx, function() {
-            // The watcher will reload history.json shortly and updateFilters()
-            // will clamp selectedIndex; nothing else to do here.
-        })
+        service.callDeleteEntry(idx, function() {})
     }
 
     function activatePinnedItem() {
@@ -100,7 +113,7 @@ Scope {
                 })
             } else {
                 service.callIgnore(function() {
-                    service.copy(entry.text, function() { Qt.quit() })
+                    service.copy(entry.text, function() { root.hide() })
                 })
             }
         }
@@ -122,6 +135,12 @@ Scope {
         return Quickshell.screens[0]
     }
 
+    function maybeFocusFilterBar() {
+        if (!panelVisible) return
+        var item = contentLoader.item
+        if (item && item.filterBar) item.filterBar.forceFocus()
+    }
+
     // --- Service Connections ---
     Connections {
         target: service
@@ -134,27 +153,26 @@ Scope {
                         return new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime()
                     })
                     .slice(0, root.historyLimit)
-                // Precompute lowercase search key once per entry.
                 for (var i = 0; i < entries.length; i++) {
                     var e = entries[i]
                     e._searchKey = (e.type === "image" ? "image" : (e.content || "")).toLowerCase()
                 }
-                root.historyModel = entries   // triggers updateFilters via onHistoryModelChanged
+                root.historyModel = entries
             } catch (e) {
                 root.historyModel = []
             }
         }
 
         function onMailLoaded(content) {
-            if (content.length > 0) service.copy(content, function() { Qt.quit() })
-            else Qt.quit()
+            if (content.length > 0) service.copy(content, function() { root.hide() })
+            else root.hide()
         }
 
-        function onCursorPosReady(x, y) {
+        // Server pushes show intent + cursor position in one call.
+        function onShowRequested(x, y) {
             cursorX = x
             cursorY = y
-            panel.visible = true
-            // The focus timer now lives inside the lazily-loaded content.
+            root.show()
         }
     }
 
@@ -162,7 +180,7 @@ Scope {
     PanelWindow {
         id: panel
         screen: root.screenForCursor()
-        visible: false
+        visible: root.panelVisible
         color: "transparent"
 
         WlrLayershell.namespace: "clipboard-manager"
@@ -174,31 +192,28 @@ Scope {
         WlrLayershell.anchors.right: true
         WlrLayershell.exclusiveZone: 0
 
-        MouseArea { anchors.fill: parent; onClicked: Qt.quit() }
+        MouseArea { anchors.fill: parent; onClicked: root.hide() }
 
-        // Defer the entire popup tree until the panel is actually shown.
         Loader {
             id: contentLoader
             anchors.fill: parent
-            active: panel.visible
+            active: true
             asynchronous: true
             sourceComponent: popupComponent
+            onLoaded: root.maybeFocusFilterBar()
         }
     }
 
-        Component {
+    Component {
         id: popupComponent
 
         Item {
             id: popupRoot
-
-            // Exposed so main.qml can reach the widgets imperatively.
             property alias filterBar: filterBar
             property alias pagesView: pagesView
 
             Rectangle {
                 id: popupContent
-
                 width: 400
                 height: 500
                 x: Math.max(0, Math.min(root.cursorX - panel.screen.x - width / 2,
@@ -223,12 +238,9 @@ Scope {
                         currentPage: root.currentPage
                         fgColor: theme.fgColor
                         fontFamily: theme.fontFamily
-
-                        onEscapePressed: Qt.quit()
+                        onEscapePressed: root.hide()
                         onPageToggled: root.currentPage = root.currentPage === 0 ? 1 : 0
-                        onUpPressed: {
-                            if (root.selectedIndex > 0) root.selectedIndex--
-                        }
+                        onUpPressed: { if (root.selectedIndex > 0) root.selectedIndex-- }
                         onDownPressed: {
                             var maxIndex = (root.currentPage === 0
                                 ? root.historyFiltered.length
@@ -261,7 +273,6 @@ Scope {
                         commentColor: theme.commentColor
                         fontFamily: theme.fontFamily
                         scrollOff: 2
-
                         onHistoryClicked: function(index) {
                             root.selectedIndex = index
                             root.activateHistoryItem()
@@ -284,18 +295,13 @@ Scope {
                 visible: root.deleteDialogVisible
                 z: 100
 
-                // Dimmed background. Click outside the card → cancel.
                 Rectangle {
                     anchors.fill: parent
                     color: "#aa000000"
                     radius: 8
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: root.cancelDelete()
-                    }
+                    MouseArea { anchors.fill: parent; onClicked: root.cancelDelete() }
                 }
 
-                // Inner card. Eat its own clicks so the backdrop doesn't fire.
                 Rectangle {
                     anchors.centerIn: parent
                     width: 280
@@ -335,10 +341,7 @@ Scope {
                                 border.color: activeFocus ? theme.fgColor : theme.commentColor
                                 border.width: activeFocus ? 2 : 1
                                 radius: 4
-
-                                // Default focus item inside the scope.
                                 focus: true
-
                                 Text {
                                     anchors.centerIn: parent
                                     text: "Cancel"
@@ -364,7 +367,6 @@ Scope {
                                 border.color: activeFocus ? theme.fgColor : theme.commentColor
                                 border.width: activeFocus ? 2 : 1
                                 radius: 4
-
                                 Text {
                                     anchors.centerIn: parent
                                     text: "Delete"
@@ -384,46 +386,18 @@ Scope {
                     }
                 }
 
-                // On show, grab focus (Cancel picks it up via focus: true).
-                // On hide, hand focus back to the filter bar.
                 onVisibleChanged: {
-                    if (visible) {
-                        cancelButton.forceActiveFocus()   // <-- was: forceActiveFocus()
-                    } else {
-                        Qt.callLater(function() {
-                            var rootItem = contentLoader.item
-                            if (rootItem && rootItem.filterBar)
-                                rootItem.filterBar.forceFocus()
-                        })
-                    }
+                    if (visible) cancelButton.forceActiveFocus()
+                    else Qt.callLater(root.maybeFocusFilterBar)
                 }
 
-                // Escape cancels from anywhere in the dialog, regardless of
-                // which button is focused.
                 Keys.onEscapePressed: root.cancelDelete()
-
-                // Keep Tab inside the dialog: cycle Cancel ↔ Delete.
                 Keys.onTabPressed: function(event) {
-                    if (cancelButton.activeFocus)
-                        deleteButton.forceActiveFocus()
-                    else
-                        cancelButton.forceActiveFocus()
+                    if (cancelButton.activeFocus) deleteButton.forceActiveFocus()
+                    else cancelButton.forceActiveFocus()
                     event.accepted = true
                 }
             }
-
-            Component.onCompleted: focusTimer.start()
-
-            Timer {
-                id: focusTimer
-                interval: 50
-                repeat: false
-                onTriggered: filterBar.forceFocus()
-            }
         }
-    }
-
-    Component.onCompleted: {
-        service.getCursorPos()
     }
 }

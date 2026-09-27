@@ -13,6 +13,14 @@
       <arg name="index" type="i" direction="in"/>
     </method>
     <method name="IgnoreNext"/>
+    <method name="Show">
+      <arg name="x" type="i" direction="in"/>
+      <arg name="y" type="i" direction="in"/>
+    </method>
     <signal name="HistoryChanged"/>
+    <signal name="ShowRequested">
+      <arg name="x" type="i"/>
+      <arg name="y" type="i"/>
+    </signal>
   </interface>
 </node>

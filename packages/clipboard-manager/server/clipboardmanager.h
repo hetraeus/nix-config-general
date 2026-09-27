@@ -22,8 +22,13 @@ public slots:
     void DeleteEntry(int index);
     void IgnoreNext();
 
+    // NEW: called by the hotkey bind via dbus-send.
+    // Writes a show request and ensures a client is running.
+    void Show(int x, int y);
+
 signals:
     void HistoryChanged();
+    void ShowRequested(int x, int y);   // declared for interface completeness
 
 private slots:
     void onHistoryFileChanged();
@@ -32,12 +37,20 @@ private slots:
 private:
     void startWatchers();
     void setupWatcher();
-    void killExistingWatchers();   // <-- declared here
+    void killExistingWatchers();
+
+    // NEW
+    void writeShowRequest(int x, int y);
+    void ensureClientRunning();
+    static QString runtimeDir();
+    static QString showRequestPath();
+    static QString clientLockPath();
 
     HistoryStorage m_storage;
     QProcess m_anyWatcher;
     QFileSystemWatcher *m_watcher;
     QTimer *m_debounceTimer;
+    int m_showSeq = 0;   // NEW
 };
 
 #endif
