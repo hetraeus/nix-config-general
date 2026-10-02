@@ -67,7 +67,7 @@ flake.homeModules.maker = { pkgs, self, ... }: {
     };
 
   # INFO: get SRI like this :
-  # VER="v1.11.0"
+  # VER="v1.11.8"
   # URL="https://github.com/APEbbers/FreeCAD-Ribbon/archive/refs/tags/$VER.tar.gz"
   # nix store prefetch-file --hash-type sha256 --unpack --json "$URL" | jq --raw-output '.hash'
   xdg.dataFile."FreeCAD/Mod/Ribbon" = {
@@ -75,8 +75,8 @@ flake.homeModules.maker = { pkgs, self, ... }: {
     source  = pkgs.fetchFromGitHub {
       owner = "APEbbers";
       repo  = "FreeCAD-Ribbon";
-      rev   = "v1.11.0";
-      hash  = "sha256-UYcPkONYQXs2ewSkfm4vMPhm44HvsGSoN+J7qd8MDvs=";
+      rev   = "v1.11.8";
+      hash  = "sha256-6xaVLdt6LF0W1q1I9MEhRUPArY+ZCXMXdkAhFW6beAk=";
       };
     };
  xdg.mimeApps.defaultApplications = {
