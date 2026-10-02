@@ -17,12 +17,10 @@
       pkgs.neovim
       pkgs.xdg-utils
       pkgs.kitty
-      pkgs.systemd
+      pkgs.systemdMinimal
       pkgs.iwd
       pkgs.curl
       # 2026-05-03 build failure
-      # pkgs.termshark
-      # pkgs.wireshark
       pkgs.iw
       pkgs.iputils # ping
       pkgs.gping
@@ -35,7 +33,6 @@
       pkgs.bandwhich
       pkgs.librespeed-cli
       pkgs.speedtest-go
-      pkgs.zbar
       pkgs.iproute2 # ss
       pkgs.netdiscover
       pkgs.trippy

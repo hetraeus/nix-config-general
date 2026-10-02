@@ -1,7 +1,7 @@
 { perSystem = { pkgs, ... }: {
   packages.fmenu-boot-this-now = pkgs.writeShellApplication {
     name          = "fmenu-boot-this-now";
-    runtimeInputs = [ pkgs.systemd pkgs.fzf pkgs.gawk pkgs.coreutils pkgs.bat ];
+    runtimeInputs = [ pkgs.systemdMinimal pkgs.fzf pkgs.gawk pkgs.coreutils pkgs.bat ];
     text = ''
       [ "$EUID" -eq 0 ] || exec run0 "$0" "$@"
       BOOT_STATS="$(bootctl status --no-pager)"

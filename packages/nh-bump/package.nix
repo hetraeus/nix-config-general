@@ -1,7 +1,7 @@
 { perSystem = { pkgs, ... }: {
   packages.nh-bump = pkgs.writeShellApplication {
     name          = "nh-bump";
-    runtimeInputs = [ pkgs.systemd pkgs.nh ];
+    runtimeInputs = [ pkgs.systemdMinimal pkgs.nh ];
     text = ''
       OP="''${1:-}"
       [[ -z "$OP" ]] && exit

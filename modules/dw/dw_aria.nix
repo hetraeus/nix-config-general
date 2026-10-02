@@ -3,7 +3,7 @@
   dw_add = self.packages.${pkgs.stdenv.hostPlatform.system}.dw-add;
   restart_service = pkgs.writeShellApplication {
     name    = "restart_service";
-    runtimeInputs = [ pkgs.systemd pkgs.libnotify ];
+    runtimeInputs = [ pkgs.systemdMinimal pkgs.libnotify ];
     text    = ''
       systemctl            --user restart           "$1"
       systemctl --no-pager --user status            "$1"

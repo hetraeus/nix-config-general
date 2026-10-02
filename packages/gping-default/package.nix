@@ -2,7 +2,7 @@
   packages.gping-default = let
     script = pkgs.writeShellApplication {
       name          = "gping-gateway-dns-example";
-      runtimeInputs = [ pkgs.gping pkgs.gawk pkgs.jq pkgs.iproute2 pkgs.systemd ];
+      runtimeInputs = [ pkgs.gping pkgs.gawk pkgs.jq pkgs.iproute2 pkgs.systemdMinimal ];
       text = ''
         ALL_TARGETS=( "$(ip -json route list default | jq --raw-output '.[].gateway')" )
         [[ -n "''${ALL_TARGETS[0]}" ]] &&

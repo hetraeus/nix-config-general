@@ -1,7 +1,7 @@
 { perSystem = { pkgs, ... }: {
   packages.visual-caffeine = pkgs.writeShellApplication {
     name          = "visual-caffeine";
-    runtimeInputs = [ pkgs.gnugrep pkgs.libnotify pkgs.systemd pkgs.procps ];
+    runtimeInputs = [ pkgs.gnugrep pkgs.libnotify pkgs.systemdMinimal pkgs.procps ];
     text = ''
       PROC_NAME="caffeine notification panel"
       pkill --full "$PROC_NAME" && { notify-send --app-name=caffeine "🥱 Sleeper"; exit; }

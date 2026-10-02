@@ -10,10 +10,10 @@
       pkgs.bat
       pkgs.kitty
       pkgs.fastfetch
-      pkgs.systemd
+      pkgs.systemdMinimal
       # pkgs.perf
       pkgs.util-linux
-      pkgs.btop
+      # pkgs.btop
       pkgs.tuned
       pkgs.inxi
       pkgs.lshw

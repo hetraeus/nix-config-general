@@ -10,7 +10,7 @@
         pkgs.wireplumber
         pkgs.piper-tts
         pkgs.wlr-randr
-        pkgs.systemd
+        pkgs.systemdMinimal
         self'.packages.qr-selectread
         self'.packages.qr-code-from-clipboard
         self'.packages.visual-brightness

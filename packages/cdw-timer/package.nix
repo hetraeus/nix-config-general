@@ -5,7 +5,7 @@
       pkgs.brightnessctl
       pkgs.coreutils
       pkgs.libnotify
-      pkgs.systemd
+      pkgs.systemdMinimal
       pkgs.sox
     ];
     text = ''

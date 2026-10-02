@@ -2,7 +2,7 @@
   packages.fmenu-selsong = pkgs.writeShellApplication {
     name          = "fmenu-selsong";
     runtimeInputs = [
-      pkgs.systemd pkgs.fzf pkgs.mpc pkgs.gnugrep pkgs.gawk pkgs.ffmpeg
+      pkgs.systemdMinimal pkgs.fzf pkgs.mpc pkgs.gnugrep pkgs.gawk pkgs.ffmpeg
       pkgs.picard pkgs.wl-clipboard-rs pkgs.xdg-utils pkgs.rsync pkgs.blobdrop
     ];
     text = ''

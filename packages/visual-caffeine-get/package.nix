@@ -1,7 +1,7 @@
 { perSystem = { pkgs, ... }: {
   packages.visual-caffeine-get = pkgs.writeShellApplication {
     name          = "visual-caffeine-get";
-    runtimeInputs = [ pkgs.gnugrep pkgs.systemd ];
+    runtimeInputs = [ pkgs.gnugrep pkgs.systemdMinimal ];
     text = ''
       systemd-inhibit --list --no-pager --no-legend --what=idle \
       | grep --quiet "caffeine notification panel" && {

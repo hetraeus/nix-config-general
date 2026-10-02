@@ -2,7 +2,7 @@
   packages.fmenu-radio-mpd = let
     script = pkgs.writeShellApplication {
       name          = "fmenu-radio-mpd";
-      runtimeInputs = [ pkgs.curl pkgs.jq pkgs.fzf pkgs.mpc pkgs.gnugrep pkgs.mpv pkgs.systemd ];
+      runtimeInputs = [ pkgs.curl pkgs.jq pkgs.fzf pkgs.mpc pkgs.gnugrep pkgs.mpv pkgs.systemdMinimal ];
       text = ''
         export FZF_DEFAULT_OPTS="\
           --layout=reverse       \

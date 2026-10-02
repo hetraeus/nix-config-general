@@ -1,7 +1,7 @@
 { perSystem = { pkgs, ... }: {
   packages.visual-brightness = pkgs.writeShellApplication {
     name          = "visual-brightness";
-    runtimeInputs = [ pkgs.systemd pkgs.brightnessctl pkgs.wl-gammarelay-rs pkgs.gnugrep ];
+    runtimeInputs = [ pkgs.systemdMinimal pkgs.brightnessctl pkgs.wl-gammarelay-rs pkgs.gnugrep ];
     text = ''
       case "$1" in
         "up"   )
