@@ -2,12 +2,14 @@
   perSystem = { pkgs, ... }: {
     packages.retroarch-ready = let
       retroarchWrapped = pkgs.retroarch.withCores (cores: with cores; [
-        melonds
-        mgba
-        bsnes-hd
-        flycast
-        fuse
         mame2003-plus
+        melondsds # Nintendo DS
+        mgba # Gameboy + Gameboy Advance
+        bsnes-hd # Super Nintando
+        flycast # SEGA Dreamcast, Naomi, Naomi 2, Atomiswave
+        fuse # Sinclair spectrum
+        beetle-psx-hw # Playstation 1
+        play # Playstation 2
       ]);
 
       retroarchCfg = let
