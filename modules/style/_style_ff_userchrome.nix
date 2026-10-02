@@ -46,8 +46,8 @@ in {
 
   programs.firefox.profiles."user".userChrome = let
     autohide = pkgs.fetchurl {
-      url = "https://raw.githubusercontent.com/MrOtherGuy/firefox-csshacks/refs/heads/master/chrome/autohide_tabstoolbar_v2.css";
-      hash = "sha256-ERBWry+dVaslQSU7IkGLtqc3HRMO2v2OhBsj+yzEDSg=";
+      url = "https://raw.githubusercontent.com/MrOtherGuy/firefox-csshacks/36a2db6cc7edb60bb94e63669c040653bec99a5e/chrome/autohide_bookmarks_and_main_toolbars.css";
+      hash = "sha256-9qLGfr2yUcHxA4Ky+Ov7URVVGwlM8JF5s83SeCvSW7c=";
       };
   in ''
   /*
