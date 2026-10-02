@@ -7,15 +7,28 @@ import Quickshell.Wayland
 Scope {
     id: root
 
-    Theme { id: theme }
-    ClipboardService { id: service }
+    Theme {
+        id: theme
+    }
+    ClipboardService {
+        id: service
+    }
 
     // --- State (unchanged) ---
     property var historyModel: []
     property var pinnedModel: [
-        { type: "pinned", text: formatLocalDateTime(new Date()) },
-        { type: "pinned", text: formatLocalDateTime(new Date()).slice(0, 10) },
-        { type: "pinned", text: "💌 e-mail" }
+        {
+            type: "pinned",
+            text: formatLocalDateTime(new Date())
+        },
+        {
+            type: "pinned",
+            text: formatLocalDateTime(new Date()).slice(0, 10)
+        },
+        {
+            type: "pinned",
+            text: "💌 e-mail"
+        }
     ]
     property string filterText: ""
     property var historyFiltered: []
@@ -33,88 +46,102 @@ Scope {
 
     // --- Show / Hide API ---
     function show() {
-        filterText = ""
-        currentPage = 0
-        selectedIndex = 0
-        hoveredIndex = -1
-        deleteDialogVisible = false
-        deleteTargetIndex = -1
-        panelVisible = true
-        maybeFocusFilterBar()
+        filterText = "";
+        currentPage = 0;
+        selectedIndex = 0;
+        hoveredIndex = -1;
+        deleteDialogVisible = false;
+        deleteTargetIndex = -1;
+        panelVisible = true;
+        maybeFocusFilterBar();
     }
 
     function hide() {
-        panelVisible = false
-        deleteDialogVisible = false
+        panelVisible = false;
+        deleteDialogVisible = false;
     }
 
     // --- Logic (unchanged) ---
     function updateFilters() {
-        var lower = filterText.toLowerCase()
-        var hist = [], pin = []
+        var lower = filterText.toLowerCase();
+        var hist = [], pin = [];
         for (var i = 0; i < historyModel.length; i++) {
-            if (historyModel[i]._searchKey.indexOf(lower) !== -1) hist.push(i)
+            if (historyModel[i]._searchKey.indexOf(lower) !== -1)
+                hist.push(i);
         }
-        historyFiltered = hist
+        historyFiltered = hist;
         for (var j = 0; j < pinnedModel.length; j++) {
-            if (pinnedModel[j].text.toLowerCase().indexOf(lower) !== -1) pin.push(j)
+            if (pinnedModel[j].text.toLowerCase().indexOf(lower) !== -1)
+                pin.push(j);
         }
-        pinnedFiltered = pin
+        pinnedFiltered = pin;
 
-        var maxIndex = (currentPage === 0 ? historyFiltered.length : pinnedFiltered.length) - 1
-        if (selectedIndex > maxIndex) selectedIndex = Math.max(0, maxIndex)
+        var maxIndex = (currentPage === 0 ? historyFiltered.length : pinnedFiltered.length) - 1;
+        if (selectedIndex > maxIndex)
+            selectedIndex = Math.max(0, maxIndex);
     }
 
     onFilterTextChanged: {
-        updateFilters()
-        var fb = contentLoader.item ? contentLoader.item.filterBar : null
-        if (fb && fb.text !== filterText) fb.text = filterText
+        updateFilters();
+        var fb = contentLoader.item ? contentLoader.item.filterBar : null;
+        if (fb && fb.text !== filterText)
+            fb.text = filterText;
     }
     onHistoryModelChanged: updateFilters()
-    onCurrentPageChanged: { filterText = ""; selectedIndex = 0 }
+    onCurrentPageChanged: {
+        filterText = "";
+        selectedIndex = 0;
+    }
 
     function activateHistoryItem() {
         if (selectedIndex < historyFiltered.length) {
-            var idx = historyFiltered[selectedIndex]
-            service.callSetSelection(idx, function() {
-                root.selectedIndex = 0
-                root.hoveredIndex = -1
-                root.hide()
-            })
+            var idx = historyFiltered[selectedIndex];
+            service.callSetSelection(idx, function () {
+                root.selectedIndex = 0;
+                root.hoveredIndex = -1;
+                root.hide();
+            });
         }
     }
 
     function requestDelete() {
-        if (currentPage !== 0) return
-        if (selectedIndex >= historyFiltered.length) return
-        deleteTargetIndex = historyFiltered[selectedIndex]
-        deleteDialogVisible = true
+        if (currentPage !== 0)
+            return;
+        if (selectedIndex >= historyFiltered.length)
+            return;
+        deleteTargetIndex = historyFiltered[selectedIndex];
+        deleteDialogVisible = true;
     }
 
     function cancelDelete() {
-        deleteDialogVisible = false
-        deleteTargetIndex = -1
+        deleteDialogVisible = false;
+        deleteTargetIndex = -1;
     }
 
     function confirmDelete() {
-        if (deleteTargetIndex < 0) { cancelDelete(); return }
-        var idx = deleteTargetIndex
-        deleteTargetIndex = -1
-        deleteDialogVisible = false
-        service.callDeleteEntry(idx, function() {})
+        if (deleteTargetIndex < 0) {
+            cancelDelete();
+            return;
+        }
+        var idx = deleteTargetIndex;
+        deleteTargetIndex = -1;
+        deleteDialogVisible = false;
+        service.callDeleteEntry(idx, function () {});
     }
 
     function activatePinnedItem() {
         if (selectedIndex < pinnedFiltered.length) {
-            var entry = pinnedModel[pinnedFiltered[selectedIndex]]
+            var entry = pinnedModel[pinnedFiltered[selectedIndex]];
             if (entry.text === "💌 e-mail") {
-                service.callIgnore(function() {
-                    service.readMail(Quickshell.env("XDG_RUNTIME_DIR") + "/mail")
-                })
+                service.callIgnore(function () {
+                    service.readMail(Quickshell.env("XDG_RUNTIME_DIR") + "/mail");
+                });
             } else {
-                service.callIgnore(function() {
-                    service.copy(entry.text, function() { root.hide() })
-                })
+                service.callIgnore(function () {
+                    service.copy(entry.text, function () {
+                        root.hide();
+                    });
+                });
             }
         }
     }
@@ -129,16 +156,19 @@ Scope {
 
     function screenForCursor() {
         for (var i = 0; i < Quickshell.screens.length; i++) {
-            var s = Quickshell.screens[i]
-            if (cursorX >= s.x && cursorX < s.x + s.width && cursorY >= s.y && cursorY < s.y + s.height) return s
+            var s = Quickshell.screens[i];
+            if (cursorX >= s.x && cursorX < s.x + s.width && cursorY >= s.y && cursorY < s.y + s.height)
+                return s;
         }
-        return Quickshell.screens[0]
+        return Quickshell.screens[0];
     }
 
     function maybeFocusFilterBar() {
-        if (!panelVisible) return
-        var item = contentLoader.item
-        if (item && item.filterBar) item.filterBar.forceFocus()
+        if (!panelVisible)
+            return;
+        var item = contentLoader.item;
+        if (item && item.filterBar)
+            item.filterBar.forceFocus();
     }
 
     // --- Service Connections ---
@@ -147,32 +177,32 @@ Scope {
 
         function onHistoryLoaded(rawJson) {
             try {
-                var doc = JSON.parse(rawJson)
-                var entries = (doc.entries || [])
-                    .sort(function(a, b) {
-                        return new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime()
-                    })
-                    .slice(0, root.historyLimit)
+                var doc = JSON.parse(rawJson);
+                var entries = (doc.entries || []).slice(0, root.historyLimit);
                 for (var i = 0; i < entries.length; i++) {
-                    var e = entries[i]
-                    e._searchKey = (e.type === "image" ? "image" : (e.content || "")).toLowerCase()
+                    var e = entries[i];
+                    e._searchKey = (e.type === "image" ? "image" : (e.content || "")).toLowerCase();
                 }
-                root.historyModel = entries
+                root.historyModel = entries;
             } catch (e) {
-                root.historyModel = []
+                root.historyModel = [];
             }
         }
 
         function onMailLoaded(content) {
-            if (content.length > 0) service.copy(content, function() { root.hide() })
-            else root.hide()
+            if (content.length > 0)
+                service.copy(content, function () {
+                    root.hide();
+                });
+            else
+                root.hide();
         }
 
         // Server pushes show intent + cursor position in one call.
         function onShowRequested(x, y) {
-            cursorX = x
-            cursorY = y
-            root.show()
+            cursorX = x;
+            cursorY = y;
+            root.show();
         }
     }
 
@@ -192,7 +222,10 @@ Scope {
         WlrLayershell.anchors.right: true
         WlrLayershell.exclusiveZone: 0
 
-        MouseArea { anchors.fill: parent; onClicked: root.hide() }
+        MouseArea {
+            anchors.fill: parent
+            onClicked: root.hide()
+        }
 
         Loader {
             id: contentLoader
@@ -216,16 +249,17 @@ Scope {
                 id: popupContent
                 width: 400
                 height: 500
-                x: Math.max(0, Math.min(root.cursorX - panel.screen.x - width / 2,
-                                         panel.screen.width - width))
-                y: Math.max(0, Math.min(root.cursorY - panel.screen.y - height / 4,
-                                         panel.screen.height - height))
+                x: Math.max(0, Math.min(root.cursorX - panel.screen.x - width / 2, panel.screen.width - width))
+                y: Math.max(0, Math.min(root.cursorY - panel.screen.y - height / 4, panel.screen.height - height))
                 color: theme.bgColor
                 radius: 8
                 border.color: theme.commentColor
                 border.width: 1
 
-                MouseArea { anchors.fill: parent; onClicked: {} }
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {}
+                }
 
                 ColumnLayout {
                     anchors.fill: parent
@@ -240,19 +274,21 @@ Scope {
                         fontFamily: theme.fontFamily
                         onEscapePressed: root.hide()
                         onPageToggled: root.currentPage = root.currentPage === 0 ? 1 : 0
-                        onUpPressed: { if (root.selectedIndex > 0) root.selectedIndex-- }
-                        onDownPressed: {
-                            var maxIndex = (root.currentPage === 0
-                                ? root.historyFiltered.length
-                                : root.pinnedFiltered.length) - 1
-                            if (root.selectedIndex < maxIndex) root.selectedIndex++
+                        onUpPressed: {
+                            if (root.selectedIndex > 0)
+                                root.selectedIndex--;
                         }
-                        onLeftPressed:  if (root.currentPage === 0) root.currentPage = 1
-                        onRightPressed: if (root.currentPage === 1) root.currentPage = 0
+                        onDownPressed: {
+                            var maxIndex = (root.currentPage === 0 ? root.historyFiltered.length : root.pinnedFiltered.length) - 1;
+                            if (root.selectedIndex < maxIndex)
+                                root.selectedIndex++;
+                        }
+                        onLeftPressed: if (root.currentPage === 0)
+                            root.currentPage = 1
+                        onRightPressed: if (root.currentPage === 1)
+                            root.currentPage = 0
                         onReturnPressed: {
-                            root.currentPage === 0
-                                ? root.activateHistoryItem()
-                                : root.activatePinnedItem()
+                            root.currentPage === 0 ? root.activateHistoryItem() : root.activatePinnedItem();
                         }
                         onDeletePressed: root.requestDelete()
                     }
@@ -273,18 +309,22 @@ Scope {
                         commentColor: theme.commentColor
                         fontFamily: theme.fontFamily
                         scrollOff: 2
-                        onHistoryClicked: function(index) {
-                            root.selectedIndex = index
-                            root.activateHistoryItem()
+                        onHistoryClicked: function (index) {
+                            root.selectedIndex = index;
+                            root.activateHistoryItem();
                         }
-                        onPinnedClicked: function(index) {
-                            root.selectedIndex = index
-                            root.activatePinnedItem()
+                        onPinnedClicked: function (index) {
+                            root.selectedIndex = index;
+                            root.activatePinnedItem();
                         }
-                        onHistoryHovered: function(index) { root.hoveredIndex = index }
-                        onPinnedHovered:  function(index) { root.hoveredIndex = index }
+                        onHistoryHovered: function (index) {
+                            root.hoveredIndex = index;
+                        }
+                        onPinnedHovered: function (index) {
+                            root.hoveredIndex = index;
+                        }
                         onHistoryActivated: root.activateHistoryItem()
-                        onPinnedActivated:  root.activatePinnedItem()
+                        onPinnedActivated: root.activatePinnedItem()
                     }
                 }
             }
@@ -299,7 +339,10 @@ Scope {
                     anchors.fill: parent
                     color: "#aa000000"
                     radius: 8
-                    MouseArea { anchors.fill: parent; onClicked: root.cancelDelete() }
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: root.cancelDelete()
+                    }
                 }
 
                 Rectangle {
@@ -311,7 +354,10 @@ Scope {
                     border.width: 1
                     radius: 8
 
-                    MouseArea { anchors.fill: parent; onClicked: {} }
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {}
+                    }
 
                     ColumnLayout {
                         anchors.fill: parent
@@ -336,8 +382,7 @@ Scope {
                                 id: cancelButton
                                 Layout.fillWidth: true
                                 Layout.preferredHeight: 30
-                                color: cancelHover.containsMouse || activeFocus
-                                       ? "#404060" : "transparent"
+                                color: cancelHover.containsMouse || activeFocus ? "#404060" : "transparent"
                                 border.color: activeFocus ? theme.fgColor : theme.commentColor
                                 border.width: activeFocus ? 2 : 1
                                 radius: 4
@@ -355,15 +400,14 @@ Scope {
                                     onClicked: root.cancelDelete()
                                 }
                                 Keys.onReturnPressed: root.cancelDelete()
-                                Keys.onEnterPressed:  root.cancelDelete()
+                                Keys.onEnterPressed: root.cancelDelete()
                             }
 
                             Rectangle {
                                 id: deleteButton
                                 Layout.fillWidth: true
                                 Layout.preferredHeight: 30
-                                color: delHover.containsMouse || activeFocus
-                                       ? "#a04040" : "#602020"
+                                color: delHover.containsMouse || activeFocus ? "#a04040" : "#602020"
                                 border.color: activeFocus ? theme.fgColor : theme.commentColor
                                 border.width: activeFocus ? 2 : 1
                                 radius: 4
@@ -380,22 +424,26 @@ Scope {
                                     onClicked: root.confirmDelete()
                                 }
                                 Keys.onReturnPressed: root.confirmDelete()
-                                Keys.onEnterPressed:  root.confirmDelete()
+                                Keys.onEnterPressed: root.confirmDelete()
                             }
                         }
                     }
                 }
 
                 onVisibleChanged: {
-                    if (visible) cancelButton.forceActiveFocus()
-                    else Qt.callLater(root.maybeFocusFilterBar)
+                    if (visible)
+                        cancelButton.forceActiveFocus();
+                    else
+                        Qt.callLater(root.maybeFocusFilterBar);
                 }
 
                 Keys.onEscapePressed: root.cancelDelete()
-                Keys.onTabPressed: function(event) {
-                    if (cancelButton.activeFocus) deleteButton.forceActiveFocus()
-                    else cancelButton.forceActiveFocus()
-                    event.accepted = true
+                Keys.onTabPressed: function (event) {
+                    if (cancelButton.activeFocus)
+                        deleteButton.forceActiveFocus();
+                    else
+                        cancelButton.forceActiveFocus();
+                    event.accepted = true;
                 }
             }
         }

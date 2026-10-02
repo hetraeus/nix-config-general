@@ -20,36 +20,46 @@ Item {
     property bool initialPositionSet: false
 
     function thumbPath(content) {
-        if (!content) return ""
-        var parts = content.split("/")
-        var filename = parts[parts.length - 1]
-        var runtime = Quickshell.env("XDG_RUNTIME_DIR")
-        if (!runtime) runtime = "/tmp"
-        return runtime + "/clipboard-manager/thumbnails/" + filename
+        if (!content)
+            return "";
+        var parts = content.split("/");
+        var filename = parts[parts.length - 1];
+        var runtime = Quickshell.env("XDG_RUNTIME_DIR");
+        if (!runtime)
+            runtime = "/tmp";
+        // Image.source needs a URL; a bare absolute path is resolved relative
+        // to this QML file's own URL and silently fails to load.
+        return "file://" + runtime + "/clipboard-manager/thumbnails/" + filename;
     }
 
     function lineCount(text) {
-        if (!text) return 0
-        return text.split(/\r\n|\r|\n/).length
+        if (!text)
+            return 0;
+        return text.split(/\r\n|\r|\n/).length;
     }
 
     readonly property int contentLineCount: {
-        if (!entry) return 0
-        if (entry.type === "text") return lineCount(entry.content)
-        if (entry.type === "pinned") return lineCount(entry.text)
-        return 0
+        if (!entry)
+            return 0;
+        if (entry.type === "text")
+            return lineCount(entry.content);
+        if (entry.type === "pinned")
+            return lineCount(entry.text);
+        return 0;
     }
 
     signal clicked(int index)
-    signal activated()
+    signal activated
     signal hovered(int index)
 
     Rectangle {
         anchors.fill: parent
         color: {
-            if (isCurrent) return highlightColor
-            if (isHovered) return hoverColor
-            return "transparent"
+            if (isCurrent)
+                return highlightColor;
+            if (isHovered)
+                return hoverColor;
+            return "transparent";
         }
         radius: 4
 
@@ -64,13 +74,20 @@ Item {
                 height: 56
                 fillMode: Image.PreserveAspectCrop
                 source: (entry && entry.type === "image") ? thumbPath(entry.content) : ""
-                visible: (entry && entry.type === "image") ? true : false
+                visible: (entry && entry.type === "image") && status !== Image.Error && status !== Image.Null
                 asynchronous: true
                 sourceSize.width: 56
                 sourceSize.height: 56
-                onStatusChanged: function(status) {
-                    if (status === Image.Error) visible = false
-                }
+
+                // --- DEBUG ---
+                onSourceChanged: console.log("thumb src:", source)
+                onStatusChanged: console.log("thumb status:", status,
+                                             "err:", errorString,
+                                             "progress:", progress)
+                Component.onCompleted: console.log("delegate type:", entry ? entry.type : "(none)",
+                                                    "content:", entry ? entry.content : "(none)",
+                                                    "resolved:", thumbPath(entry ? entry.content : ""))
+                // --- END DEBUG ---
             }
 
             Text {
@@ -85,11 +102,15 @@ Item {
                 font.pointSize: 11
                 textFormat: Text.PlainText
                 text: {
-                    if (!entry) return ""
-                    if (entry.type === "pinned") return entry.text
-                    else if (entry.type === "text") return entry.content
-                    else if (entry.type === "image") return "🖼️ Image"
-                    return ""
+                    if (!entry)
+                        return "";
+                    if (entry.type === "pinned")
+                        return entry.text;
+                    else if (entry.type === "text")
+                        return entry.content;
+                    else if (entry.type === "image")
+                        return "🖼️ Image";
+                    return "";
                 }
             }
         }
@@ -104,13 +125,14 @@ Item {
             anchors.margins: 4
 
             text: {
-                if (!entry) return ""
+                if (!entry)
+                    return "";
                 if (entry.type === "image" && entry.mimeType)
-                    return entry.mimeType
+                    return entry.mimeType;
                 else if (entry.type === "text" && contentLineCount >= 3)
-                    return contentLineCount + " lines"
+                    return contentLineCount + " lines";
                 else
-                    return ""
+                    return "";
             }
             visible: text !== ""
         }

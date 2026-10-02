@@ -37,20 +37,11 @@ private slots:
 private:
     void startWatchers();
     void setupWatcher();
-    void killExistingWatchers();
-
-    // NEW
-    void writeShowRequest(int x, int y);
-    void ensureClientRunning();
-    static QString runtimeDir();
-    static QString showRequestPath();
-    static QString clientLockPath();
 
     HistoryStorage m_storage;
     QProcess m_anyWatcher;
     QFileSystemWatcher *m_watcher;
     QTimer *m_debounceTimer;
-    int m_showSeq = 0;   // NEW
 };
 
 #endif

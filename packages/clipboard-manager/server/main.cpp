@@ -149,6 +149,12 @@ static int storeAny()
             return 0;
 
         QString text = QString::fromUtf8(data);
+
+        if (text.endsWith("\r\n"))
+            text.chop(2);
+        else if (text.endsWith('\n') || text.endsWith('\r'))
+            text.chop(1);
+        
         QString trimmed = text.trimmed();
         if (trimmed.isEmpty())
             return 0;

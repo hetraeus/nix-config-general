@@ -17,7 +17,7 @@ public:
     void addEntry(const QString &type, const QString &content, const QString &mimeType = QString());
     QList<HistoryEntry> entries() const { return m_entries; }
     void clear();
-    void bumpEntry(int index);
+    bool takeAndBump(int index, HistoryEntry &out);
     void removeEntry(int index);
 
     // Saves a full-size image + thumbnail to disk and returns the path to
@@ -42,6 +42,7 @@ private:
 
     QList<HistoryEntry> m_entries;
     bool m_loadFailed = false;
+    bool m_droppedOnLoad = false;   // true if load() pruned any stale image entry
     static const int MAX_ENTRIES = 100;
     static const int MAX_IMAGES = 10;
 };

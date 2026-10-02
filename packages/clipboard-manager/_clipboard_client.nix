@@ -1,10 +1,12 @@
 {
+  lib,
   stdenv,
   cmake,
   ninja,
   qt6,
   makeWrapper,
   coreutils,
+  dbus,
   wl-clipboard,
   quickshell
 }:
@@ -21,6 +23,7 @@ stdenv.mkDerivation (finalAttrs: {
 
   nativeBuildInputs = [
     cmake
+    makeWrapper
     ninja
     qt6.wrapQtAppsHook
   ];
@@ -53,12 +56,31 @@ stdenv.mkDerivation (finalAttrs: {
     mkdir -p $out/bin
     makeWrapper ${quickshell}/bin/quickshell $out/bin/clipboard-client \
       --add-flags "-p $out/share/clipboard-client/shell.qml" \
-      --prefix PATH : ${wl-clipboard}/bin \
+      --prefix PATH : ${lib.makeBinPath [ dbus wl-clipboard ]} \
       --prefix QML2_IMPORT_PATH : $out/lib/qml \
       --prefix QML2_IMPORT_PATH : ${quickshell}/lib/qt-6/qml \
       --prefix QML2_IMPORT_PATH : ${quickshell}/lib/qt6/qml \
       --prefix QML2_IMPORT_PATH : ${quickshell}/lib/qml \
       --prefix LD_LIBRARY_PATH : ${quickshell}/lib
+
+    mkdir -p $out/share/systemd/user
+    cat > $out/share/systemd/user/clipboard-client.service <<EOF
+[Unit]
+Description=clipboard-client
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+ExecStart=$out/bin/clipboard-client
+Type=exec
+PrivateTmp=yes
+Restart=on-failure
+RestartSec=1
+
+[Install]
+WantedBy=graphical-session.target
+After=clipboard-server.service
+EOF
   '';
 
   meta = {

@@ -7,8 +7,7 @@
   makeWrapper,
   coreutils,
   util-linux,
-  wl-clipboard,
-  clipboard-client
+  wl-clipboard
 }:
 stdenv.mkDerivation (finalAttrs: {
   pname = "clipboard-server";
@@ -38,12 +37,29 @@ stdenv.mkDerivation (finalAttrs: {
 
   qtWrapperArgs = [
     "--prefix PATH : ${lib.makeBinPath [
-      clipboard-client
       util-linux
       coreutils
       wl-clipboard
     ]}"
   ];
+
+  postInstall = ''
+    mkdir -p $out/share/systemd/user
+    cat > $out/share/systemd/user/clipboard-server.service <<EOF
+[Unit]
+Description=clipboard-server
+
+[Service]
+ExecStart=$out/bin/clipboard-server
+Type=exec
+PrivateTmp=yes
+Restart=on-failure
+RestartSec=1
+
+[Install]
+WantedBy=default.target
+EOF
+  '';
 
   meta = {
     description = "Quickshell clipboard manager server";

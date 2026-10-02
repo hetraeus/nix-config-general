@@ -18,7 +18,23 @@ HistoryStorage::HistoryStorage(QObject *parent) : QObject(parent)
     QDir().mkpath(cacheDir());
     QDir().mkpath(thumbDir());
     QDir().mkpath(QFileInfo(historyPath()).absolutePath());
-    load();
+
+    // Prune stale image entries (files wiped from XDG_RUNTIME_DIR on reboot)
+    // and persist the pruning immediately, so the client — which reads
+    // history.json directly — doesn't keep rendering dead "🖼 Image" rows.
+    QDir().mkpath(QFileInfo(lockPath()).absolutePath());
+    QLockFile lock(lockPath());
+    lock.setStaleLockTime(5000);
+    if (lock.tryLock(2000)) {
+        load();
+        if (m_droppedOnLoad && !m_loadFailed)
+            save();
+        lock.unlock();
+    } else {
+        // Someone else holds the lock; load without saving. The next writer
+        // will pick up the pruning via its own load()-then-save().
+        load();
+    }
 }
 
 QString HistoryStorage::historyPath()
@@ -97,17 +113,27 @@ void HistoryStorage::load()
         m_loadFailed = true;
         return;
     }
-
     m_loadFailed = false;
     QJsonArray arr = doc.object().value("entries").toArray();
     m_entries.clear();
+    m_droppedOnLoad = false;
     for (const auto &item : arr) {
         QJsonObject obj = item.toObject();
         HistoryEntry e;
         e.type = obj.value("type").toString();
         e.content = obj.value("content").toString();
         e.timestamp = obj.value("timestamp").toString();
-        e.mimeType = obj.value("mimeType").toString();   // read MIME type
+        e.mimeType = obj.value("mimeType").toString();
+
+        // Images live in XDG_RUNTIME_DIR (tmpfs, wiped on reboot) while
+        // history.json lives in ~/.cache. After a reboot every image entry
+        // here points at a nonexistent file; without pruning they render as
+        // bare "🖼 Image" rows forever.
+        if (e.type == "image" && !QFile::exists(e.content)) {
+            m_droppedOnLoad = true;
+            continue;
+        }
+
         m_entries.append(e);
     }
 }
@@ -251,24 +277,38 @@ void HistoryStorage::clear()
     lock.unlock();
 }
 
-void HistoryStorage::bumpEntry(int index)
+bool HistoryStorage::takeAndBump(int index, HistoryEntry &out)
 {
-    if (index <= 0 || index >= m_entries.size())
-        return;
-
     QDir().mkpath(QFileInfo(lockPath()).absolutePath());
     QLockFile lock(lockPath());
     lock.setStaleLockTime(5000);
     if (!lock.tryLock(2000)) {
-        qWarning() << "Could not acquire history lock, bumpEntry() aborted";
-        return;
+        qWarning() << "Could not acquire history lock, takeAndBump() aborted";
+        return false;
     }
 
-    HistoryEntry entry = m_entries.takeAt(index);
-    entry.timestamp = QDateTime::currentDateTimeUtc().toString(Qt::ISODateWithMs);
-    m_entries.prepend(entry);
-    save();
+    // Re-read while holding the lock so the index refers to the exact view
+    // we are about to mutate, even if another process (the --store-any
+    // watcher, another SetSelection, etc.) wrote in between.
+    load();
+    if (m_loadFailed || index < 0 || index >= m_entries.size()) {
+        lock.unlock();
+        return false;
+    }
+
+    out = m_entries.at(index);
+
+    // Match the old bumpEntry() semantics: index 0 is already at the top,
+    // so there is nothing to move. The caller still gets the entry via `out`.
+    if (index > 0) {
+        HistoryEntry moved = m_entries.takeAt(index);
+        moved.timestamp = QDateTime::currentDateTimeUtc().toString(Qt::ISODateWithMs);
+        m_entries.prepend(moved);
+        save();
+    }
+
     lock.unlock();
+    return true;
 }
 
 void HistoryStorage::removeEntry(int index)

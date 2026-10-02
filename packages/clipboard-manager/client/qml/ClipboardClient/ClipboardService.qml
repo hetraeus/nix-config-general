@@ -1,4 +1,4 @@
-import QtQuick 2.15
+import QtQuick
 import Quickshell
 import Quickshell.Io
 
@@ -7,60 +7,85 @@ Item {
 
     readonly property string homeDir: Quickshell.env("HOME") || ""
     readonly property string historyPath: homeDir + "/.cache/clipboard-manager/history.json"
-    readonly property string runtimeDir: {
-        var r = Quickshell.env("XDG_RUNTIME_DIR")
-        return (r && r.length > 0) ? r : "/tmp"
-    }
-    readonly property string showRequestPath: runtimeDir + "/clipboard-manager/show-request"
-    readonly property string lockPath: runtimeDir + "/clipboard-client.lock"
-
-    property int lastSeq: -1
 
     signal historyLoaded(string rawJson)
     signal mailLoaded(string content)
     signal showRequested(int x, int y)
 
-    // Hold an exclusive flock for the lifetime of this process. The server
-    // uses the same lock file to decide whether a client is already alive
-    // and needs to be spawned. If we can't get the lock, another client
-    // owns it and we exit immediately.
+    // --- Listen for D-Bus signals from the server ---
+    //
+    // Two signals matter here:
+    //   ShowRequested(x, y) — emitted by the hotkey path; two int32 args.
+    //   HistoryChanged()    — emitted whenever the server mutates history.json
+    //                         (add / bump / delete). No args.
+    //
+    // dbus-monitor is started with one match rule per signal. Its stdout for a
+    // matched signal looks like:
+    //
+    //   signal time=... sender=... -> ... interface=org.clipboard.Manager; member=ShowRequested
+    //      int32 1234
+    //      int32 5678
+    //   signal time=... sender=... -> ... interface=org.clipboard.Manager; member=HistoryChanged
+    //
+    // The parser tracks which signal it's currently inside via pendingMember,
+    // and for ShowRequested accumulates the two int32 coordinates across lines.
+    property int pendingX: 0
+    property bool hasX: false
+    property string pendingMember: ""
+
     Process {
-        id: lockHolder
+        id: dbusMonitor
         running: true
-        command: ["flock", "-n", root.lockPath, "sleep", "infinity"]
-        onExited: function(exitCode) {
-            if (exitCode !== 0)
-                Qt.quit()
+        command: [
+            "dbus-monitor", "--session",
+            "type='signal',interface='org.clipboard.Manager',member='ShowRequested'",
+            "type='signal',interface='org.clipboard.Manager',member='HistoryChanged'"
+        ]
+        stdout: SplitParser {
+            onRead: function(line) {
+                // --- signal header lines ---
+                if (line.indexOf("member=ShowRequested") !== -1) {
+                    root.pendingMember = "ShowRequested"
+                    root.hasX = false
+                    root.pendingX = 0
+                    return
+                }
+                if (line.indexOf("member=HistoryChanged") !== -1) {
+                    root.pendingMember = ""
+                    // The server rewrites history.json via remove+rename, so the
+                    // file's inode changes on every save and FileView's inotify
+                    // watch silently goes stale. Force a re-read whenever the
+                    // server tells us the file changed.
+                    historyFile.reload()
+                    return
+                }
+
+                // --- ShowRequested body: two int32 lines ---
+                if (root.pendingMember === "ShowRequested") {
+                    var match = line.match(/int32\s+(-?\d+)/)
+                    if (!match) return
+                    var value = parseInt(match[1], 10)
+                    if (isNaN(value)) return
+
+                    if (!root.hasX) {
+                        root.pendingX = value
+                        root.hasX = true
+                    } else {
+                        root.showRequested(root.pendingX, value)
+                        root.hasX = false
+                        root.pendingX = 0
+                        root.pendingMember = ""
+                    }
+                }
+            }
         }
     }
 
-    // Watch the show-request file. The server writes "seq epoch_ms x y\n"
-    // on every Show() call. We act only on new sequence numbers with a
-    // recent timestamp, so a client restart never pops a stale panel.
-    FileView {
-        id: showRequestFile
-        path: root.showRequestPath
-        watchChanges: true
-        onTextChanged: {
-            var raw = text().trim()
-            if (raw.length === 0) return
-            var parts = raw.split(/\s+/)
-            if (parts.length < 4) return
-            var seq = parseInt(parts[0])
-            var epochMs = parseInt(parts[1])
-            var x = parseInt(parts[2])
-            var y = parseInt(parts[3])
-            if (isNaN(seq) || isNaN(epochMs) || isNaN(x) || isNaN(y)) return
-            if (seq <= root.lastSeq) return
-            root.lastSeq = seq
-            if (Date.now() - epochMs > 5000) return    // stale
-            root.showRequested(x, y)
-        }
-    }
-
+    // --- Read history file ---
     FileView {
         id: historyFile
         path: root.historyPath
+        watchChanges: true
         onTextChanged: {
             root.historyLoaded(text().trim())
         }
