@@ -17,8 +17,89 @@
     enable = true;
     binfmt = true;
     package = pkgs.appimage-run.override {
-     extraPkgs = pkgs: [
-        pkgs.icu
+     extraPkgs = pkgs: with pkgs; [
+        # --- Base & Compression ---
+        zlib
+        bzip2
+        icu
+
+        # --- Audio ---
+        alsa-lib
+        pipewire
+        ffmpeg
+
+        # --- Graphics, GUI, & Fonts ---
+        cairo
+        cups
+        expat
+        fontconfig
+        freetype
+        fribidi
+        gdk-pixbuf
+        glib
+        gtk3
+        glibcLocales
+        harfbuzz
+        libglvnd
+        libdrm
+        libgbm
+        libxkbcommon
+        pango
+        libX11
+        libice
+        libsm
+        libxcomposite
+        libxcursor
+        libxdamage
+        libxext
+        libxfixes
+        libxi
+        libxrandr
+        libxrender
+        libxscrnsaver
+        libxtst
+        libxcb
+        qt5.qtwayland
+        qt6.qtwayland
+
+        # --- System & Security ---
+        dbus
+        e2fsprogs    # Provides libcom_err
+        libapparmor
+        libcap
+        libcap_ng
+        libgcrypt
+        libgpg-error
+        gpgmepp
+        libksba
+        libselinux
+        libseccomp
+        linux-pam
+        npth
+        systemd      # Provides libudev
+        util-linux   # Provides libmount, libuuid
+        udev
+
+        # --- Cryptography & Networking ---
+        gnutls
+        libassuan
+        nspr
+        nss
+
+        # --- Other Libraries ---
+        e2fsprogs
+        imagemagick
+        libxcrypt
+        libxcrypt-legacy # Provides libcrypt.so.1
+        ncurses
+        perl
+        readline
+        sqlite
+        stdenv.cc.cc.lib # Provides libstdc++.so.6
+        libxau
+        libxdmcp
+        libxshmfence
+
         ];
       };
     };
