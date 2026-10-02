@@ -46,7 +46,7 @@
 
           # Derived values from resolved config
           needsRoboto = cfg.mpvStyle.osd-font == "Roboto" || cfg.mpvStyle.sub-font == "Roboto";
-          styleLines = lib.concatStringsSep "\n" (lib.mapAttrsToList (k: v: "${k}=${v}") cfg.mpvStyle);
+          styleLines = lib.concatStringsSep "\n" (lib.mapAttrsToList (k: v: "${k}='${v}'") cfg.mpvStyle);
           subsLangLines = lib.concatStringsSep "\n" (map (lang: "slang=${lang}") cfg.subs_player_langs);
           audioLangLines = lib.concatStringsSep "\n" (map (lang: "alang=${lang}") cfg.audio_player_langs);
 

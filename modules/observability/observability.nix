@@ -68,7 +68,7 @@
 
 
 flake.homeModules.observability = { pkgs, ... }: {
-  programs.btop.enable = true;
+  # programs.btop.enable = true;
   xdg.configFile."procps/toprc".source = ./toprc ;
   home.packages = [ pkgs.mission-center ];
 };}

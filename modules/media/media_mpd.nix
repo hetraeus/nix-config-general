@@ -3,7 +3,7 @@
 
   home.shellAliases.mr    = " systemctl restart --user mpd #";
   home.shellAliases.mq    = " systemctl stop    --user mpd #";
-  services.mpdris2.enable = true;
+  services.mpdris2-rs.enable = true;
   services.mpd = {
   #  musicDirectory default to xdg.userDirs.music
   #  musicDirectory = /run/media/sfx/Lasagna/Music;
@@ -27,6 +27,12 @@
         type   "pipewire"
         name   "My PipeWire Output"
         format "48000:16:2"
+        
+        # Output enabled/disabled state is persisted in state_file.
+        # Check with: mpc outputs
+        # or "$XDG_DATA_HOME/mpd/state" by home manager
+        # or "$XDG_STATE_HOME/mpd/state" sensible future place
+
       }
       audio_output {
         type         "httpd"

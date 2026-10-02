@@ -1,11 +1,11 @@
 { flake.nixosModules.network_diagnostics_deep = { pkgs, lib, config, ... }: {
   programs.mtr.enable = true;
   programs.bandwhich.enable = true;
-  # programs.wireshark.enable  = true;
+  programs.wireshark.enable  = true;
   programs.wireshark.usbmon.enable = true;
   environment.systemPackages = [
-    # pkgs.termshark
-    # pkgs.wireshark
+    pkgs.termshark
+    #pkgs.wireshark-cli
     pkgs.nftables
 
     pkgs.pwru
