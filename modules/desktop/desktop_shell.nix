@@ -136,15 +136,14 @@ flake.homeModules.desktop_shell = { pkgs, lib, config, self, ... }: {
   programs.noctalia.enable = true;
   programs.noctalia.systemd.enable = true;
 
-  systemd.user.services.clipboard = {
-    Install.WantedBy    = [ "graphical-session.target" ];
-    Service.ExecStart   = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.clipboard-server}";
-    Service.Restart     = "on-failure";
-    Service.RestartSec  = 1;
-    Unit.Description    = "clipboard manager";
-    Unit.After          = [ "graphical-session.target" ];
-    Unit.PartOf         = [ "graphical-session.target" ];
-    };
+  systemd.user.packages = [
+    self.packages.${pkgs.stdenv.hostPlatform.system}.clipboard-server
+    self.packages.${pkgs.stdenv.hostPlatform.system}.clipboard-client
+    ];
+  xdg.configFile."systemd/user/default.target.wants/clipboard-server.service".source =
+    "${self.packages.${pkgs.stdenv.hostPlatform.system}.clipboard-server}/share/systemd/user/clipboard-server.service";
+  xdg.configFile."systemd/user/graphical-session.target.wants/clipboard-client".source =
+    "${self.packages.${pkgs.stdenv.hostPlatform.system}.clipboard-client}/share/systemd/user/clipboard-client.service";
 
   # thunar is not smart enought to mount hard disks plugged from boot
   # TODO what about nemo?
