@@ -214,6 +214,13 @@ flake.homeModules.desktop_shell = { pkgs, lib, config, self, ... }: {
     pkgs.zbar
     pkgs.zint-qt
     ];
+
+  multiverse.pins = {
+    noctalia = "5.2.0";
+    };
+  programs.noctalia.package = config.multiverse.pinned.noctalia;
+
+    
   programs.noctalia.enable = true;
   programs.noctalia.systemd.enable = true;
 
