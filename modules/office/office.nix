@@ -82,12 +82,15 @@
 
 flake.homeModules.office = { pkgs, lib, config, self, ... }: {
 
+  multiverse.pins = {
+    euro-office-desktopeditors = "9.3.1-dev.1";
+    };
   home.packages = [
-    # Note taking, alternative to Joplin
+    config.multiverse.pinned.euro-office-desktopeditors
+    pkgs.libreoffice-qt6-fresh
+
 #    pkgs.logseq # 2026-06-02 unsafe !
 
-    pkgs.libreoffice-qt6-fresh
-    pkgs.onlyoffice-desktopeditors
 
     pkgs.marimo
 
