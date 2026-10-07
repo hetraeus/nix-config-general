@@ -9,13 +9,9 @@ inputs = {
   nixpkgs.url        = "github:NixOS/nixpkgs/nixos-26.05";
   omniflake.url      = "github:fzakaria/omniflake";
   omniflake.inputs.nixpkgs.follows = "nixpkgs";
-  # multiverse.url     = "github:fzakaria/nixpkgs-multiverse";
 
   flake-parts.url    = "github:hercules-ci/flake-parts";
-  # import-tree.url    = "github:vic/import-tree";
-  # nixos-hardware.url = "github:NixOS/nixos-hardware/master";
   wrappers.url       = "github:Lassulus/wrappers";
-  multios-usb.url    = "github:Mexit/MultiOS-USB";
 
   stylix.url         = "github:nix-community/stylix/release-26.05";
   stylix.inputs.nixpkgs.follows       = "nixpkgs";
@@ -29,8 +25,6 @@ inputs = {
   # nix-index-database.url = "github:nix-community/nix-index-database";
   # nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
 
-  # nvf.url       = "github:notashelf/nvf";
-  # nvf.inputs.nixpkgs.follows = "nixpkgs";
   noctalia = {
     url = "github:noctalia-dev/noctalia";
     inputs.nixpkgs.follows = "nixpkgs";
