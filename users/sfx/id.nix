@@ -6,6 +6,8 @@
     inputs.omniflake.flakes.nix-index-database.homeModules.default
     inputs.sops-nix.homeManagerModules.sops
     inputs.noctalia.homeModules.default
+    inputs.omniflake.flakes.nixpkgs-multiverse.homeManagerModules.default
+
 
     self.homeModules."${config.users_list.principalUser}Modules"
     self.homeModules.sound_control
