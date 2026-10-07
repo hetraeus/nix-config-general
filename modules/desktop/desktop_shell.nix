@@ -223,7 +223,7 @@ flake.homeModules.desktop_shell = { pkgs, lib, config, self, ... }: {
     ];
   xdg.configFile."systemd/user/default.target.wants/clipboard-server.service".source =
     "${self.packages.${pkgs.stdenv.hostPlatform.system}.clipboard-server}/share/systemd/user/clipboard-server.service";
-  xdg.configFile."systemd/user/graphical-session.target.wants/clipboard-client".source =
+  xdg.configFile."systemd/user/graphical-session.target.wants/clipboard-client.service".source =
     "${self.packages.${pkgs.stdenv.hostPlatform.system}.clipboard-client}/share/systemd/user/clipboard-client.service";
 
   # thunar is not smart enought to mount hard disks plugged from boot

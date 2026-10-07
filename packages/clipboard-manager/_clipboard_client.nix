@@ -67,7 +67,7 @@ stdenv.mkDerivation (finalAttrs: {
     cat > $out/share/systemd/user/clipboard-client.service <<EOF
 [Unit]
 Description=clipboard-client
-After=graphical-session.target
+After=graphical-session.target clipboard-server.service
 PartOf=graphical-session.target
 
 [Service]
@@ -79,7 +79,6 @@ RestartSec=1
 
 [Install]
 WantedBy=graphical-session.target
-After=clipboard-server.service
 EOF
   '';
 

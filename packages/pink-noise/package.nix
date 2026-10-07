@@ -25,7 +25,7 @@
       name        = "pink-noise";
       exec        = "pink-noise";
       desktopName = "drone ambient";
-      genericName = "pink noise drone ambient";
+      genericName = "pink noise drone ambient brown";
       comment     = "background noise";
       categories  = [ "AudioVideo" "Audio" ];
       icon        = "bee-package-manager";

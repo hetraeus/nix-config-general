@@ -23,15 +23,16 @@
     self.packages.${pkgs.stdenv.hostPlatform.system}.freeze-sound
     ];
 
-  #services.easyeffects.enable = true; # 2026-08-30 : crackling audio
+  # WARN crackinling audio may depend on:
+  # - tuned. Use latency-performance and it goes away
+  # - services.easyeffects.enable = true; # 2026-08-30
+  # - equalizer preset:
+  #   services.easyeffects.extraPresets.sony_mdr_zx110sony_mdr_zx110 = builtins.fromJSON (builtins.readFile ./easyeffect_headphones_Sony_MDR-ZX110.json);
+  #   services.easyeffects.preset = "sony_mdr_zx110" ;
+  
   # don't forget to add your headphones equalizer from
   # https://autoeq.app/
   # and convert it to a json preset through easyeffects
-
-  # NOTE keep the equalizer preset disabled, it produce crackling noises
-  #services.easyeffects.extraPresets.sony_mdr_zx110sony_mdr_zx110 = builtins.fromJSON (builtins.readFile ./easyeffect_headphones_Sony_MDR-ZX110.json);
-  #services.easyeffects.preset = "sony_mdr_zx110" ;
-
 
   wayland.windowManager.hyprland.extraConfig = let
     run-or-raise = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.wlr-focus}";
