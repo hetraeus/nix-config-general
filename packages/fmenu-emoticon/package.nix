@@ -20,10 +20,6 @@
       EMOJI_LIST=${emojiList}
       EMOJI_HISTORY="''${XDG_CACHE_HOME:-$HOME/.cache}"/emoji_history
       selectedSmileyEntry="$({
-        # date --iso-8601=date
-        # date --iso-8601=minutes
-        # printf '%(%H:%M)T\n'
-        [ -f "$XDG_RUNTIME_DIR"/mail ] && { cat "$XDG_RUNTIME_DIR"/mail ; printf '\n'; }
         tac "$EMOJI_HISTORY" || touch "$EMOJI_HISTORY"
         cat "$EMOJI_LIST"
       } | rofi \
