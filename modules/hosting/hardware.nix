@@ -4,7 +4,7 @@
   boot.uki.tries = 3;
   environment.systemPackages = [
     pkgs.pciutils pkgs.gparted
-    inputs.multios-usb.packages.${pkgs.stdenv.hostPlatform.system}.default
+    inputs.omniflake.flakes.multios-usb.packages.${pkgs.stdenv.hostPlatform.system}.default
     ];
 
   services.opensnitch.rules.qqq_fwupd = {
