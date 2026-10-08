@@ -25,6 +25,10 @@
           testsrc2=s=$DISPLAY_SIZE:d=10[mov];
           [w][r][g][b][k][bars][mov]concat=n=7:v=1:a=0"
 
+        # stop all pipewire/wireplumber services and triggers and run
+        # speaker-test -D hw:0,0 -c 2
+        # no cracklings? Not an hardware problem. May be a power saving daemon
+
         wdotool mousemove --relative -100 -100
       '';
     };

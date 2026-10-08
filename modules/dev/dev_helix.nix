@@ -71,6 +71,13 @@
     end-of-line-diagnostics   = "hint";
   # inline-diagnostics.cursor-line =   "error";
   # inline-diagnostics.other-lines = "disable";
+  # TODO wait new release
+    # persistance = {
+    #   old-files = true;
+    #   commands = true;
+    #   search = true;
+    #   clipboard = true;
+    #   };
     whitespace   = { render   =  "all";
       characters = {
       space      = " ";

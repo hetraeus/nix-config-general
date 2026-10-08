@@ -44,6 +44,7 @@
 
     pkgs.glmark2
     pkgs.vkmark
+    # pkgs.rustconn
     vkmark-dGPU
     vkmark-iGPU
     pkgs.kdiskmark

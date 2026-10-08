@@ -45,8 +45,17 @@
     };};
 };
 
-flake.homeModules.gaming = { pkgs, lib, self, ... }: {
+flake.homeModules.gaming = { pkgs, lib, self, config, ... }: {
+
+
+  multiverse.config.allowUnfree = true;
+  multiverse.pins = {
+    ut1999 = "469e";
+    };
   home.packages = [
+    config.multiverse.pinned.ut1999
+    # (config.multiverse.instance.at "tip").ut2004
+
   #  fmenu-games-roms
 
     pkgs.flare
@@ -59,7 +68,6 @@ flake.homeModules.gaming = { pkgs, lib, self, ... }: {
     pkgs.wesnoth
     pkgs.mindustry
     pkgs.openloco
-    pkgs.ut1999
 
   #  manga-tui
     pkgs.faugus-launcher
