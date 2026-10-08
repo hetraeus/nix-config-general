@@ -25,7 +25,6 @@
       "A-x"         = "command_palette";
       "C-backspace" = "delete_word_backward";
       "C-del"       = "delete_word_forward";
-      "C-left"      = "move_prev_word_end";
       };
 
     normal          = {
