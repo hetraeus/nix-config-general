@@ -2,12 +2,12 @@
 # INFO: usage
 # run0 nix --experimental-features "nix-command flakes" run github:nix-community/disko/latest -- --mode destroy,format,mount "$this_nix_file"
 # TEST still WIP:
+# WIP lanzaboote integration
 
 # TODO: remove relative entries in the hardware module
-# lanzaboote integration
 
 type    = "disk";
-device  = "/dev/disk/by-path/pci-0000:00:17.0-ata-1.0";
+device  = "/dev/disk/by-id/ata-SanDisk_SD9SB8W512G1101_1903B0800501";
 content = { type = "gpt";
 
   partitions.ESP = { size = "2G"; type = "EF00"; };
@@ -22,22 +22,23 @@ content = { type = "gpt";
   partitions.luks.content = {
     type  = "luks";
     name  = "crypted";
-    # disable settings.keyFile if you want to use interactive password entry
+    # settings.keyFile   = "/tmp/secret.key"; # Procedural
+    # additionalKeyFiles = [ "/tmp/additionalSecret.key" ];
     passwordFile = "/tmp/secret.key"; # Interactive
-    #additionalKeyFiles = [ "/tmp/additionalSecret.key" ];
-    # settings.keyFile = "/tmp/secret.key";
     settings.allowDiscards = true;
-    content = {
-      type  = "btrfs"; extraArgs  = [ "-f" ];
-      subvolumes = {
+    };
+
+  partitions.luks.content.content = {
+      type         = "btrfs";
+      extraArgs    = [ "-f" ];
+      subvolumes   = {
         # discard/trim enabled by default since linux 6.2
         "/my_root" = { mountpoint = "/";     mountOptions = [ "compress=zstd" "lazytime" ]; };
         "/my_home" = { mountpoint = "/home"; mountOptions = [ "compress=zstd" "lazytime" ]; };
         "/my_nix"  = { mountpoint = "/nix";  mountOptions = [ "compress=zstd" "lazytime" ]; };
         "/subv"    = { mountpoint = "/subv"; mountOptions = [ "compress=zstd" "lazytime" ]; };
 
-    };};};
-
+    };};
 
  plainSwap.size     = "100%";
   plainSwap.content  = {

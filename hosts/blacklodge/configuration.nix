@@ -13,8 +13,11 @@ flake.nixosConfigurations.${hostname} = inputs.nixpkgs.lib.nixosSystem {
     self.nixosModules."${hostname}Modules"
     self.nixosModules.generalPurpUsers
 
+    inputs.disko.nixosModules.disko
+    ./_disko.nix
     self.nixosModules.hardware
     self.nixosModules.power
+
     self.nixosModules.share_samba
     self.nixosModules.share_ssh
     self.nixosModules.virtualisation_android
@@ -25,6 +28,7 @@ flake.nixosConfigurations.${hostname} = inputs.nixpkgs.lib.nixosSystem {
     self.nixosModules.network_offensive
     self.nixosModules.network_simulation
     self.nixosModules.network_torrent
+
     self.nixosModules.terminal_gui
     self.nixosModules.terminal_shell
     self.nixosModules.terminal_tty

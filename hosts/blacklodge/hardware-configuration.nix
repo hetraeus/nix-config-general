@@ -30,30 +30,5 @@
     memtest86.enable   = true;
     };
 
-  fileSystems."/" = {
-    device  = "/dev/sda2";
-    fsType  = "bcachefs";
-    # BUG: does not support swap file !
-    options = [
-      #"X-mount.subdir=@root/promote-001/"
-      "lazytime"
-
-      # INFO: fstrim.timer doesn't work
-      # https://github.com/koverstreet/bcachefs/issues/721
-      # note that it's enabled anyway with the hardware module
-      "discard"
-      ];
-    };
-
-  swapDevices = [ {
-    device = "/dev/disk/by-label/swap_localpart";
-
-    # WARN: Don’t hibernate when you have at least one swap partition with randomEncryption enabled!
-    # We have no way to set the partition into which hibernation image is saved, so if your image ends up on an encrypted one you would lose it!
-    # Do not use /dev/disk/by-{uuid,label}/... as your swap device when using randomEncryption as the UUIDs and labels will get
-    # erased on every boot when the partition is encrypted. Best to use /dev/disk/by-partuuid/
-    randomEncryption.enable = lib.mkForce false;
-    } ];
-
   };
 }

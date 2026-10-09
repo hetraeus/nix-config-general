@@ -1,6 +1,5 @@
 { flake.nixosModules.network_nebula = { pkgs, config, ... } : {
-  hardware.bluetooth.enable = true;
-  services.blueman.enable   = true;
+  # INFO overlay network/vpn
 
 
   # services.opensnitch.rules.eee_kdeconnect_zero = {
