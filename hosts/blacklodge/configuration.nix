@@ -53,6 +53,8 @@ flake.nixosConfigurations.${hostname} = inputs.nixpkgs.lib.nixosSystem {
     self.nixosModules.backup
     self.nixosModules.i18n_en_de_it
     self.nixosModules.desktop_troubleshoot
+    self.nixosModules.desktop_portable_formats
+
     self.nixosModules.observability
     self.nixosModules.desktop_shell
     self.nixosModules.sound_control

@@ -29,6 +29,7 @@
     self.homeModules.desktop_hyprland
     self.homeModules.desktop_screenshot
     self.homeModules.desktop_shell
+    self.homeModules.desktop_portable_formats
     # self.homeModules.desktop_notification
     # self.homeModules.desktop_waybar
     self.homeModules.desktop_voices

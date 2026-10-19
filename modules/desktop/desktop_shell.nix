@@ -13,97 +13,6 @@
   programs.dconf.enable    = true;
 
   environment.pathsToLink = [ "/share/xdg-desktop-portal" "/share/applications" ]; # allow portals in home manager
-  programs.appimage = {
-    enable = true;
-    binfmt = true;
-    package = pkgs.appimage-run.override {
-     extraPkgs = pkgs: with pkgs; [
-        # --- Base & Compression ---
-        zlib
-        bzip2
-        icu
-
-        # --- Audio ---
-        alsa-lib
-        pipewire
-        ffmpeg
-
-        # --- Graphics, GUI, & Fonts ---
-        cairo
-        cups
-        expat
-        fontconfig
-        freetype
-        fribidi
-        gdk-pixbuf
-        glib
-        gtk3
-        glibcLocales
-        harfbuzz
-        libglvnd
-        libdrm
-        libgbm
-        libxkbcommon
-        pango
-        libX11
-        libice
-        libsm
-        libxcomposite
-        libxcursor
-        libxdamage
-        libxext
-        libxfixes
-        libxi
-        libxrandr
-        libxrender
-        libxscrnsaver
-        libxtst
-        libxcb
-        qt5.qtwayland
-        qt6.qtwayland
-
-        # --- System & Security ---
-        dbus
-        e2fsprogs    # Provides libcom_err
-        libapparmor
-        libcap
-        libcap_ng
-        libgcrypt
-        libgpg-error
-        gpgmepp
-        libksba
-        libselinux
-        libseccomp
-        linux-pam
-        npth
-        systemd      # Provides libudev
-        util-linux   # Provides libmount, libuuid
-        udev
-
-        # --- Cryptography & Networking ---
-        gnutls
-        libassuan
-        nspr
-        nss
-
-        # --- Other Libraries ---
-        e2fsprogs
-        imagemagick
-        libxcrypt
-        libxcrypt-legacy # Provides libcrypt.so.1
-        ncurses
-        perl
-        readline
-        sqlite
-        stdenv.cc.cc.lib # Provides libstdc++.so.6
-        libxau
-        libxdmcp
-        libxshmfence
-
-        ];
-      };
-    };
-  services.flatpak.package = true; # 2025-07-20 beekeeper can't be installed with nix https://github.com/beekeeper-studio/beekeeper-studio/pull/3023
 
   # mount
   services.gvfs.enable     = true;
@@ -114,31 +23,6 @@
   # programs.thunar.plugins = with pkgs; [ thunar-archive-plugin thunar-volman thunar-vcs-plugin thunar-shares-plugin thunar-media-tags-plugin ];
 
   # Should withelist wttr.in , but sometimes is not online. Can I replace it?
-
-  services.opensnitch.rules.flk-flatpak = {
-    name        = "flk-flatpak";
-    created     = "2010-01-01T10:00:00.000000Z"; # silence logs
-    enabled     = true;
-    action      = "allow";
-    duration    = "always";
-    operator    = {
-      type      = "list";
-      operand   = "list";
-      sensitive = false;
-      list      = [{
-       type     = "simple";
-       operand  = "process.command";
-       data     = "${lib.getExe' pkgs.flatpak ".flatpak-wrapped"}";
-       } {
-       type     = "regexp";
-       operand  = "dest.host";
-       data     = "^(ciscobinary\.openh264\.org|dl\.flathub\.org)$";
-       } {
-       type     = "simple";
-       operand  = "dest.port";
-       data     = "443";
-       }];
-    };};
 
   services.opensnitch.rules.shell-noctalia = {
     name        = "shell-noctalia";
@@ -210,7 +94,6 @@ flake.homeModules.desktop_shell = { pkgs, lib, config, self, ... }: {
     pkgs.glib # allow gio trash, gio rm and other xdg desktop aware commands
     pkgs.playerctl
 
-    pkgs.flatpak
     pkgs.zbar
     pkgs.zint-qt
     ];
@@ -241,11 +124,6 @@ flake.homeModules.desktop_shell = { pkgs, lib, config, self, ... }: {
   xdg.autostart.entries   = [
     "${self.packages.${pkgs.stdenv.hostPlatform.system}.chillfile}/share/applications/chillfile.desktop"
     ];
-
-  # BUG: https://github.com/gmodena/nix-flatpak/issues/31
-  # Hide warning about showing the program in the menu
-  xdg.systemDirs.data  = [ "${config.xdg.dataHome}/flatpak/exports/share" ];
-
 
   # wayland.windowManager.hyprland.extraLuaFiles.desktop_shell = ''
   wayland.windowManager.hyprland.extraConfig = ''
