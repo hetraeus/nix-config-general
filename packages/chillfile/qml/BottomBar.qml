@@ -301,7 +301,7 @@ Item {
             }
 
             onClicked: {
-              var args = ["kitty", "--directory", bottomBar.browser.currentPath, "edir"];
+              var args = ["kitty", "--directory", bottomBar.browser.currentPath, "edir", "--recurse"];
               var selected = bottomBar.desktop.fileGrid.selectedPaths;
               if (selected.length > 0) {
                   for (var i = 0; i < selected.length; i++) {
