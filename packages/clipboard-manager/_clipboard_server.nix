@@ -1,53 +1,49 @@
 {
   lib,
-  stdenv,
-  qt6,
-  cmake,
-  ninja,
-  makeWrapper,
-  coreutils,
-  util-linux,
-  wl-clipboard
+  rustPlatform,
+  pkg-config,
+  wayland,
 }:
-stdenv.mkDerivation (finalAttrs: {
+rustPlatform.buildRustPackage rec {
   pname = "clipboard-server";
   version = "0.1.0";
 
   src = ./server;
 
+  # Requires ./server/Cargo.lock to be committed to the repo.
+  # If you prefer not to commit it, delete this line and set:
+  #   cargoHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+  # then run `nix build` and paste the "got" hash back in.
+  cargoLock.lockFile = ./server/Cargo.lock;
+
   nativeBuildInputs = [
-    cmake
-    ninja
-    makeWrapper
-    qt6.wrapQtAppsHook
-    qt6.qttools
+    pkg-config
   ];
 
   buildInputs = [
-    qt6.qtbase
-    qt6.qtsvg
+    # wayland-client (pulled in by wl-clipboard-rs) links libwayland-client.so
+    # on the "client_system" backend, which is the default for wayland-client
+    # 0.31+. Putting it here sets rpath so the binary runs from the store.
+    wayland
   ];
 
   env.LC_ALL = "C.UTF-8";
 
-  cmakeFlags = [
-    "-DBUILD_TESTING=OFF"
-    "-DCMAKE_EXPORT_NO_PACKAGE_REGISTRY=ON"
-  ];
-
-  qtWrapperArgs = [
-    "--prefix PATH : ${lib.makeBinPath [
-      util-linux
-      coreutils
-      wl-clipboard
-    ]}"
-  ];
+  # No tests defined in the crate — skip the check phase instead of letting
+  # cargo spin up an empty test runner.
+  doCheck = false;
 
   postInstall = ''
     mkdir -p $out/share/systemd/user
+    # WARN: DO NOT DROP graphical-session! The server needs WAYLAND_DISPLAY
+    # set by the compositor, and it speaks the Wayland protocol directly via
+    # wl-clipboard-rs (no external wl-copy/wl-paste binaries are invoked).
+    # A cli should read ~/.cache/clipboard-manager/history.json
     cat > $out/share/systemd/user/clipboard-server.service <<EOF
 [Unit]
 Description=clipboard-server
+PartOf=graphical-session.target
+After=graphical-session.target
 
 [Service]
 ExecStart=$out/bin/clipboard-server
@@ -57,12 +53,14 @@ Restart=on-failure
 RestartSec=1
 
 [Install]
-WantedBy=default.target
+WantedBy=graphical-session.target
 EOF
   '';
 
   meta = {
-    description = "Quickshell clipboard manager server";
+    description = "clipboard manager server";
     mainProgram = "clipboard-server";
+    license = lib.licenses.mit;
+    platforms = lib.platforms.linux;
   };
-})
+}

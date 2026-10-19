@@ -58,6 +58,12 @@ void ClipboardManager::startWatchers()
     if (!m_anyWatcher.waitForStarted(2000)) {
         qWarning() << "Failed to start wl-paste watcher - is wl-clipboard installed and on PATH?";
     }
+    connect(&m_anyWatcher, &QProcess::finished, this, [this](int, QProcess::ExitStatus) {
+        QTimer::singleShot(500, this, [this] { startWatchers(); });
+    });
+    connect(&m_anyWatcher, &QProcess::errorOccurred, this, [this](QProcess::ProcessError) {
+        QTimer::singleShot(500, this, [this] { startWatchers(); });
+    });
 }
 
 void ClipboardManager::setupWatcher()

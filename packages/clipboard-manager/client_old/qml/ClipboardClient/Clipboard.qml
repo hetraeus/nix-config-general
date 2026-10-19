@@ -19,11 +19,11 @@ Scope {
     property var pinnedModel: [
         {
             type: "pinned",
-            text: formatLocalDateTime(new Date())
+            text: formatLocalDateTime(new Date()).slice(0, 10)
         },
         {
             type: "pinned",
-            text: formatLocalDateTime(new Date()).slice(0, 10)
+            text: formatLocalDateTime(new Date())
         },
         {
             type: "pinned",

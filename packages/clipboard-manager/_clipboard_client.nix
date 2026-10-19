@@ -1,16 +1,18 @@
 {
   lib,
-  stdenv,
-  cmake,
-  ninja,
-  qt6,
+  rustPlatform,
+  pkg-config,
   makeWrapper,
   coreutils,
   dbus,
-  wl-clipboard,
-  quickshell
+  wayland,
+  mold,
+  libxkbcommon,
+  vulkan-loader,
+  libGL
 }:
-stdenv.mkDerivation (finalAttrs: {
+
+rustPlatform.buildRustPackage (finalAttrs: {
   pname = "clipboard-client";
   version = "0.1.0";
 
@@ -18,56 +20,52 @@ stdenv.mkDerivation (finalAttrs: {
     path = ./client;
     filter = path: type:
       let base = baseNameOf path;
-      in base != "build" && base != ".direnv";
+      in base != "target"
+         && base != ".direnv"
+         && base != "result"
+         && base != "Cargo.lock.orig";
   };
 
+  cargoLock.lockFile = ./client/Cargo.lock;
+  RUSTFLAGS = "-C link-arg=-fuse-ld=mold";
+
   nativeBuildInputs = [
-    cmake
+    pkg-config
     makeWrapper
-    ninja
-    qt6.wrapQtAppsHook
+    mold
   ];
 
   buildInputs = [
-    qt6.qtbase
-    qt6.qtdeclarative
-    qt6.qtwayland
-    coreutils
-    wl-clipboard
-    quickshell
-  ];
+    # Iced uses wgpu by default; wgpu needs a Vulkan/GL loader at runtime.
+    vulkan-loader
+    libGL
 
-  cmakeFlags = [
-    "-DCMAKE_BUILD_TYPE=Release"
+    # iced-layershell talks to the Wayland compositor directly.
+    wayland
+    libxkbcommon
+
+    # zbus is pure-Rust, but the session bus address is inherited from the
+    # user environment; keeping dbus in buildInputs guarantees the client
+    # links against a known-good libdbus if any transitive dep needs it.
+    dbus
   ];
 
   postInstall = ''
-    qmldir=$(find . -name qmldir -type f | head -n1)
-    if [ -z "$qmldir" ]; then
-      echo "ERROR: no qmldir found anywhere in the build tree" >&2
-      echo "Listing all .qml-related files for diagnosis:" >&2
-      find . -name '*.qml*' -o -name 'qmldir*' >&2
-      exit 1
-    fi
-    echo "Installing qmldir from: $qmldir"
-    mkdir -p $out/lib/qml/ClipboardClient
-    cp "$qmldir" $out/lib/qml/ClipboardClient/qmldir
-
-    mkdir -p $out/bin
-    makeWrapper ${quickshell}/bin/quickshell $out/bin/clipboard-client \
-      --add-flags "-p $out/share/clipboard-client/shell.qml" \
-      --prefix PATH : ${lib.makeBinPath [ dbus wl-clipboard ]} \
-      --prefix QML2_IMPORT_PATH : $out/lib/qml \
-      --prefix QML2_IMPORT_PATH : ${quickshell}/lib/qt-6/qml \
-      --prefix QML2_IMPORT_PATH : ${quickshell}/lib/qt6/qml \
-      --prefix QML2_IMPORT_PATH : ${quickshell}/lib/qml \
-      --prefix LD_LIBRARY_PATH : ${quickshell}/lib
+    wrapProgram $out/bin/clipboard-client \
+      --prefix PATH : ${lib.makeBinPath [ coreutils dbus ]} \
+      --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath [
+        vulkan-loader
+        libGL
+        wayland
+        libxkbcommon
+      ]}
 
     mkdir -p $out/share/systemd/user
     cat > $out/share/systemd/user/clipboard-client.service <<EOF
 [Unit]
 Description=clipboard-client
 After=graphical-session.target clipboard-server.service
+Requires=clipboard-server.service
 PartOf=graphical-session.target
 
 [Service]
@@ -83,7 +81,7 @@ EOF
   '';
 
   meta = {
-    description = "Quickshell clipboard manager client";
+    description = "Iced clipboard manager client";
     mainProgram = "clipboard-client";
   };
 })
