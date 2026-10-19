@@ -80,5 +80,6 @@ flake.homeModules.terminal_gui = { lib, pkgs, ... }: {
     clipboard_control         =  "write-clipboard write-primary";
     };
   home.shellAliases.lsi = "${lib.getExe' pkgs.kitty "kitten"} icat ";
+  home.shellAliases.dnd = "${lib.getExe' pkgs.kitty "kitten"} dnd  ";
 
 };}
