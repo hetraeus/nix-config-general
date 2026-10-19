@@ -104,4 +104,9 @@ services.swaync.settings.widget-config.buttons-grid.actions = [ {
 
   } ];
 
+  wayland.windowManager.hyprland.settings.layer_rule = [{
+    match.namespace = "^(swaync-control-center)$";
+    no_anim = true;
+    }];
+
 };}
