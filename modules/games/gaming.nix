@@ -51,10 +51,11 @@ flake.homeModules.gaming = { pkgs, lib, self, config, ... }: {
   multiverse.config.allowUnfree = true;
   multiverse.pins = {
     ut1999 = "469e";
+    ut2004 = "3374-preview-23";
     };
   home.packages = [
     config.multiverse.pinned.ut1999
-    # (config.multiverse.instance.at "tip").ut2004
+    config.multiverse.pinned.ut2004
 
   #  fmenu-games-roms
 
@@ -82,28 +83,12 @@ flake.homeModules.gaming = { pkgs, lib, self, config, ... }: {
     categories   = [ "Game" ];
     exec         = "${lib.getExe' pkgs.sgt-puzzles "solo"}";
     };
+  home.file.".utpg/System/UnrealTournament.ini".source = ./UnrealTournament.ini;
+  home.file.".utpg/System/User.ini".source             = ./User.ini;
 
-  # programs.retroarch.enable = true;
-  # programs.retroarch.cores  = {
-  #   melonds.enable          = true;
-  #   mgba.enable             = true;
-  #   fuse.enable             = true;
-  #   mame2003-plus.enable    = true;
-  #   };
-  # programs.retroarch.settings = {
-  #   # https://github.com/libretro/RetroArch/blob/master/retroarch.cfg
-  #   menu_show_load_content_animation = "false";
-  #   input_exit_emulator = "";
-  #   audio_driver        = "pipewire";
-  #   camera_driver       = "pipewire";
-  #   video_driver        = "vulkan";
-  #   video_shader_enable = "true";
-  #   video_shader_dir    = "${pkgs.libretro-shaders-slang}/share/libretro/shaders";
-  #   };
+  wayland.windowManager.hyprland.settings.window_rule = [{
+   match.class = "^(ut-bin-.*)$";
+   border_size = 0;
+   }];
 
-  # xdg.configFile."retroarch/config/retroarch.slangp".text = ''
-  #   #reference "${pkgs.libretro-shaders-slang}/share/libretro/shaders/shaders_slang/edge-smoothing/ddt/ddt-extended.slangp"
-  #   '';
-
-    #reference "/nix/store/w817mvykhzw17xylsfi5qy21qh9f0jy2-libretro-shaders-slang-0-unstable-2025-12-27/share/libretro/shaders/shaders_slang/edge-smoothing/ddt/ddt-extended.slangp"
 };}
