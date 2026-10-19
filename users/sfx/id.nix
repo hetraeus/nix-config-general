@@ -95,17 +95,6 @@ in {
   programs.keepassxc.settings.Browser.UpdateBinaryPath = false;
   home.file.".gnupg" = { source = config.lib.file.mkOutOfStoreSymlink "${config.xdg.dataHome}/../config/.gnupg"; };
 
-
-  home.stateVersion = "24.11";
-# TODO delete this block
-gtk.gtk4.theme = lib.mkDefault null;
-xdg.userDirs.setSessionVariables = lib.mkDefault false;
-wayland.windowManager.hyprland.configType = "lua";
-programs.firefox.configPath = "${config.xdg.configHome}/mozilla/firefox";
-programs.zsh.dotDir = "${config.xdg.configHome}/zsh";
-# end block
-
-
   home.username      =       "${osConfig.users_list.principalUser}";
   home.homeDirectory = "/home/${osConfig.users_list.principalUser}";
   xdg.enable                          = true;
