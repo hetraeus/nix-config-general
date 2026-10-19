@@ -82,7 +82,7 @@
 flake.homeModules.sfxModules = { osConfig, config, pkgs, lib, ...} : let
   default_browser = "firefox.desktop";
 in {
-
+  home.stateVersion = "26.05";
   home.packages = [
     pkgs.celestia
     pkgs.minicom
