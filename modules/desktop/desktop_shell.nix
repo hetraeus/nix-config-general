@@ -111,7 +111,9 @@ flake.homeModules.desktop_shell = { pkgs, lib, config, self, ... }: {
     self.packages.${pkgs.stdenv.hostPlatform.system}.clipboard-server
     self.packages.${pkgs.stdenv.hostPlatform.system}.clipboard-client
     ];
-  xdg.configFile."systemd/user/default.target.wants/clipboard-server.service".source =
+
+  # WARN: the server depends on wayland protocol, so it depends on graphical-session
+  xdg.configFile."systemd/user/graphical-session.target.wants/clipboard-server.service".source =
     "${self.packages.${pkgs.stdenv.hostPlatform.system}.clipboard-server}/share/systemd/user/clipboard-server.service";
   xdg.configFile."systemd/user/graphical-session.target.wants/clipboard-client.service".source =
     "${self.packages.${pkgs.stdenv.hostPlatform.system}.clipboard-client}/share/systemd/user/clipboard-client.service";
