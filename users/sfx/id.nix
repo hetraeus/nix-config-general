@@ -46,6 +46,7 @@
 
     self.homeModules.virtualisation_containers
     self.homeModules.security
+    self.homeModules.keepassxc
     self.homeModules.media_songrec
     self.homeModules.discord
     self.homeModules.documentation
@@ -90,7 +91,6 @@ in {
     ];
 
   sops.age.keyFile = "${config.xdg.configHome}/sops/age/keys.txt";
-  programs.keepassxc.enable = true;
   # BUG: https://github.com/nix-community/home-manager/pull/7675/files
   programs.keepassxc.settings.Browser.UpdateBinaryPath = false;
   home.file.".gnupg" = { source = config.lib.file.mkOutOfStoreSymlink "${config.xdg.dataHome}/../config/.gnupg"; };
@@ -157,7 +157,6 @@ programs.zsh.dotDir = "${config.xdg.configHome}/zsh";
       };
   # add geminize?
     };
-
 
     programs.firefox.profiles.user = {
     id              = 0;
