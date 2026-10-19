@@ -20,7 +20,6 @@
         MOVIE_HISTORY="$XDG_CACHE_HOME"/movie_history
         MOVIE_CHOICE="$({
           tac              "$MOVIE_HISTORY"
-          echo              '📷 webcams.sh' # './' and '.sh' are here just to pass fzf filter
           fd --base-directory "$MOVIES_DIR" \
              --follow                       \
              --type      f                  \
@@ -43,10 +42,6 @@
              -p "$(printf ' 🜚  %(%H:%M)T  ')"
              )"
         [ -z "$MOVIE_CHOICE" ] && exit
-        [ "$MOVIE_CHOICE" == "📷 webcams.sh" ] && {       \
-          MOVIE_CHOICE="$(~/.local/bin/scripts/web_cams)" \
-          MOVIES_DIR=""                                   \
-        ;} || \
         grep   --quiet   "$MOVIE_CHOICE"  "$MOVIE_HISTORY" || {
           tail --lines=4 "$MOVIE_HISTORY"
           echo           "$MOVIE_CHOICE"
