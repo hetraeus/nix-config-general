@@ -46,29 +46,94 @@ in {
 
   programs.firefox.profiles."user".userChrome = let
     autohide = pkgs.fetchurl {
-      url = "https://raw.githubusercontent.com/MrOtherGuy/firefox-csshacks/36a2db6cc7edb60bb94e63669c040653bec99a5e/chrome/autohide_bookmarks_and_main_toolbars.css";
-      hash = "sha256-9qLGfr2yUcHxA4Ky+Ov7URVVGwlM8JF5s83SeCvSW7c=";
+      url = "https://raw.githubusercontent.com/MrOtherGuy/firefox-csshacks/refs/heads/master/chrome/autohide_main_toolbar.css";
+      hash = "sha256-mGLTkwK2DwNwbycixfTMda6ux01WUZMRpip1aPzH9r8=";
       };
   in ''
-  /*
-  Find what is breaking with:
-  mkdir --parents /tmp/firefox-clean
-  firefox --no-remote --profile /tmp/firefox-clean
+/*
+Find what is breaking with:
+mkdir --parents /tmp/firefox-clean
+firefox --no-remote --profile /tmp/firefox-clean
 
-  then about:config
-    devtools.chrome.enabled true
-    devtools.debugger.remote-enabled true
-  then ctrl+shift+alt+I
-  */
-  :root{
-  --tab-collapsed-width: 1.5rem !important;
-  }
-  '' + builtins.readFile autohide + ''
+then about:config
+  devtools.chrome.enabled true
+  devtools.debugger.remote-enabled true
+then ctrl+shift+alt+I
+*/
+:root{
+--tab-collapsed-width: 1.5rem !important;
+}
+/* KEEP IMPORTS AT THE TOP*/
+/* This import prevents redownloads that would occur with string concatenation*/
+@import url("file://${autohide}");
+
+/* Remove Nova focus outline/border and background color change from the URL bar */
+:root {
+    /* Prevents the background color from changing on focus */
+    --toolbar-field-focus-background-color: var(--toolbar-field-background-color) !important;
+}
+
+.urlbar-input-container,
+#searchbar {
+    /* Removes the focus border color */
+    --toolbar-field-border-color-focus: var(--toolbar-field-border-color) !important;
+    /* Removes any inner box-shadow that might act as a border */
+    box-shadow: none !important;
+}
+
+/* Specifically targets the background element that draws the Nova outline */
+.urlbar-background {
+    .urlbar[focused]:not([suppress-focus-border]) > & {
+        outline: 0 !important;
+        border: 0 !important;
+    }
+}
+
+/* Ensures the internal input container has no focus outline */
+.urlbar, #searchbar {
+    --urlbar-input-container-outline-open-focused: 0 !important;
+}
+/* Removes focus border, outline, and background color change from the Ctrl-F findbox */
+.findbar-textbox:focus {
+    background-color: transparent !important; /* Prevents background color change */
+    border: none !important;                 /* Removes the border */
+    outline: none !important;               /* Removes the focus outline ring */
+    box-shadow: none !important;            /* Removes any inner shadow acting as a border */
+}
+/* Removes the border from the findbox even when unfocused */
+.findbar-textbox {
+    border: none !important;
+}
+
+/* Address bar dropdown background */
+#urlbar[open] .urlbarView-background {
+    background-color: ${config.lib.stylix.colors.withHashtag.base00} !important; /* Change to your preferred color */
+    border: none !important;
+    box-shadow: none !important; /* Removes any focus shadow */
+}
+
+/* Ensures the main container is transparent to let the new background show */
+.urlbarView {
+    background-color: transparent !important;
+}
+
+/* Hamburger menu panel background */
+menupopup, panel {
+    --panel-background: ${config.lib.stylix.colors.withHashtag.base00} !important; /* Change to your preferred color */
+    --panel-border-color: transparent !important; /* Optional: removes border */
+    --panel-shadow-margin: 0 !important; /* Optional: removes shadow space */
+}
+
+/* Matches the toolbar button background to avoid a visual gap */
+#PanelUI-menu-button {
+    background-color: ${config.lib.stylix.colors.withHashtag.base00} !important; /* Use the same color here */
+}
+  
   #nav-bar,
   .browserContainer > findbar,
   #sidebar-container,
   #sidebar-wrapper,
-  sidebar-main,
+  #sidebar-container,
   #identity-icon-box,
   #nav-bar-customization-target,
   .urlbar-background,
@@ -76,7 +141,7 @@ in {
     background-color: ${config.lib.stylix.colors.withHashtag.base00} !important;
     }
 
-  sidebar-main{
+  #sidebar-container{
     --tab-pinned-horizontal-count: 7;
   }
 
@@ -110,8 +175,8 @@ in {
   /* Try removing urlbar shadow */
   /*this seems to work!*/
   .urlbar:is([focused], [open]) > .urlbar-background,
-  #urlbar[breakout] > #urlbar-input-container
-  #urlbar[breakout][breakout-extend] > #urlbar-input-container,
+  #urlbar[breakout] > .urlbar-input-container
+  #urlbar[breakout][breakout-extend] > .urlbar-input-container,
   #urlbar[breakout][breakout-extend],
   #searchbar:focus-within {
     outline:none !important;
