@@ -164,7 +164,6 @@ hl.gesture({ fingers = 3, direction = "horizontal", action = "scroll_move" })
 --------------------------------------------------------------------------------
 
 hl.layer_rule({ match = { namespace = "^(rofi)$"                  }, no_anim = true })
-hl.layer_rule({ match = { namespace = "^(swaync-control-center)$" }, no_anim = true })
 hl.layer_rule({ match = { namespace = "^(clipboard-manager)$"     }, no_anim = true })
 hl.layer_rule({ match = { namespace = "^(noctalia-.*)$"     }, no_anim = true })
 
@@ -172,7 +171,6 @@ hl.layer_rule({ match = { namespace = "^(noctalia-.*)$"     }, no_anim = true })
 -- WINDOW RULES
 --------------------------------------------------------------------------------
 
-hl.window_rule({ match = { class = "^(org.keepassxc.KeePassXC)$" }, no_screen_share = true })
 hl.window_rule({ match = { class = ".*" }, suppress_event = "maximize" })
 hl.window_rule({ match = { class = "^(nemo)$"       }, workspace = "1" })
 hl.window_rule({ match = { class = "^(thunar)$"     }, workspace = "1" })
@@ -180,8 +178,6 @@ hl.window_rule({ match = { class = "^(pcmanfm-qt)$" }, workspace = "1" })
 hl.window_rule({ match = { class = "^(pcmanfm-qt)$", title = "^(Current)$" }, workspace = "+0" })
 hl.window_rule({ match = { class = "^(thunderbird)$" }, fullscreen = true })
 hl.window_rule({ match = { class = "^(thunderbird)$", title = "^(Calendar Reminders)$" }, float = true })
-hl.window_rule({ match = { class = "^(qimgv)$", title = "^(Edit shortcut)$" }, float = true })
-hl.window_rule({ match = { class = "^(qimgv)$", title = "^(Add shortcut)$" }, float = true })
 hl.window_rule({ match = { class = "^(wev)$" }, float = true })
 hl.window_rule({ match = { class = "^(zenity)$" }, float = true })
 hl.window_rule({ match = { class = "^(gcolor3)$" }, float = true })
@@ -229,13 +225,6 @@ hl.window_rule({ match = { class = "^(log_dashboard)$" }, workspace = "11", full
 hl.window_rule({ match = { class = "^(network_dashboard)$" }, workspace = "11", fullscreen = true })
 hl.window_rule({ match = { class = "^(firefox)$" }, workspace = "2" })
 hl.window_rule({ match = { class = "^(firefox)$", title = "^(Library)$" }, float = true })
-hl.window_rule({
-  match = { class = "^(firefox)$", title = "^(Picture-in-Picture)$" },
-  float = true,
-  pin = true,
-  tag =
-  "+dontclose"
-})
 hl.window_rule({
   match = { class = "kando" },
   border_size = 0,
