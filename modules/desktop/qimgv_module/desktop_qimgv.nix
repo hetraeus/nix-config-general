@@ -69,4 +69,10 @@
       ];
     in lib.genAttrs viewerMimeTypes (_: [ default_viewer ]);
 
+  wayland.windowManager.hyprland.settings.window_rule = [{
+   match.class = "^(qimgv)$";
+   match.title = "^((Add|Edit) shortcut)$";
+   float       = true;
+   }];
+
 };}
