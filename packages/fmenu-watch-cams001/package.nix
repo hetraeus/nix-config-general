@@ -5,7 +5,7 @@
     description = "Path to the file containing camera URLs.";
   };
 
-  config.packages.fmenu-watch-cams0001 = let
+  config.packages.fmenu-watch-cams001 = let
     script = pkgs.writeShellApplication {
       name          = "fmenu-watch-cams001";
       runtimeInputs = [ pkgs.mpv ];
@@ -16,14 +16,14 @@
           --wayland-app-id=securitycam \
           --x11-name=securitycam       \
             "$CAM" 2>/dev/null & disown
-         done < "${config.fmenu-watch-cams001.watchCamsPath}"
+         done < "$HOME/.config/sops-nix/secrets/watch_cams001"
          unset CAMS
       '';
     };
 
     desktopItem = pkgs.makeDesktopItem {
       name         = "fmenu-watch-cams001";
-      genericName  = "webcams watch";
+      genericName  = "webcams watch cctv";
       desktopName  = "webcams watch";
       icon         = "camera-ready";
       terminal     = false;

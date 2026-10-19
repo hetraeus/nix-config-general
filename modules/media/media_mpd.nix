@@ -19,10 +19,6 @@
       local_permissions   "read,add,control,player,admin"
      # host_permissions  "127.0.0.1 read,add,control,player,admin"
 
-      # NOTE: MPRIS OVERRIDES THE PASSWORD !
-      include "${config.sops.secrets.mpd_permissions.path}"
-      include "${config.sops.secrets.mpd_soundcloud.path}"
-
       audio_output {
         type   "pipewire"
         name   "My PipeWire Output"
@@ -54,6 +50,10 @@
         format       "44100:16:2"
       }
     '';
+      # # NOTE: MPRIS OVERRIDES THE PASSWORD !
+      # include "${config.sops.secrets.mpd_permissions.path}"
+      # include "${config.sops.secrets.mpd_soundcloud.path}"
+
     };
 
   wayland.windowManager.hyprland.extraConfig = let

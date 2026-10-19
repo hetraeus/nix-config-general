@@ -1,20 +1,17 @@
-{ flake.homeModules.secrets = { ... }: {
-  
-  sops.secrets."ai-api-mistral" = { sopsFile = ./ai-api.yaml ; };
-  sops.secrets."ai-api-antigravity"  = { sopsFile = ./ai-api.yaml ; };
-  sops.secrets.mpd_permissions.sopsFile = ./mpd_permissions.yaml;
-  sops.secrets.mpd_soundcloud.sopsFile  = ./mpd_soundcloud.yaml;
+{ flake.homeModules.secrets = { config, ... }: {
+
+  home.file.".gnupg" = { source = config.lib.file.mkOutOfStoreSymlink "${config.xdg.dataHome}/../config/.gnupg"; };
+
+  home.sessionVariables.SOPS_AGE_KEY_FILE = "${config.xdg.dataHome}/../secrets/sops-age/sops-age.txt";
+  sops.age.keyFile = config.home.sessionVariables.SOPS_AGE_KEY_FILE;
+  # sops.secrets."ai-api-mistral"     = { sopsFile = ./ai-api.yaml ; };
+  # sops.secrets."ai-api-antigravity" = { sopsFile = ./ai-api.yaml ; };
 
   sops.secrets.aria2_torrent = {
     path     = "%r/aria2/torrent.conf"; # Needed by the dw_ launchers
     sopsFile =   ./aria2_torrent.yaml ;
     };
 
-  sops.secrets.search_engines = {
-    sopsFile =   ./search_engines.yaml ;
-    path     = "%r/search_engines.json";
-    };
-    
   sops.secrets.mail = {
     sopsFile = ./mail.yaml ;
     path     = "%r/mail";

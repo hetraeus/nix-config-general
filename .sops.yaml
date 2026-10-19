@@ -1,13 +1,16 @@
 keys:
-  - &blacklodge age1cfyx7eu9jdr6klvlhtpmuxuspg9gn02lvn22vqpyx0yz0dxjld9qpqh2rq
+  - &blacklodge age1r88q7z2y36ulw4gtcupyej4098uejt7dshpycr5vqjdlq6d68qwqr39afz
+  - &masterkey age1gj034y39c8c9q520ly3ny2cqs4hfq00axkw5253nqtdf0vncvfmsdh7pr6
 creation_rules:
 
   - path_regex: users/.*/secrets/.*$
     key_groups:
     - age:
+      - *masterkey
       - *blacklodge
 
   - path_regex: hosts/.*/secrets/.*$
     key_groups:
     - age:
+      - *masterkey
       - *blacklodge

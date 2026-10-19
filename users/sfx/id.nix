@@ -90,11 +90,6 @@ in {
   #binsider
     ];
 
-  sops.age.keyFile = "${config.xdg.configHome}/sops/age/keys.txt";
-  # BUG: https://github.com/nix-community/home-manager/pull/7675/files
-  programs.keepassxc.settings.Browser.UpdateBinaryPath = false;
-  home.file.".gnupg" = { source = config.lib.file.mkOutOfStoreSymlink "${config.xdg.dataHome}/../config/.gnupg"; };
-
   home.username      =       "${osConfig.users_list.principalUser}";
   home.homeDirectory = "/home/${osConfig.users_list.principalUser}";
   xdg.enable                          = true;
