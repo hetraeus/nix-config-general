@@ -82,15 +82,6 @@ flake.nixosConfigurations.${hostname} = inputs.nixpkgs.lib.nixosSystem {
    # run0 nix run 'nixpkgs#nixos-facter' -- -o facter.json
    # config.facter.reportPath = ./facter.json;
    #
-   # If you want to test out nixos-facter, you can add these dummy
-   # values to make the configuration valid. Note that this likely won't boot if
-   # it doesn't match your own partitioning
-   # {
-   #   users.users.root.initialPassword = "test password, don't use this";
-   #   boot.loader.grub.devices = lib.mkForce [ "/dev/sda" ];
-   #   fileSystems."/".device = lib.mkDefault "/dev/sda";
-   # }
-   # ...
    {
      networking.hostName   = "${hostname}";
      programs.hyprland.enable       = true; # NEEDED AS A NIXOS MODULE by xdg portals
