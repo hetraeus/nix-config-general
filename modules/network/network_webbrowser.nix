@@ -194,5 +194,13 @@ programs.firefox.policies.ExtensionSettings = { # about:support
     };
   };
 
+  wayland.windowManager.hyprland.settings.window_rule = [{
+    match.class = "^(firefox)$";
+    match.title = "^(Picture-in-Picture)$";
+    float       = true;
+    pin         = true;
+    tag         = "+dontclose";
+    }];
+
 
 };}
