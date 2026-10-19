@@ -28,6 +28,7 @@
     editor             = false;
     configurationLimit = 20;
     memtest86.enable   = true;
+    # bootCounting.enable = true; WAIT 26.11
     };
 
   };
