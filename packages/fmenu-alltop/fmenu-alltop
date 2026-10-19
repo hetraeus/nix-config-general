@@ -5,8 +5,6 @@
 stty -echoctl
 trap true SIGINT
 
-COLOR_RED="\e[31m"
-
 export  FZF_DEFAULT_OPTS="\
   --layout=reverse        \
   --info=hidden           \
@@ -40,7 +38,7 @@ echo "🧬 $0"
 UPDATE_DATE="$(<"$HOME/.cache/shell/due_supdate")"
 (( EPOCHSECONDS > UPDATE_DATE )) && echo '🔸 🔸 🔸 🤕 need backup ! 🔸 🔸 🔸'
 
-systemctl show --property=Options -- -.mount | sed "s/.*subvolid=/$COLOR_RED🦕 subvolid: /; s/,.*//"
+systemctl show --property=Options -- -.mount | sed "s/.*subvolid=/🦕 subvolid: /; s/,.*//"
 
 
 echo -n '🏹 battery charge type: '; grep --only-matching '\[.*\]' /sys/class/power_supply/BAT0/charge_types
