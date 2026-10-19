@@ -15,7 +15,7 @@
     };
   model_onnx     = pkgs.fetchurl {
     url  = url_onnx;
-    hash = "sha256-s5kNdgbhg+yNv7pwpGBwdPFi3hoMQS4BgNH/YLsVTso=";
+    hash = "sha256-tzYs9gKxqH3D4r7pozaRZKmpIgbUicSyBX3utIgTSwM=";
     name = "model.onnx";
     };
 
