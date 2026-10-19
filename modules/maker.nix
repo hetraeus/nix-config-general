@@ -42,6 +42,7 @@ flake.homeModules.maker = { pkgs, self, ... }: {
   home.packages = [
     pkgs.exhibit
     pkgs.f3d    # for thumbnails. It works, verified 2025-02-23
+    # pkgs.cadcraft # wait 26.11
 
     pkgs.dune3d
     pkgs.librecad
