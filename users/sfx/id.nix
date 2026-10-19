@@ -92,19 +92,11 @@ in {
 
   home.username      =       "${osConfig.users_list.principalUser}";
   home.homeDirectory = "/home/${osConfig.users_list.principalUser}";
-  xdg.enable                          = true;
-  xdg.userDirs.enable                 = true;
-  xdg.userDirs.createDirectories      = true;
   home.preferXdgDirectories = lib.mkForce false; # It's easier to use a subdirectory as home
-
-  home.sessionVariables.VISUAL  = "zeditor" ;
-  home.sessionVariables.PAGER   = let
-    custom_pager = pkgs.writeShellApplication {
-    name = "custom_pager";
-    text = "nvim +Man!";
-    runtimeInputs = [ pkgs.neovim ];
-    };
-  in "${lib.getExe custom_pager}" ;
+  xdg.enable                       = true;
+  xdg.userDirs.enable              = true;
+  xdg.userDirs.createDirectories   = true;
+  xdg.userDirs.setSessionVariables = true;
 
   xdg.userDirs.publicShare = "${config.home.homeDirectory}/my/share"; # samba and what else??
   xdg.userDirs.desktop     = "${config.home.homeDirectory}/my/proj";
@@ -114,6 +106,15 @@ in {
   xdg.userDirs.pictures    = "${config.home.homeDirectory}/my/pics";
   xdg.userDirs.documents   = "${config.home.homeDirectory}/my/proj";
   xdg.userDirs.projects    = "${config.home.homeDirectory}/my/proj";
+
+  home.sessionVariables.VISUAL  = "zeditor" ;
+  home.sessionVariables.PAGER   = let
+    custom_pager = pkgs.writeShellApplication {
+    name = "custom_pager";
+    text = "nvim +Man!";
+    runtimeInputs = [ pkgs.neovim ];
+    };
+  in "${lib.getExe custom_pager}" ;
 
   programs.firefox.enable      = true;
   programs.firefox.package     = lib.mkForce pkgs.firefox; # avoiding firefox esr because of extensions
