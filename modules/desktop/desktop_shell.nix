@@ -5,7 +5,6 @@
     pkgs.wlr-randr
     ];
 
-  security.polkit.enable = true; # allow nix shell 'nixpkgs#gparted' --command gparted
   # Realtime scheduling priority to user processes on demand
   security.rtkit.enable    = true;
 
