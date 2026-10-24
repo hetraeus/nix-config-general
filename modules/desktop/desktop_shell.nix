@@ -245,6 +245,7 @@ flake.homeModules.desktop_shell = { pkgs, lib, config, self, ... }: {
 
       [lockscreen]
       wallpaper = "${config.stylix.image}"
+      transition = [] # empty disables lock/unlock animation
 
       [lockscreen_widgets]
       enabled = true
