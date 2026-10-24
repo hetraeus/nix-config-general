@@ -65,7 +65,7 @@ flake.homeModules.gaming = { pkgs, lib, self, config, ... }: {
     pkgs.sgt-puzzles
     pkgs.space-cadet-pinball
   # pkgs.superTuxKart
-    pkgs.tetris
+    self.packages.${pkgs.stdenv.hostPlatform.system}.fidget-tetris
     pkgs.wesnoth
     pkgs.mindustry
     pkgs.openloco
