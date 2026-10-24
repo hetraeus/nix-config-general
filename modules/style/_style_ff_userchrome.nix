@@ -94,7 +94,7 @@ then ctrl+shift+alt+I
     --urlbar-input-container-outline-open-focused: 0 !important;
 }
 /* Removes focus border, outline, and background color change from the Ctrl-F findbox */
-.findbar-textbox:focus {
+.findbar-textbox, .findbar-textbox:focus {
     background-color: transparent !important; /* Prevents background color change */
     border: none !important;                 /* Removes the border */
     outline: none !important;               /* Removes the focus outline ring */
