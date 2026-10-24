@@ -11,7 +11,8 @@
 
     self.homeModules."${config.users_list.principalUser}Modules"
     self.homeModules.sound_control
-    self.homeModules.media_mpd
+    # self.homeModules.media_mpd
+    self.homeModules.media_navidrome
     self.homeModules.media_editor
     self.homeModules.media_mpv
     self.homeModules.media_dashboard

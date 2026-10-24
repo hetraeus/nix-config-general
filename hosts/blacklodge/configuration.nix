@@ -59,6 +59,9 @@ flake.nixosConfigurations.${hostname} = inputs.nixpkgs.lib.nixosSystem {
     self.nixosModules.desktop_shell
     self.nixosModules.sound_control
 
+    self.nixosModules.media_navidrome_setup
+    self.nixosModules.media_navidrome
+
     inputs.omniflake.flakes.nixpkgs-multiverse.nixosModules.default
     inputs.omniflake.flakes.nixos-hardware.nixosModules.common-pc-ssd # this adds services.fstrim.enable
 
