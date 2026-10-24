@@ -319,6 +319,14 @@ xdg.mimeApps.defaultApplications = let
   programs.antigravity-cli.commands.sciency.prompt = "Write me the factually correct, most accurate and scientifically sound explanation of {{args}}";
   programs.antigravity-cli.commands.eli5.description = "eli5";
   programs.antigravity-cli.commands.eli5.prompt = "Write me the factually correct, most accurate and scientifically sound explanation of this argument in simple terms: {{args}}";
-  };
 
+  programs.zsh.initContent = lib.mkIf (osConfig.users.users.${config.home.username}.shell == pkgs.zsh) ''
+    devmat() {
+      local args
+      args=( ''${(f)"$(${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.p_devmat} "${config.xdg.userDirs.projects}/devenv/devenv.nix")"} ) || return
+      # shellcheck disable=SC2086
+      devenv $args shell
+    }
+  '';
+  };
 }
