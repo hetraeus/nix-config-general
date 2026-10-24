@@ -54,6 +54,7 @@ case "$@" in
   ""*  ) hyprctl --quiet dispatch 'hl.dsp.window.pin()'            ; exit;;
   "33%" ) hyprctl --quiet dispatch 'hl.dsp.layout("colresize .334")'; exit;;
   "66%" ) hyprctl --quiet dispatch 'hl.dsp.layout("colresize .664")'; exit;;
+  "75%" ) hyprctl --quiet dispatch 'hl.dsp.layout("colresize .748")'; exit;;
   "100%") hyprctl --quiet dispatch 'hl.dsp.layout("colresize 1")'   ; exit;;
   "50%" ) hyprctl --quiet dispatch 'hl.dsp.layout("colresize .499")'; exit;;
   "⤥"   ) hyprctl --quiet dispatch 'hl.dsp.layout("consume")'       ; exit;;
@@ -136,6 +137,7 @@ case "$0" in
 ◨\0meta\x1fmaster layout
 𑁍\0meta\x1fmonocle fullscreen layout
 🎭\0meta\x1finvert colors opposite
+75%\0meta\x1f77%
 🧛\0meta\x1fdontclose toggle" ;;
 
 esac
