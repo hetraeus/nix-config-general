@@ -141,6 +141,15 @@ menupopup, panel {
     background-color: ${config.lib.stylix.colors.withHashtag.base00} !important;
     }
 
+  /* Main application menu (Hamburger menu) background */
+  #appMenu-popup,
+  #PanelUI-multiView,
+  .panel-subview-body {
+      background-color: ${config.lib.stylix.colors.withHashtag.base00} !important; /* Change to your preferred color */
+      --panel-background-color: ${config.lib.stylix.colors.withHashtag.base00} !important;
+      --panel-background: ${config.lib.stylix.colors.withHashtag.base00} !important;
+  }
+
   #sidebar-container{
     --tab-pinned-horizontal-count: 7;
   }
