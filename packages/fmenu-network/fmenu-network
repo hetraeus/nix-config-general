@@ -26,7 +26,11 @@ COLOR_DARK_RED="\e[38;05;124m"
 
 # }}}
 
-CAMS_IP="$(grep --only-matching --max-count=1 '[12]*[0-9][0-9]*\.[12]*[0-9][0-9]*\.[12]*[0-9][0-9]*\.[12]*[0-9][0-9]*' "$XDG_CONFIG_HOME"/sops-nix/secrets/watch_cams001)"
+CAMS_FILE="$XDG_CONFIG_HOME/sops-nix/secrets/watch_cams001"
+CAMS_IP=""
+[[ -f "$CAMS_FILE" ]] && {
+  CAMS_IP="$(grep --only-matching --max-count=1 '[12]*[0-9][0-9]*\.[12]*[0-9][0-9]*\.[12]*[0-9][0-9]*\.[12]*[0-9][0-9]*' "$CAMS_FILE")"
+  }
 WLAN_DEV="$(find /sys/class/net -iname 'w*'  -printf '%f')"
 WLAN_PHY="$(<    /sys/class/net/"$WLAN_DEV"/phy80211/name)"
 WLAN_SERVICE="iwd.service"
